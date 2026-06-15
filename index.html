@@ -105,6 +105,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .field:last-child{margin-bottom:0}
 label.lbl{display:block;font-size:13px;color:#E2E0FF;margin-bottom:7px;font-weight:600}
 input,textarea,select{width:100%;background:#0D2545;border:1.5px solid #1E5060;border-radius:var(--radius-sm);color:#F5F4FF;font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s;font-family:inherit}
+input[type=checkbox],input[type=radio]{width:auto;padding:0;background:none;border:none;margin:0}
+.comb-btn{background:var(--surface2);border:2px solid var(--border);border-radius:20px;padding:8px 14px;font-size:14px;color:var(--text);cursor:pointer;transition:all .2s}
+.comb-btn.sel{background:#059669;border-color:#059669;color:#fff;font-weight:700}
 input:focus,textarea:focus,select:focus{border-color:var(--primary)}
 textarea{resize:vertical;min-height:100px}
 select{appearance:none;-webkit-appearance:none}
@@ -1854,14 +1857,17 @@ function veiFecharCadastro(){
   document.getElementById('vei-form-cadastro').style.display='none';
   document.getElementById('vei-novo-nome').value='';
   ['gasolina','etanol','gnv','diesel'].forEach(function(c){
-    document.getElementById('vei-comb-'+c).checked=false;
+    document.getElementById('vei-comb-'+c).classList.remove('sel');
   });
+}
+function veiToggleComb(btn){
+  btn.classList.toggle('sel');
 }
 function veiSalvarCadastro(){
   var nome = document.getElementById('vei-novo-nome').value.trim();
   if(!nome){toast('Digite o nome do veículo');return;}
   var combs = ['gasolina','etanol','gnv','diesel'].filter(function(c){
-    return document.getElementById('vei-comb-'+c).checked;
+    return document.getElementById('vei-comb-'+c).classList.contains('sel');
   });
   if(!combs.length){toast('Selecione pelo menos um combustível');return;}
   var lista = veiGetLista();
@@ -2026,20 +2032,12 @@ if('serviceWorker' in navigator){
         <input type="text" id="vei-novo-nome" class="inp" placeholder="Ex: Onix, Moto Honda, Ranger...">
       </div>
       <div style="margin-bottom:14px">
-        <label class="lbl">Combustíveis que usa</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
-            <input type="checkbox" id="vei-comb-gasolina" value="gasolina"> ⛽ Gasolina
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
-            <input type="checkbox" id="vei-comb-etanol" value="etanol"> 🌿 Etanol
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
-            <input type="checkbox" id="vei-comb-gnv" value="gnv"> 💨 GNV
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
-            <input type="checkbox" id="vei-comb-diesel" value="diesel"> 🛢️ Diesel
-          </label>
+        <label class="lbl">Combustíveis que usa (toque para selecionar)</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button type="button" class="comb-btn" id="vei-comb-gasolina" onclick="veiToggleComb(this)">⛽ Gasolina</button>
+          <button type="button" class="comb-btn" id="vei-comb-etanol" onclick="veiToggleComb(this)">🌿 Etanol</button>
+          <button type="button" class="comb-btn" id="vei-comb-gnv" onclick="veiToggleComb(this)">💨 GNV</button>
+          <button type="button" class="comb-btn" id="vei-comb-diesel" onclick="veiToggleComb(this)">🛢️ Diesel</button>
         </div>
       </div>
       <div style="display:flex;gap:8px">
