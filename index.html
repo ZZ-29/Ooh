@@ -216,6 +216,10 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-name">Tempo</div>
       <div class="tool-desc">Previsão sem anúncio</div>
     </div>
+    <div class="tool-card" onclick="goTo('veiculos')" style="background:linear-gradient(145deg,#059669,#047857);grid-column:1/-1;flex-direction:row;align-items:center;gap:16px">
+      <div class="tool-icon" style="font-size:36px;flex-shrink:0">&#x26FD;</div>
+      <div><div class="tool-name">Veículos</div><div class="tool-desc">Gastos de combustível por mês e ano</div></div>
+    </div>
     <div class="tool-card extra" onclick="goTo('extras')" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px">
       <div class="tool-icon" style="flex-shrink:0">&#x1F9F0;</div>
       <div><div class="tool-name">Extras</div><div class="tool-desc">Conversor de unidades, moedas e notas</div></div>
@@ -248,7 +252,7 @@ select{appearance:none;-webkit-appearance:none}
   <div class="page-head">
     <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
     <div class="icon" style="background:linear-gradient(145deg,#0369A1,#075985)">&#x26C5;</div>
-    <h1>Previsao do Tempo</h1>
+    <h1>Previsão do Tempo</h1>
   </div>
 
   <!-- Busca -->
@@ -259,7 +263,7 @@ select{appearance:none;-webkit-appearance:none}
       <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
     </div>
     <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="usarGPS()">
-      &#x1F4CD; Usar minha localizacao
+      &#x1F4CD; Usar minha localização
     </button>
   </div>
 
@@ -283,7 +287,7 @@ select{appearance:none;-webkit-appearance:none}
     <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
     <!-- Previsão 7 dias -->
     <div style="padding:0 16px 24px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PROXIMOS 7 DIAS</div>
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PRÓXIMOS 7 DIAS</div>
       <div id="tempo-semana"></div>
     </div>
   </div>
@@ -304,61 +308,9 @@ select{appearance:none;-webkit-appearance:none}
   </div>
   <div class="tabs">
     <div class="tab active" onclick="timerTab('timer')">&#x23F2; Timer</div>
-    <div class="tab" onclick="timerTab('crono')">&#x23F1; Cronometro</div>
+    <div class="tab" onclick="timerTab('crono')">&#x23F1; Cronômetro</div>
   </div>
 
-  
-<!-- TEMPO -->
-<div class="screen" id="screen-tempo">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#0369A1,#075985)">&#x26C5;</div>
-    <h1>Previsao do Tempo</h1>
-  </div>
-
-  <!-- Busca -->
-  <div style="padding:0 16px 4px">
-    <div style="display:flex;gap:8px">
-      <input type="text" id="tempo-cidade" placeholder="Buscar cidade..." style="flex:1" 
-        onkeydown="if(event.key==='Enter')buscarCidade()">
-      <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
-    </div>
-    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="usarGPS()">
-      &#x1F4CD; Usar minha localizacao
-    </button>
-  </div>
-
-  <!-- Loading -->
-  <div id="tempo-loading" style="display:none;text-align:center;padding:40px">
-    <div class="spinner" style="margin:0 auto 12px"></div>
-    <div style="color:var(--text2);font-size:14px">Buscando previsão...</div>
-  </div>
-
-  <!-- Resultado -->
-  <div id="tempo-resultado" style="display:none">
-    <!-- Atual -->
-    <div style="padding:0 16px;text-align:center;margin-bottom:4px">
-      <div id="tempo-local" style="font-size:15px;color:var(--text2);margin-bottom:4px"></div>
-      <div id="tempo-icone" style="font-size:80px;line-height:1;margin-bottom:8px"></div>
-      <div id="tempo-temp" style="font-size:72px;font-weight:900;color:#fff;line-height:1"></div>
-      <div id="tempo-desc" style="font-size:16px;color:#A78BFA;margin:6px 0 4px;font-weight:600"></div>
-      <div id="tempo-sensacao" style="font-size:13px;color:var(--text2)"></div>
-    </div>
-    <!-- Detalhes -->
-    <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
-    <!-- Previsão 7 dias -->
-    <div style="padding:0 16px 24px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PROXIMOS 7 DIAS</div>
-      <div id="tempo-semana"></div>
-    </div>
-  </div>
-
-  <!-- Vazio -->
-  <div id="tempo-vazio" style="text-align:center;padding:40px 16px">
-    <div style="font-size:60px;margin-bottom:12px">&#x1F30D;</div>
-    <div style="color:var(--text2);font-size:14px;line-height:1.6">Busque uma cidade ou use sua localizacao para ver a previsão do tempo sem publicidade</div>
-  </div>
-</div>
 
 <!-- TIMER -->
   <div class="pane active" id="pane-timer">
@@ -731,6 +683,7 @@ function goTo(s){
   if(s!=='qr')pararCam();
   if(s==='extras')carregarNotas();
   if(s==='lembretes')initLembretes();
+  if(s==='veiculos'){veiRenderResumo(veiAtual);veiRenderHist(veiAtual);}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
 }
 
@@ -1853,6 +1806,104 @@ function renderCookPresets(){
 // Renderiza ao entrar na tela
 var _origGoTo = goTo;
 
+// ============ VEÍCULOS ============
+var veiAtual = 'yaris';
+
+function veiTab(v){
+  veiAtual = v;
+  document.querySelectorAll('#screen-veiculos .tab').forEach(function(t,i){
+    t.classList.toggle('active', ['yaris','scooter','ranger'][i]===v);
+  });
+  document.querySelectorAll('#screen-veiculos .pane').forEach(function(p,i){
+    p.classList.toggle('active', ['yaris','scooter','ranger'][i]===v);
+  });
+  veiRenderResumo(v);
+  veiRenderHist(v);
+}
+
+function veiSalvar(v){
+  var data   = document.getElementById(v+'-data').value;
+  var comb   = document.getElementById(v+'-comb').value;
+  var litros = parseFloat(document.getElementById(v+'-litros').value);
+  var preco  = parseFloat(document.getElementById(v+'-preco').value);
+  var km     = parseFloat(document.getElementById(v+'-km').value);
+  if(!data||!litros||!preco){toast('Preencha data, litros e preço');return;}
+  var total  = litros * preco;
+  var lista  = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
+  lista.unshift({data:data, comb:comb, litros:litros, preco:preco, km:km||0, total:total});
+  localStorage.setItem('vei_'+v, JSON.stringify(lista));
+  // Limpa campos exceto data e comb
+  ['litros','preco','km'].forEach(function(f){ document.getElementById(v+'-f').value=''; });
+  document.getElementById(v+'-litros').value='';
+  document.getElementById(v+'-preco').value='';
+  document.getElementById(v+'-km').value='';
+  toast('Abastecimento salvo!');
+  veiRenderResumo(v);
+  veiRenderHist(v);
+}
+
+function veiRenderResumo(v){
+  var el = document.getElementById('vei-resumo-'+v);
+  if(!el) return;
+  var lista = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
+  if(!lista.length){ el.innerHTML='<div style="color:var(--text2);font-size:13px;padding:4px 0">Nenhum registro ainda.</div>'; return; }
+  var agora = new Date();
+  var mes   = agora.getMonth()+1;
+  var ano   = agora.getFullYear();
+  var totalMes=0, totalAno=0, litrosMes=0, litrosAno=0;
+  var kmAtual=0, kmAnterior=0;
+  lista.forEach(function(r,i){
+    var d = new Date(r.data+'T12:00:00');
+    if(d.getFullYear()===ano){ totalAno+=r.total; litrosAno+=r.litros; }
+    if(d.getFullYear()===ano && d.getMonth()+1===mes){ totalMes+=r.total; litrosMes+=r.litros; }
+    if(i===0) kmAtual=r.km;
+    if(i===lista.length-1) kmAnterior=r.km;
+  });
+  var kmRodado = kmAtual > kmAnterior ? kmAtual - kmAnterior : 0;
+  var custoPorKm = kmRodado>0 ? (totalAno/kmRodado).toFixed(2) : '--';
+  function chip(label, val, cor){
+    return '<div style="background:var(--surface2);border-radius:10px;padding:8px 12px;border-left:3px solid '+cor+'">'+
+      '<div style="font-size:10px;color:var(--text2)">'+label+'</div>'+
+      '<div style="font-size:15px;font-weight:700;color:#fff">'+val+'</div></div>';
+  }
+  el.innerHTML =
+    chip('Gasto este mês','R$ '+totalMes.toFixed(2),'#F8AA22') +
+    chip('Gasto este ano','R$ '+totalAno.toFixed(2),'#A78BFA') +
+    chip('Litros/m³ no ano',litrosAno.toFixed(1)+'L','#10B981') +
+    chip('Custo por km','R$ '+custoPorKm+'/km','#3B82F6');
+}
+
+function veiRenderHist(v){
+  var el = document.getElementById('vei-hist-'+v);
+  if(!el) return;
+  var lista = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
+  if(!lista.length){ el.innerHTML='<div style="color:var(--text2);font-size:13px">Nenhum registro.</div>'; return; }
+  var combLabel={'gasolina':'⛽ Gasolina','etanol':'🌿 Etanol','gnv':'💨 GNV'};
+  el.innerHTML = lista.slice(0,20).map(function(r,i){
+    var d = r.data ? r.data.split('-').reverse().join('/') : '';
+    return '<div style="background:var(--surface);border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:600">'+(combLabel[r.comb]||r.comb)+'</div>'+
+        '<div style="font-size:11px;color:var(--text2)">'+d+' · '+r.litros.toFixed(2)+'L · R$'+r.preco.toFixed(2)+'/L'+(r.km?' · '+r.km+'km':'')+'</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:15px;font-weight:700;color:#F8AA22">R$ '+r.total.toFixed(2)+'</div>'+
+        '<div onclick="veiExcluir('+JSON.stringify(v)+','+i+')" style="font-size:11px;color:var(--danger);cursor:pointer;margin-top:2px">excluir</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function veiExcluir(v, i){
+  var lista = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
+  lista.splice(i,1);
+  localStorage.setItem('vei_'+v, JSON.stringify(lista));
+  veiRenderResumo(v);
+  veiRenderHist(v);
+  toast('Registro removido');
+}
+// ============ FIM VEÍCULOS ============
+
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -1868,5 +1919,111 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+
+<!-- VEÍCULOS -->
+<div class="screen" id="screen-veiculos">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#059669,#047857)">&#x26FD;</div>
+    <h1>Veículos</h1>
+  </div>
+
+  <!-- Abas por veículo -->
+  <div class="tabs" style="padding:0 16px">
+    <div class="tab active" onclick="veiTab('yaris')">🚗 Yaris</div>
+    <div class="tab" onclick="veiTab('scooter')">🛵 Scooter</div>
+    <div class="tab" onclick="veiTab('ranger')">🚙 Ranger</div>
+  </div>
+
+  <!-- Painel Yaris -->
+  <div class="pane active" id="vei-pane-yaris">
+    <div style="padding:12px 16px 4px;font-size:11px;color:var(--text2);font-weight:700">TOYOTA YARIS — FLEX (Gasolina / Etanol)</div>
+    <div id="vei-resumo-yaris" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
+    <div style="padding:0 16px 12px">
+      <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div><label class="lbl">Data</label><input type="date" id="yaris-data" class="inp"></div>
+          <div><label class="lbl">Combustível</label>
+            <select id="yaris-comb" class="inp">
+              <option value="gasolina">Gasolina</option>
+              <option value="etanol">Etanol</option>
+            </select>
+          </div>
+          <div><label class="lbl">Litros</label><input type="number" id="yaris-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+          <div><label class="lbl">R$/litro</label><input type="number" id="yaris-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+          <div><label class="lbl">Km atual</label><input type="number" id="yaris-km" class="inp" placeholder="Ex: 45230" min="0"></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-success" style="width:100%" onclick="veiSalvar('yaris')">&#x2714; Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px 24px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px">HISTÓRICO</div>
+      <div id="vei-hist-yaris"></div>
+    </div>
+  </div>
+
+  <!-- Painel Scooter -->
+  <div class="pane" id="vei-pane-scooter">
+    <div style="padding:12px 16px 4px;font-size:11px;color:var(--text2);font-weight:700">YAMAHA SCOOTER — GASOLINA</div>
+    <div id="vei-resumo-scooter" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
+    <div style="padding:0 16px 12px">
+      <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div><label class="lbl">Data</label><input type="date" id="scooter-data" class="inp"></div>
+          <div><label class="lbl">Combustível</label>
+            <select id="scooter-comb" class="inp">
+              <option value="gasolina">Gasolina</option>
+            </select>
+          </div>
+          <div><label class="lbl">Litros</label><input type="number" id="scooter-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+          <div><label class="lbl">R$/litro</label><input type="number" id="scooter-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+          <div><label class="lbl">Km atual</label><input type="number" id="scooter-km" class="inp" placeholder="Ex: 12500" min="0"></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-success" style="width:100%" onclick="veiSalvar('scooter')">&#x2714; Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px 24px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px">HISTÓRICO</div>
+      <div id="vei-hist-scooter"></div>
+    </div>
+  </div>
+
+  <!-- Painel Ranger -->
+  <div class="pane" id="vei-pane-ranger">
+    <div style="padding:12px 16px 4px;font-size:11px;color:var(--text2);font-weight:700">FORD RANGER — GASOLINA / GNV</div>
+    <div id="vei-resumo-ranger" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
+    <div style="padding:0 16px 12px">
+      <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div><label class="lbl">Data</label><input type="date" id="ranger-data" class="inp"></div>
+          <div><label class="lbl">Combustível</label>
+            <select id="ranger-comb" class="inp">
+              <option value="gasolina">Gasolina</option>
+              <option value="gnv">GNV (m³)</option>
+            </select>
+          </div>
+          <div><label class="lbl">Litros / m³</label><input type="number" id="ranger-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+          <div><label class="lbl">R$/litro ou m³</label><input type="number" id="ranger-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+          <div><label class="lbl">Km atual</label><input type="number" id="ranger-km" class="inp" placeholder="Ex: 78000" min="0"></div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-success" style="width:100%" onclick="veiSalvar('ranger')">&#x2714; Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 16px 24px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px">HISTÓRICO</div>
+      <div id="vei-hist-ranger"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
