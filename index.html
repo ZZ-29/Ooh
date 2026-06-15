@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UniBox">
+<meta name="theme-color" content="#6C3CE1">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<title>Ooh!</title>
+<style>
+:root{--bg:#061C22;--surface:#0A2830;--surface2:#0F3340;--surface3:#164050;--primary:#6C3CE1;--primary2:#8B5CF6;--accent:#A78BFA;--text:#F1F0FF;--text2:#8885A8;--border:#1E5060;--success:#10B981;--danger:#EF4444;--warn:#F59E0B;--nav-h:68px;--radius:16px;--radius-sm:10px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden}
+.screen{display:none;position:fixed;inset:0 0 var(--nav-h) 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.screen.active{display:block;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:#0A2830;border-top:1px solid #1E5060;display:flex;align-items:center;z-index:100;padding:6px 8px env(safe-area-inset-bottom);gap:6px}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;padding:0;transition:transform .15s}
+.nav-btn:active{transform:scale(.93)}
+.nav-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;padding:7px 4px 6px;border-radius:12px;transition:all .22s}
+#nav-home .nav-box{background:linear-gradient(145deg,#7A68CC,#5B45AA)}
+#nav-scanner .nav-box{background:linear-gradient(145deg,#2563EB,#1D4ED8)}
+#nav-qr .nav-box{background:linear-gradient(145deg,#12995E,#0A6640)}
+#nav-cam .nav-box{background:linear-gradient(145deg,#C07A10,#8A5508)}
+#nav-extras .nav-box{background:linear-gradient(145deg,#0D9AAA,#076878)}
+.nav-lbl{font-size:9px;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1}
+.nav-btn svg{width:20px;height:20px;stroke-width:1.9;color:#fff}
+#nav-home.active .nav-box{background:linear-gradient(145deg,#B49BFC,#8B6BE8)!important;box-shadow:0 4px 14px rgba(139,107,232,.7)!important}
+#nav-scanner.active .nav-box{background:linear-gradient(145deg,#3B82F6,#2563EB)!important;box-shadow:0 4px 14px rgba(37,99,235,.7)!important}
+#nav-qr.active .nav-box{background:linear-gradient(145deg,#1DC98A,#0D9966)!important;box-shadow:0 4px 14px rgba(16,185,129,.6)!important}
+#nav-cam.active .nav-box{background:linear-gradient(145deg,#F8AA22,#D4880A)!important;box-shadow:0 4px 14px rgba(245,158,11,.6)!important}
+#nav-extras.active .nav-box{background:linear-gradient(145deg,#14C9DC,#0898AA)!important;box-shadow:0 4px 14px rgba(6,182,212,.6)!important}
+.nav-btn.active .nav-lbl{color:#fff!important}
+.nav-btn.active svg{color:#fff!important}
+.home-hero{padding:24px 20px 16px;background:linear-gradient(160deg,#0A2A35 0%,#061C22 70%)}
+.home-logo{display:flex;align-items:center;gap:14px}
+
+.ooh-logo{display:flex;align-items:baseline;justify-content:center;gap:0;line-height:1;margin-bottom:4px}
+.ooh-o1{font-size:72px;font-weight:900;color:#fff;font-family:'Poppins',sans-serif;letter-spacing:-4px;position:relative;display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border:5px solid #fff;border-radius:50%;margin-right:2px}
+.ooh-o1::after{content:'';width:16px;height:16px;background:#6C3CE1;border-radius:50%;position:absolute}
+.ooh-o2{font-size:42px;font-weight:900;color:#A78BFA;font-family:'Poppins',sans-serif;letter-spacing:-2px}
+.ooh-h{font-size:52px;font-weight:900;color:#fff;font-family:'Poppins',sans-serif}
+.ooh-exc{font-size:64px;font-weight:900;color:#10B981;font-family:'Poppins',sans-serif;line-height:1}
+
+.logo-symbol{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:44px;height:32px}
+
+
+
+
+.home-sub{font-size:13px;color:var(--text2);margin-top:8px;padding-left:2px}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px 0}
+.tool-card{border-radius:var(--radius);padding:20px 16px 18px;cursor:pointer;transition:transform .15s;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;border:none;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.tool-card:active{transform:scale(.96)}
+.tool-card::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,rgba(255,255,255,.12),transparent);pointer-events:none}
+.tool-card.pdf{background:linear-gradient(145deg,#7C4CF1,#5D2EC8)}
+.tool-card.qr{background:linear-gradient(145deg,#1DC98A,#0D9966)}
+.tool-card.ocr{background:linear-gradient(145deg,#F8AA22,#D4880A)}
+
+.tool-card.scanner{background:linear-gradient(145deg,#2563EB,#1D4ED8)}
+
+.doc-result{border-radius:var(--radius);padding:18px;text-align:center;margin-bottom:8px}
+.doc-result.valido{background:rgba(16,185,129,.12);border:1.5px solid var(--success)}
+.doc-result.invalido{background:rgba(239,68,68,.12);border:1.5px solid var(--danger)}
+.doc-emoji{font-size:40px;margin-bottom:6px}
+.doc-status{font-size:18px;font-weight:700;margin-bottom:4px}
+.doc-detalhe{font-size:13px;color:var(--text2);line-height:1.5}
+.back-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 8px 0 0;line-height:1}
+
+
+.cook-cat{background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.cook-cat.active{background:#6C3CE1;border-color:#6C3CE1;color:#fff}
+.cook-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1.5px solid transparent;transition:all .2s}
+.cook-item:active{border-color:#6C3CE1;background:var(--surface3)}
+.cook-nome{font-size:14px;font-weight:700;color:#fff}
+.cook-dica{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.cook-tempo{font-size:18px;font-weight:900;color:#A78BFA;font-family:monospace;white-space:nowrap}
+
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#6C3CE1;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scan-btn-tipo{flex:1;padding:10px 4px;border-radius:10px;border:2px solid transparent;background:var(--surface2);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.scan-btn-tipo:hover,.scan-btn-tipo.sel{border-color:#6C3CE1;background:#1a1040;color:#fff}
+
+.tool-card.pix{background:linear-gradient(145deg,#B49BFC,#8B6BE8)}
+.tool-card.extra{background:linear-gradient(145deg,#14C9DC,#0898AA)}
+.tool-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(255,255,255,.18)}
+.tool-name{font-size:15px;font-weight:800;color:#fff}
+.tool-desc{font-size:11.5px;color:rgba(255,255,255,.78);line-height:1.45}
+.pix-rapido-card{background:#0A2830;border:1px solid #1E5060;border-radius:var(--radius);padding:16px;border-top:3px solid #B49BFC}
+.page-head{display:flex;align-items:center;gap:12px;padding:20px 16px 8px}
+.page-head .icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.page-head h1{font-size:22px;font-weight:800;color:#fff}
+.tabs{display:flex;margin:0 16px 16px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;gap:3px}
+.tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;border-radius:8px;transition:all .2s}
+.tab.active{background:var(--surface3);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.pane{display:none}
+.pane.active{display:block}
+.section{background:#0D2E38;border:1.5px solid #1E5060;border-radius:var(--radius);padding:18px;margin:0 16px 14px}
+.section-title{font-size:12px;font-weight:700;color:#B49BFC;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label.lbl{display:block;font-size:13px;color:#E2E0FF;margin-bottom:7px;font-weight:600}
+input,textarea,select{width:100%;background:#0A2830;border:1.5px solid #1E5060;border-radius:var(--radius-sm);color:#F5F4FF;font-size:15px;padding:12px 14px;outline:none;transition:border-color .2s;font-family:inherit}
+input:focus,textarea:focus,select:focus{border-color:var(--primary)}
+textarea{resize:vertical;min-height:100px}
+select{appearance:none;-webkit-appearance:none}
+.row{display:flex;gap:10px}
+.row .field{flex:1}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--radius);border:none;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;width:100%}
+.btn:active{transform:scale(.98);opacity:.88}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1.5px solid #1E5060}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:9px 14px;font-size:12px;width:auto;border-radius:8px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 16px 14px}
+.file-pick{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:26px 14px;border-radius:var(--radius);border:2px dashed #5B5880;color:#E2E0FF;cursor:pointer;font-size:14px;font-weight:600;background:var(--surface2)}
+.file-pick input{display:none}
+.file-duo{display:flex;gap:10px;padding:0 16px;margin-bottom:12px}
+.file-duo .fp-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:700;color:#fff;border:none}
+.file-duo .fp-btn input{display:none}
+.file-duo .fp-btn span.ic{font-size:28px}
+.result{background:var(--surface2);border:1.5px solid #1E5060;border-radius:var(--radius-sm);padding:14px;margin-top:12px;font-size:13px;line-height:1.6;word-break:break-all;max-height:220px;overflow-y:auto}
+.result.ok{border-color:var(--success)}
+.result.err{border-color:var(--danger);color:var(--danger)}
+#qr-output{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px}
+#qr-canvas-wrap{background:#fff;padding:14px;border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+#cam-reader{width:100%;border-radius:var(--radius);overflow:hidden;background:#000;min-height:220px}
+#cam-reader video{width:100%!important;border-radius:var(--radius)}
+.scan-hint{text-align:center;font-size:12px;color:var(--text2);padding:8px 16px}
+.ocr-result-box{background:var(--surface3);border:1.5px solid #1E5060;border-radius:var(--radius-sm);padding:14px;font-size:14px;line-height:1.7;color:#fff;word-break:break-word;max-height:260px;overflow-y:auto;white-space:pre-wrap;margin-top:8px}
+.progresso{display:none;font-size:14px;font-weight:600;color:#fff;padding:10px 16px;text-align:center;border-radius:10px;margin:8px 16px}
+.progresso.ocr-prog{background:rgba(248,170,34,.2)}
+.boleto-result{background:var(--surface2);border:1.5px solid #1DC98A;border-radius:var(--radius);padding:16px;margin:0 16px}
+.boleto-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.boleto-row:last-child{border-bottom:none}
+.boleto-lbl{font-size:12px;color:#C4C0E8;font-weight:600}
+.boleto-val{font-size:13px;font-weight:700;color:var(--text);text-align:right;max-width:60%}
+.boleto-val.big{font-size:20px;color:var(--success)}
+.qual-btns{display:flex;gap:6px}
+.qual-btn{flex:1;padding:8px;border-radius:8px;border:1.5px solid #5B5880;background:var(--surface3);color:#E2E0FF;font-size:12px;font-weight:600;cursor:pointer;text-align:center}
+.qual-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.ctabs{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px;margin-bottom:14px}
+.ctab{padding:7px 12px;border-radius:20px;border:1.5px solid #1E5060;background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer}
+.ctab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.conv-result{font-size:18px;font-weight:700;text-align:center;color:var(--accent);padding:18px;background:var(--surface2);border-radius:var(--radius-sm);margin-top:12px;min-height:58px;display:flex;align-items:center;justify-content:center}
+.nota-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;position:relative}
+.nota-card-text{font-size:13px;line-height:1.6;white-space:pre-wrap;padding-right:28px;color:#fff}
+.nota-card-date{font-size:11px;color:var(--text2);margin-top:6px}
+.nota-card-del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:2px 6px}
+.toast{position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;transform:translateX(-50%) translateY(10px);background:#0F3340;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;pointer-events:none;border:1px solid var(--border)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.divider{height:1px;background:var(--border);margin:0 16px 14px}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <div class="home-logo">
+      <div class="ooh-logo">
+        <span class="ooh-o1">O</span><span class="ooh-o2">o</span><span class="ooh-h">h</span><span class="ooh-exc">!</span>
+      </div>
+    </div>
+    <div class="home-sub">veja o que voce nao sabia que precisava</div>
+  </div>
+  <div class="tools-grid">
+    <div class="tool-card qr" onclick="goTo('qr')">
+      <div class="tool-icon">&#x2B1B;</div>
+      <div class="tool-name">QR / Barras</div>
+      <div class="tool-desc">Gerar e ler codigos</div>
+    </div>
+    <div class="tool-card ocr" onclick="goTo('cam')">
+      <div class="tool-icon">&#x1F50D;</div>
+      <div class="tool-name">OCR</div>
+      <div class="tool-desc">Extrair texto de fotos</div>
+    </div>
+    <div class="tool-card scanner" onclick="goTo('scanner')">
+      <div class="tool-icon">&#x1F4C3;</div>
+      <div class="tool-name">Scanner</div>
+      <div class="tool-desc">Digitaliza documentos</div>
+    </div>
+
+    <div class="tool-card" onclick="goTo('docs')" style="background:linear-gradient(145deg,#0F766E,#0D5F58)">
+      <div class="tool-icon">&#x1F9FE;</div>
+      <div class="tool-name">CPF / CNPJ</div>
+      <div class="tool-desc">Valida documentos</div>
+    </div>
+    <div class="tool-card pix" onclick="togglePixRapido()" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px">
+      <div class="tool-icon" style="flex-shrink:0">&#x26A1;</div>
+      <div style="flex:1"><div class="tool-name">Pix Rapido</div><div class="tool-desc">Gere um QR Pix na hora</div></div>
+      <div id="pix-seta" style="font-size:20px;color:rgba(255,255,255,.8)">&#x25BC;</div>
+    </div>
+    <div class="tool-card" onclick="goTo('lembretes')" style="background:linear-gradient(145deg,#B45309,#92400E)">
+      <div class="tool-icon">&#x23F0;</div>
+      <div class="tool-name">Lembretes</div>
+      <div class="tool-desc">Alarmes e avisos</div>
+    </div>
+    <div class="tool-card" onclick="goTo('timer')" style="background:linear-gradient(145deg,#DC2626,#991B1B)">
+      <div class="tool-icon">&#x1F373;</div>
+      <div class="tool-name">Timer</div>
+      <div class="tool-desc">Cronometro e cozinha</div>
+    </div>
+    <div class="tool-card" onclick="goTo('tempo')" style="background:linear-gradient(145deg,#0369A1,#075985)">
+      <div class="tool-icon">&#x26C5;</div>
+      <div class="tool-name">Tempo</div>
+      <div class="tool-desc">Previsao sem anuncio</div>
+    </div>
+    <div class="tool-card extra" onclick="goTo('extras')" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px">
+      <div class="tool-icon" style="flex-shrink:0">&#x1F9F0;</div>
+      <div><div class="tool-name">Extras</div><div class="tool-desc">Conversor de unidades, moedas e notas</div></div>
+    </div>
+  </div>
+  <div style="padding:12px 16px 20px">
+    <div class="pix-rapido-card" id="pix-rapido-card">
+      <div id="pix-rapido-body" style="display:none">
+        <div class="field"><label class="lbl">Chave Pix</label><input type="text" id="pr-chave" placeholder="CPF, e-mail, celular ou aleatoria"></div>
+        <div class="row">
+          <div class="field"><label class="lbl">Seu nome</label><input type="text" id="pr-nome" placeholder="Ex: Joao Silva"></div>
+          <div class="field"><label class="lbl">Valor (R$)</label><input type="number" id="pr-valor" placeholder="0.00" step="0.01"></div>
+        </div>
+        <button class="btn btn-success" onclick="gerarPixRapido()" style="margin-bottom:14px">Gerar QR Pix</button>
+        <div id="pr-output" style="display:none;flex-direction:column;align-items:center;gap:10px;margin-top:14px">
+          <div style="background:#fff;padding:12px;border-radius:12px"><div id="pr-qr-div"></div></div>
+          <button class="btn btn-ghost btn-sm" onclick="baixarPixRapido()">Baixar imagem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- TEMPO -->
+<div class="screen" id="screen-tempo">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#0369A1,#075985)">&#x26C5;</div>
+    <h1>Previsao do Tempo</h1>
+  </div>
+
+  <!-- Busca -->
+  <div style="padding:0 16px 4px">
+    <div style="display:flex;gap:8px">
+      <input type="text" id="tempo-cidade" placeholder="Buscar cidade..." style="flex:1" 
+        onkeydown="if(event.key==='Enter')buscarCidade()">
+      <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="usarGPS()">
+      &#x1F4CD; Usar minha localizacao
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div id="tempo-loading" style="display:none;text-align:center;padding:40px">
+    <div class="spinner" style="margin:0 auto 12px"></div>
+    <div style="color:var(--text2);font-size:14px">Buscando previsao...</div>
+  </div>
+
+  <!-- Resultado -->
+  <div id="tempo-resultado" style="display:none">
+    <!-- Atual -->
+    <div style="padding:0 16px;text-align:center;margin-bottom:4px">
+      <div id="tempo-local" style="font-size:15px;color:var(--text2);margin-bottom:4px"></div>
+      <div id="tempo-icone" style="font-size:80px;line-height:1;margin-bottom:8px"></div>
+      <div id="tempo-temp" style="font-size:72px;font-weight:900;color:#fff;line-height:1"></div>
+      <div id="tempo-desc" style="font-size:16px;color:#A78BFA;margin:6px 0 4px;font-weight:600"></div>
+      <div id="tempo-sensacao" style="font-size:13px;color:var(--text2)"></div>
+    </div>
+    <!-- Detalhes -->
+    <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
+    <!-- Previsao 7 dias -->
+    <div style="padding:0 16px 24px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PROXIMOS 7 DIAS</div>
+      <div id="tempo-semana"></div>
+    </div>
+  </div>
+
+  <!-- Vazio -->
+  <div id="tempo-vazio" style="text-align:center;padding:40px 16px">
+    <div style="font-size:60px;margin-bottom:12px">&#x1F30D;</div>
+    <div style="color:var(--text2);font-size:14px;line-height:1.6">Busque uma cidade ou use sua localizacao para ver a previsao do tempo sem publicidade</div>
+  </div>
+</div>
+
+<!-- TIMER -->
+<div class="screen" id="screen-timer">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#DC2626,#991B1B)">&#x1F373;</div>
+    <h1>Timer</h1>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="timerTab('timer')">&#x23F2; Timer</div>
+    <div class="tab" onclick="timerTab('crono')">&#x23F1; Cronometro</div>
+  </div>
+
+  
+<!-- TEMPO -->
+<div class="screen" id="screen-tempo">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#0369A1,#075985)">&#x26C5;</div>
+    <h1>Previsao do Tempo</h1>
+  </div>
+
+  <!-- Busca -->
+  <div style="padding:0 16px 4px">
+    <div style="display:flex;gap:8px">
+      <input type="text" id="tempo-cidade" placeholder="Buscar cidade..." style="flex:1" 
+        onkeydown="if(event.key==='Enter')buscarCidade()">
+      <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="usarGPS()">
+      &#x1F4CD; Usar minha localizacao
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div id="tempo-loading" style="display:none;text-align:center;padding:40px">
+    <div class="spinner" style="margin:0 auto 12px"></div>
+    <div style="color:var(--text2);font-size:14px">Buscando previsao...</div>
+  </div>
+
+  <!-- Resultado -->
+  <div id="tempo-resultado" style="display:none">
+    <!-- Atual -->
+    <div style="padding:0 16px;text-align:center;margin-bottom:4px">
+      <div id="tempo-local" style="font-size:15px;color:var(--text2);margin-bottom:4px"></div>
+      <div id="tempo-icone" style="font-size:80px;line-height:1;margin-bottom:8px"></div>
+      <div id="tempo-temp" style="font-size:72px;font-weight:900;color:#fff;line-height:1"></div>
+      <div id="tempo-desc" style="font-size:16px;color:#A78BFA;margin:6px 0 4px;font-weight:600"></div>
+      <div id="tempo-sensacao" style="font-size:13px;color:var(--text2)"></div>
+    </div>
+    <!-- Detalhes -->
+    <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
+    <!-- Previsao 7 dias -->
+    <div style="padding:0 16px 24px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PROXIMOS 7 DIAS</div>
+      <div id="tempo-semana"></div>
+    </div>
+  </div>
+
+  <!-- Vazio -->
+  <div id="tempo-vazio" style="text-align:center;padding:40px 16px">
+    <div style="font-size:60px;margin-bottom:12px">&#x1F30D;</div>
+    <div style="color:var(--text2);font-size:14px;line-height:1.6">Busque uma cidade ou use sua localizacao para ver a previsao do tempo sem publicidade</div>
+  </div>
+</div>
+
+<!-- TIMER -->
+  <div class="pane active" id="pane-timer">
+    <!-- Assistente Culinario -->
+    <div style="padding:0 16px 4px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:700">ASSISTENTE DE COZINHA</div>
+      <!-- Categorias -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px">
+        <button class="cook-cat active" onclick="setCookCat('graos',this)">🌾 Graos</button>
+        <button class="cook-cat" onclick="setCookCat('massas',this)">🍝 Massas</button>
+        <button class="cook-cat" onclick="setCookCat('ovos',this)">🥚 Ovos</button>
+        <button class="cook-cat" onclick="setCookCat('carnes',this)">🥩 Carnes</button>
+        <button class="cook-cat" onclick="setCookCat('legumes',this)">🥦 Legumes</button>
+      </div>
+      <div id="cook-presets"></div>
+    </div>
+    <!-- Display -->
+    <div style="text-align:center;padding:0 16px">
+      <div id="timer-display" style="font-size:80px;font-weight:900;color:#fff;letter-spacing:4px;font-family:monospace;line-height:1">00:00</div>
+      <div id="timer-status" style="font-size:13px;color:var(--text2);margin:6px 0 16px">Defina o tempo</div>
+    </div>
+    <!-- Input manual -->
+    <div style="display:flex;justify-content:center;gap:16px;padding:0 16px 16px">
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">MIN</div>
+        <input type="number" id="timer-min" min="0" max="99" value="10" style="width:72px;text-align:center;font-size:28px;font-weight:700;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:#fff;padding:8px 4px">
+      </div>
+      <div style="display:flex;align-items:center;font-size:36px;font-weight:900;color:#fff;padding-top:16px">:</div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">SEG</div>
+        <input type="number" id="timer-seg" min="0" max="59" value="0" style="width:72px;text-align:center;font-size:28px;font-weight:700;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:#fff;padding:8px 4px">
+      </div>
+    </div>
+    <!-- Controles -->
+    <div style="display:flex;gap:10px;padding:0 16px 16px">
+      <button id="btn-timer-start" class="btn btn-primary" style="flex:2;font-size:18px" onclick="toggleTimer()">&#x25B6; Iniciar</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="resetTimer()">&#x21BA; Reset</button>
+    </div>
+    <!-- Multiplos timers ativos -->
+    <div style="padding:0 16px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:700">TIMERS ATIVOS</div>
+      <div id="timers-lista"></div>
+      <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px" onclick="adicionarTimer()">+ Adicionar outro timer</button>
+    </div>
+  </div>
+
+  <!-- CRONOMETRO -->
+  <div class="pane" id="pane-crono">
+    <div style="text-align:center;padding:24px 16px 16px">
+      <div id="crono-display" style="font-size:72px;font-weight:900;color:#fff;letter-spacing:2px;font-family:monospace;line-height:1">00:00.0</div>
+      <div id="crono-status" style="font-size:13px;color:var(--text2);margin:8px 0 20px">Pronto</div>
+    </div>
+    <div style="display:flex;gap:10px;padding:0 16px 16px">
+      <button id="btn-crono-start" class="btn btn-primary" style="flex:2;font-size:18px" onclick="toggleCrono()">&#x25B6; Iniciar</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="voltaCrono()">Volta</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="resetCrono()">&#x21BA; Reset</button>
+    </div>
+    <div style="padding:0 16px">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:700">VOLTAS</div>
+      <div id="crono-voltas" style="max-height:260px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LEMBRETES -->
+<div class="screen" id="screen-lembretes">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#B45309,#92400E)">&#x23F0;</div>
+    <h1>Lembretes</h1>
+  </div>
+  <div style="padding:0 16px 4px">
+    <div id="notif-aviso" style="display:none;background:rgba(245,158,11,.15);border:1px solid #B45309;border-radius:10px;padding:12px;font-size:13px;color:#FCD34D;margin-bottom:12px;text-align:center">
+      &#x1F514; Ative as notificacoes para receber alarmes mesmo com o app minimizado
+      <br><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pedirPermissaoNotif()">Ativar notificacoes</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="field">
+      <label class="lbl">O que precisa lembrar?</label>
+      <textarea id="lemb-texto" placeholder="Ex: Ligar para o banco, Consulta medica, Pagar boleto..." style="min-height:70px"></textarea>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label class="lbl">Data</label>
+        <input type="date" id="lemb-data">
+      </div>
+      <div class="field">
+        <label class="lbl">Hora</label>
+        <input type="time" id="lemb-hora">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="salvarLembrete()">&#x23F0; Salvar Lembrete</button>
+  </div>
+  <div style="padding:0 16px 8px">
+    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">PROXIMOS LEMBRETES</div>
+    <div id="lemb-lista"></div>
+  </div>
+</div>
+
+<!-- DOCS -->
+<div class="screen" id="screen-docs">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#0F766E,#0D5F58)">&#x1F9FE;</div>
+    <h1>CPF / CNPJ</h1>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="docsTab('cpf')">CPF</div>
+    <div class="tab" onclick="docsTab('cnpj')">CNPJ</div>
+  </div>
+
+  <!-- CPF -->
+  <div class="pane active" id="pane-cpf">
+    <div class="section">
+      <div class="field">
+        <label class="lbl">Numero do CPF</label>
+        <input type="text" id="cpf-input" placeholder="000.000.000-00" maxlength="14"
+          oninput="cpfMask(this)" inputmode="numeric">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" style="flex:1" onclick="validarCPF()">Validar</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="limparDoc('cpf')">Limpar</button>
+      </div>
+    </div>
+    <div id="cpf-result" style="padding:0 16px 16px;display:none"></div>
+    <div class="section" style="margin-top:4px">
+      <div class="section-title" style="font-size:12px;color:var(--text2);margin-bottom:10px">Sobre o CPF</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6">O CPF e validado pelo calculo dos digitos verificadores (10º e 11º digito). Um CPF pode ter formato correto mas ainda ser invalido matematicamente.</p>
+    </div>
+  </div>
+
+  <!-- CNPJ -->
+  <div class="pane" id="pane-cnpj">
+    <div class="section">
+      <div class="field">
+        <label class="lbl">Numero do CNPJ</label>
+        <input type="text" id="cnpj-input" placeholder="00.000.000/0000-00" maxlength="18"
+          oninput="cnpjMask(this)" inputmode="numeric">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" style="flex:1" onclick="validarCNPJ()">Validar</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="limparDoc('cnpj')">Limpar</button>
+      </div>
+    </div>
+    <div id="cnpj-result" style="padding:0 16px 16px;display:none"></div>
+  </div>
+</div>
+
+<!-- QR -->
+<div class="screen" id="screen-qr">
+  <div class="page-head"><div class="icon" style="background:#0a3322">&#x2B1B;</div><h1>QR / Barras</h1></div>
+  <div class="tabs">
+    <div class="tab active" onclick="qrTab('gerar')">Gerar</div>
+    <div class="tab" onclick="qrTab('ler')">Ler</div>
+    <div class="tab" onclick="qrTab('boleto')">Boleto</div>
+  </div>
+  <div class="pane active" id="pane-gerar">
+    <div class="section">
+      <div class="field"><label class="lbl">Tipo</label>
+        <select id="qr-tipo" onchange="qrTipoChange()">
+          <option value="texto">Texto / Link</option>
+          <option value="pix">Pix</option>
+          <option value="wifi">Wi-Fi</option>
+          <option value="tel">Telefone</option>
+        </select>
+      </div>
+    </div>
+    <div class="section" id="qr-form-texto"><div class="field"><label class="lbl">Texto ou URL</label><textarea id="qr-texto-val" placeholder="Digite o texto ou link..." style="min-height:80px"></textarea></div></div>
+    <div class="section" id="qr-form-pix" style="display:none">
+      <div class="section-title">Dados Pix</div>
+      <div class="field"><label class="lbl">Chave Pix</label><input type="text" id="pix-chave" placeholder="CPF, e-mail, celular ou aleatoria"></div>
+      <div class="field"><label class="lbl">Nome do recebedor</label><input type="text" id="pix-nome" placeholder="Ex: Joao Silva"></div>
+      <div class="field"><label class="lbl">Cidade</label><input type="text" id="pix-cidade" placeholder="Ex: SAO PAULO"></div>
+      <div class="row">
+        <div class="field"><label class="lbl">Valor (opcional)</label><input type="number" id="pix-valor" placeholder="0.00" step="0.01"></div>
+        <div class="field"><label class="lbl">Descricao</label><input type="text" id="pix-desc" placeholder="Opcional"></div>
+      </div>
+    </div>
+    <div class="section" id="qr-form-wifi" style="display:none">
+      <div class="section-title">Wi-Fi</div>
+      <div class="field"><label class="lbl">Nome da rede</label><input type="text" id="wifi-ssid"></div>
+      <div class="field"><label class="lbl">Senha</label><input type="text" id="wifi-senha"></div>
+      <div class="field"><label class="lbl">Seguranca</label><select id="wifi-tipo"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">Sem senha</option></select></div>
+    </div>
+    <div class="section" id="qr-form-tel" style="display:none"><div class="field"><label class="lbl">Telefone</label><input type="tel" id="tel-num" placeholder="+5511999999999"></div></div>
+    <div style="padding:0 16px 16px"><button class="btn btn-primary" onclick="gerarQR()">Gerar QR Code</button></div>
+    <div id="qr-output" style="display:none">
+      <div id="qr-canvas-wrap"></div>
+      <button class="btn btn-ghost btn-sm" onclick="baixarQR()">Baixar imagem</button>
+    </div>
+  </div>
+  <div class="pane" id="pane-ler-qr">
+    <div class="scan-hint">Le QR Codes, EAN-13, EAN-8, Code 128, UPC e mais</div>
+    <div style="padding:0 16px 12px"><button class="btn btn-primary" onclick="toggleCam()" id="btn-cam">Ativar camera</button></div>
+    <div style="padding:0 16px"><div id="cam-reader" style="display:none"></div></div>
+    <div class="divider" style="margin-top:16px"></div>
+    <div style="padding:0 16px 14px"><label class="file-pick"><span>&#x1F5BC; Imagem com QR ou codigo de barras</span><input type="file" id="qr-img-file" accept="image/*" onchange="lerQRimg(this)"></label></div>
+    <div id="qr-scan-result" style="display:none;padding:0 16px" class="result ok"></div>
+    <div id="qr-acoes" style="display:none" class="btn-row"></div>
+  </div>
+  <div class="pane" id="pane-boleto">
+    <div style="padding:0 16px 6px;font-size:12px;color:var(--text2)">Cole o codigo do boleto (44-48 digitos)</div>
+    <div class="section">
+      <div class="field"><label class="lbl">Codigo do boleto</label><textarea id="boleto-codigo" placeholder="Ex: 34191.09067 07891.302627..." style="min-height:80px;font-size:13px;font-family:monospace" oninput="autoParseBoleto()"></textarea></div>
+      <button class="btn btn-primary" onclick="parseBoleto()">Analisar boleto</button>
+    </div>
+    <div id="boleto-reader-tmp" style="display:none"></div>
+    <div style="padding:0 16px 12px"><label class="file-pick"><span>&#x1F4F7; Escanear codigo de barras do boleto</span><input type="file" id="boleto-img" accept="image/*" onchange="lerBoletoImg(this)"></label></div>
+    <div id="boleto-result" style="display:none"></div>
+  </div>
+</div>
+
+<!-- CAMERA -->
+<div class="screen" id="screen-cam">
+  <div class="page-head"><div class="icon" style="background:#3d2a00">&#x1F4F7;</div><h1>Camera</h1></div>
+  <div class="tabs">
+    <div class="tab active" onclick="camTab('ocr')">OCR - Texto</div>
+  </div>
+  <div class="pane active" id="pane-ocr">
+    <div style="padding:12px 16px 4px;font-size:13px;color:#ccc;text-align:center">Selecione uma foto com texto para extrair</div>
+    <div class="file-duo">
+      <label class="fp-btn" style="background:linear-gradient(135deg,#F8AA22,#D4880A)">
+        <span class="ic">&#x1F4F7;</span><span>Tirar Foto</span>
+        <input type="file" id="ocr-file-cam" accept="image/*" capture="environment" onchange="previewOCR(this)">
+      </label>
+      <label class="fp-btn" style="background:linear-gradient(135deg,#8B5CF6,#6C3CE1)">
+        <span class="ic">&#x1F5BC;</span><span>Da Galeria</span>
+        <input type="file" id="ocr-file" accept="image/*" onchange="previewOCR(this)">
+      </label>
+    </div>
+    <div style="padding:0 16px"><img id="ocr-preview" style="width:100%;border-radius:8px;margin-top:4px;display:none"></div>
+    <div class="progresso ocr-prog" id="ocr-progress"></div>
+    <div style="padding:4px 16px 16px">
+      <button class="btn btn-primary" id="btn-ocr" style="display:none" onclick="iniciarOCR()">Extrair Texto da Imagem</button>
+    </div>
+    <div id="ocr-result-wrap" style="display:none">
+      <div class="section">
+        <div class="section-title" style="color:#F8AA22">Texto extraido</div>
+        <div id="ocr-result" class="ocr-result-box"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" onclick="copiarOCR()" style="color:#fff">Copiar</button>
+        <button class="btn btn-primary btn-sm" onclick="ocrParaPDF()">Salvar PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SCANNER -->
+<div class="screen" id="screen-scanner">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#2563EB,#1D4ED8)">&#x1F4C3;</div>
+    <h1>Scanner</h1>
+  </div>
+
+  <!-- Step 1: Capturar foto -->
+  <div id="scanner-step1" style="padding:0 16px">
+    <div class="section" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:8px">&#x1F4F7;</div>
+      <p style="color:var(--text2);margin-bottom:20px;font-size:14px;line-height:1.6">Fotografe o documento<br>Multa, boleto, contrato, RG...</p>
+      <div class="file-duo">
+        <label class="fp-btn" style="background:linear-gradient(135deg,#2563EB,#1D4ED8)">
+          <span class="ic">&#x1F4F7;</span><span>Tirar Foto</span>
+          <input type="file" id="scanner-cam-input" accept="image/*" capture="environment" onchange="scannerPreview(this)">
+        </label>
+        <label class="fp-btn" style="background:linear-gradient(135deg,#7C3AED,#5B21B6)">
+          <span class="ic">&#x1F5BC;</span><span>Da Galeria</span>
+          <input type="file" id="scanner-file-input" accept="image/*" onchange="scannerPreview(this)">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Ajustar cantos -->
+  <div id="scanner-step2" style="display:none;padding:0 16px">
+    <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:8px">&#x1F449; Arraste os pontos coloridos para os <strong style="color:#fff">cantos do documento</strong></p>
+    <canvas id="scanner-canvas" style="width:100%;touch-action:none;border-radius:10px;display:block"></canvas>
+    <div style="margin-top:14px">
+      <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saida:</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="scan-btn-tipo" onclick="processarScan('color',this)">&#x1F3A8; Colorido</button>
+        <button class="scan-btn-tipo" onclick="processarScan('pb',this)">&#x26AB; Preto e Branco</button>
+        <button class="scan-btn-tipo sel" onclick="processarScan('doc',this)">&#x1F4C4; Documento</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="scannerNovo()" style="width:100%">&#x2190; Tirar nova foto</button>
+    </div>
+  </div>
+
+  <!-- Processando -->
+  <div id="scanner-processing" style="display:none;padding:48px 16px;text-align:center">
+    <div class="spinner" style="margin:0 auto 16px"></div>
+    <p style="color:var(--text2)">Processando documento...</p>
+  </div>
+
+  <!-- Step 3: Resultado -->
+  <div id="scanner-step3" style="display:none;padding:0 16px 24px">
+    <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:10px">Resultado:</p>
+    <img id="scanner-result-img" style="width:100%;border-radius:10px;margin-bottom:14px;display:none">
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="scannerNovo()">&#x21A9; Novo scan</button>
+      <button class="btn btn-primary" style="flex:1" onclick="salvarScannerPDF()">&#x1F4BE; Salvar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXTRAS -->
+<div class="screen" id="screen-extras">
+  <div class="page-head"><div class="icon" style="background:#042a30">&#x1F9F0;</div><h1>Extras</h1></div>
+  <div class="tabs">
+    <div class="tab active" onclick="extrasTab('conv')">Conversor</div>
+    <div class="tab" onclick="extrasTab('notas')">Notas</div>
+  </div>
+  <div class="pane active" id="pane-conv">
+    <div class="ctabs">
+      <div class="ctab active" onclick="setCategoria('comp',this)">Comprimento</div>
+      <div class="ctab" onclick="setCategoria('peso',this)">Peso</div>
+      <div class="ctab" onclick="setCategoria('temp',this)">Temp.</div>
+      <div class="ctab" onclick="setCategoria('area',this)">Area</div>
+      <div class="ctab" onclick="setCategoria('moeda',this)">Moeda</div>
+    </div>
+    <div class="section">
+      <div class="field"><label class="lbl">Valor</label><input type="number" id="conv-valor" placeholder="0" oninput="converter()"></div>
+      <div class="row">
+        <div class="field"><label class="lbl">De</label><select id="conv-de" onchange="converter()"></select></div>
+        <div class="field"><label class="lbl">Para</label><select id="conv-para" onchange="converter()"></select></div>
+      </div>
+      <div class="conv-result" id="conv-result">-</div>
+    </div>
+  </div>
+  <div class="pane" id="pane-notas">
+    <div class="section">
+      <div class="field"><label class="lbl">Nova nota</label><textarea id="nota-texto" placeholder="Escreva sua nota..."></textarea></div>
+      <button class="btn btn-primary" onclick="salvarNota()">Salvar nota</button>
+    </div>
+    <div id="notas-lista" style="padding:0 16px"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" id="nav-home" onclick="goTo('home')">
+    <div class="nav-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span class="nav-lbl">Home</span></div>
+  </button>
+  <button class="nav-btn" id="nav-scanner" onclick="goTo('scanner')">
+    <div class="nav-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h6M7 16h8"/></svg><span class="nav-lbl">Scanner</span></div>
+  </button>
+  <button class="nav-btn" id="nav-qr" onclick="goTo('qr')">
+    <div class="nav-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg><span class="nav-lbl">QR/Barras</span></div>
+  </button>
+  <button class="nav-btn" id="nav-cam" onclick="goTo('cam')">
+    <div class="nav-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span class="nav-lbl">Camera</span></div>
+  </button>
+  <button class="nav-btn" id="nav-extras" onclick="goTo('extras')">
+    <div class="nav-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg><span class="nav-lbl">Extras</span></div>
+  </button>
+</nav>
+<script>
+var camAtiva=false,html5QrScanner=null;
+
+
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('screen-'+s).classList.add('active');
+  var nb=document.getElementById('nav-'+s);
+  if(nb)nb.classList.add('active');
+  if(s!=='qr')pararCam();
+  if(s==='extras')carregarNotas();
+  if(s==='lembretes')initLembretes();
+  if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
+}
+
+function qrTab(t){var idx=t==='gerar'?0:t==='ler'?1:2;switchTabs('#screen-qr .tab','#screen-qr .pane',idx);if(t!=='ler')pararCam();}
+function camTab(t){switchTabs('#screen-cam .tab','#screen-cam .pane',t==='ocr'?0:1);}
+function extrasTab(t){switchTabs('#screen-extras .tab','#screen-extras .pane',t==='conv'?0:1);if(t==='notas')carregarNotas();}
+function switchTabs(ts,ps,idx){
+  document.querySelectorAll(ts).forEach(function(el,i){el.classList.toggle('active',i===idx);});
+  document.querySelectorAll(ps).forEach(function(el,i){el.classList.toggle('active',i===idx);});
+}
+function toast(msg,dur){
+  dur=dur||2500;
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},dur);
+}
+
+var imgQual=0.75;
+function setQual(q,el){
+  imgQual=q;
+  document.querySelectorAll('.qual-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+}
+
+document.getElementById('pdf-img').addEventListener('change',function(){
+  var file=this.files[0];
+  document.getElementById('pdf-img-nome').textContent=file?file.name:'';
+  if(file){
+    document.getElementById('pdf-img-preview').src=URL.createObjectURL(file);
+    document.getElementById('pdf-img-preview-wrap').style.display='block';
+    document.getElementById('pdf-img-info').textContent='Tamanho: '+(file.size/1024).toFixed(0)+' KB';
+  }else{document.getElementById('pdf-img-preview-wrap').style.display='none';}
+});
+document.getElementById('pdf-file').addEventListener('change',lerPDF);
+
+
+
+function qrTipoChange(){
+  var t=document.getElementById('qr-tipo').value;
+  ['texto','pix','wifi','tel'].forEach(function(x){document.getElementById('qr-form-'+x).style.display=x===t?'block':'none';});
+}
+
+function gerarQR(){
+  var c=buildQrConteudo();
+  if(!c){toast('Preencha os dados');return;}
+  if(typeof QRCode==='undefined'){toast('Aguarde o carregamento...');return;}
+  var wrap=document.getElementById('qr-canvas-wrap');
+  wrap.innerHTML='';
+  document.getElementById('qr-output').style.display='flex';
+  new QRCode(wrap,{text:c,width:240,height:240,colorDark:'#000000',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.H});
+}
+
+function buildQrConteudo(){
+  var t=document.getElementById('qr-tipo').value;
+  if(t==='texto')return document.getElementById('qr-texto-val').value.trim();
+  if(t==='tel')return 'tel:'+document.getElementById('tel-num').value.trim();
+  if(t==='wifi'){var s=document.getElementById('wifi-ssid').value,p=document.getElementById('wifi-senha').value,tp=document.getElementById('wifi-tipo').value;return 'WIFI:T:'+tp+';S:'+s+';P:'+p+';;';}
+  if(t==='pix')return buildPix();
+  return '';
+}
+
+function buildPix(){
+  var chave=document.getElementById('pix-chave').value.trim();
+  var nome=(document.getElementById('pix-nome').value.trim()||'RECEBEDOR').substring(0,25).toUpperCase();
+  var cidade=(document.getElementById('pix-cidade').value.trim()||'CIDADE').substring(0,15).toUpperCase();
+  var valor=parseFloat(document.getElementById('pix-valor').value)||0;
+  var desc=(document.getElementById('pix-desc').value.trim()||'').substring(0,35);
+  if(!chave){toast('Informe a chave Pix');return '';}
+  function tlv(id,val){return id+String(val.length).padStart(2,'0')+val;}
+  var gui=tlv('00','BR.GOV.BCB.PIX')+tlv('01',chave)+(desc?tlv('02',desc):'');
+  var payload='000201'+tlv('26',gui)+tlv('52','0000')+tlv('53','986')+(valor>0?tlv('54',valor.toFixed(2)):'')+tlv('58','BR')+tlv('59',nome)+tlv('60',cidade)+tlv('62',tlv('05','***'))+'6304';
+  return payload+crc16(payload);
+}
+
+function crc16(str){
+  var crc=0xFFFF;
+  for(var i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(var j=0;j<8;j++)crc=(crc&0x8000)?((crc<<1)^0x1021):(crc<<1);}
+  return((crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0'));
+}
+
+function baixarQR(){
+  var canvas=document.querySelector('#qr-canvas-wrap canvas');
+  if(!canvas){toast('Gere um QR primeiro');return;}
+  var a=document.createElement('a');
+  a.download='qrcode_unibox.png';a.href=canvas.toDataURL();a.click();
+  toast('Imagem salva!');
+}
+
+function toggleCam(){camAtiva?pararCam():iniciarCam();}
+function iniciarCam(){
+  var reader=document.getElementById('cam-reader');
+  reader.style.display='block';reader.innerHTML='';
+  document.getElementById('btn-cam').textContent='Parar camera';
+  camAtiva=true;
+  html5QrScanner=new Html5Qrcode('cam-reader');
+  var fmts=[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.ITF];
+  html5QrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:260,height:160},formatsToSupport:fmts},
+    function(txt){mostrarResultadoQR(txt);pararCam();},function(){})
+    .catch(function(){toast('Camera indisponivel');pararCam();});
+}
+function pararCam(){
+  if(html5QrScanner){html5QrScanner.stop().catch(function(){});html5QrScanner=null;}
+  var r=document.getElementById('cam-reader');r.style.display='none';r.innerHTML='';
+  var b=document.getElementById('btn-cam');if(b)b.textContent='Ativar camera';
+  camAtiva=false;
+}
+function lerQRimg(input){
+  if(!input.files[0])return;
+  var tmp=document.getElementById('cam-reader');
+  var s=new Html5Qrcode('cam-reader');
+  s.scanFile(input.files[0],true).then(mostrarResultadoQR).catch(function(){toast('Nenhum codigo encontrado');});
+}
+function mostrarResultadoQR(txt){
+  var res=document.getElementById('qr-scan-result'),ac=document.getElementById('qr-acoes');
+  res.style.display='block';res.textContent=txt;ac.style.display='flex';ac.innerHTML='';
+  var b1=document.createElement('button');b1.className='btn btn-ghost btn-sm';b1.textContent='Copiar';b1.style.color='#fff';
+  b1.onclick=function(){navigator.clipboard.writeText(txt);toast('Copiado!');};ac.appendChild(b1);
+  if(/^https?:\/\//.test(txt)){var b2=document.createElement('button');b2.className='btn btn-primary btn-sm';b2.textContent='Abrir link';b2.onclick=function(){window.open(txt,'_blank');};ac.appendChild(b2);}
+}
+
+var ocrFileAtual=null;
+function previewOCR(input){
+  if(!input.files[0])return;
+  ocrFileAtual=input.files[0];
+  var p=document.getElementById('ocr-preview');p.src=URL.createObjectURL(ocrFileAtual);p.style.display='block';
+  document.getElementById('btn-ocr').style.display='flex';
+  document.getElementById('ocr-result-wrap').style.display='none';
+  document.getElementById('ocr-progress').style.display='none';
+}
+async function iniciarOCR(){
+  if(!ocrFileAtual){toast('Selecione uma imagem');return;}
+  var btn=document.getElementById('btn-ocr'),prog=document.getElementById('ocr-progress');
+  btn.innerHTML='<span class="spin"></span> Processando...';btn.disabled=true;
+  prog.style.display='block';prog.textContent='Iniciando leitura do texto...';
+  document.getElementById('ocr-result-wrap').style.display='none';
+  try{
+    if(typeof Tesseract==='undefined'){
+      prog.textContent='Carregando modulo OCR... aguarde';
+      await carregarScript('https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js');
+    }
+    var worker=await Tesseract.createWorker('por+eng',1,{
+      logger:function(m){if(m.status==='recognizing text')prog.textContent='Lendo imagem... '+Math.round(m.progress*100)+'%';}
+    });
+    var result=await worker.recognize(ocrFileAtual);
+    await worker.terminate();
+    var text=result.data.text.trim()||'(nenhum texto encontrado)';
+    document.getElementById('ocr-result').textContent=text;
+    document.getElementById('ocr-result-wrap').style.display='block';
+    prog.style.display='none';
+  }catch(e){prog.textContent='Erro: '+e.message;}
+  btn.innerHTML='Extrair Texto da Imagem';btn.disabled=false;
+}
+function copiarOCR(){navigator.clipboard.writeText(document.getElementById('ocr-result').textContent).then(function(){toast('Copiado!');});}
+function ocrParaPDF(){
+  var txt=document.getElementById('ocr-result').textContent;
+  if(!txt)return;
+  if(!window.jspdf){toast('Aguarde o carregamento...');return;}
+  var doc=new window.jspdf.jsPDF();
+  doc.setFontSize(11);doc.text(doc.splitTextToSize(txt,180),15,20);
+  doc.save('ocr_unibox.pdf');toast('PDF salvo!');
+}
+
+var notaFileAtual=null;
+
+function loadImg(src){return new Promise(function(res,rej){var i=new Image();i.onload=function(){res(i);};i.onerror=rej;i.src=src;});}
+function analisarPixels(imageData,w,h){
+  var data=imageData.data,r=0,g=0,b=0,n=data.length/4;
+  for(var i=0;i<data.length;i+=4){r+=data[i];g+=data[i+1];b+=data[i+2];}
+  r/=n;g/=n;b/=n;
+  var brightness=(r+g+b)/3;
+  var colorVariance=Math.sqrt(((r-128)*(r-128)+(g-128)*(g-128)+(b-128)*(b-128))/3);
+  var sharpness=0;
+  for(var y=1;y<h-1;y+=8){for(var x=1;x<w-1;x+=8){var idx=(y*w+x)*4,idxR=(y*w+x+1)*4;sharpness+=Math.abs(data[idx]-data[idxR]);}}
+  return{brightness:brightness,colorVariance:colorVariance,sharpness:sharpness/(w/8*h/8)};
+}
+function validarSerialReal(serial){return /^[A-Z]{1,2}\d{8,11}$/.test(serial);}
+function mostrarResultadoNota(checks,serialOk,serialNum){
+  var wrap=document.getElementById('nota-result-wrap');
+  var itens=[],score=0;
+  var brightOk=checks.brightness>60&&checks.brightness<210;itens.push({ok:brightOk,txt:brightOk?'Luminosidade adequada':'Imagem muito escura ou clara'});if(brightOk)score++;
+  var colorOk=checks.colorVariance>15;itens.push({ok:colorOk,txt:colorOk?'Variacao de cores detectada':'Cores uniformes - pode ser fotocopia'});if(colorOk)score++;
+  var sharpOk=checks.sharpness>8;itens.push({ok:sharpOk,txt:sharpOk?'Detalhes visiveis na imagem':'Imagem sem nitidez - aproxime a camera'});if(sharpOk)score++;
+  if(serialOk===true){itens.push({ok:true,txt:'Serie: '+serialNum+' (formato valido)'});score++;}
+  else if(serialOk===false){itens.push({ok:false,txt:'Serie: '+serialNum+' (formato invalido)'});}
+  else{itens.push({ok:null,txt:'Serie: '+serialNum});}
+  var valid=itens.filter(function(i){return i.ok!==null;}).length;
+  var pct=valid>0?Math.round(score/valid*100):0;
+  var cls,emoji,titulo,sub;
+  if(pct>=75){cls='ok';emoji='OK';titulo='Aparenta ser autentica';sub='Para certeza use luz UV ou banco.';}
+  else if(pct>=40){cls='warn';emoji='??';titulo='Resultado inconclusivo';sub='Tire uma foto melhor com mais luz.';}
+  else{cls='err';emoji='!!';titulo='Suspeita de falsificacao';sub='Apresente ao banco ou Policia Federal.';}
+  wrap.style.display='block';
+  wrap.innerHTML='<div class="nota-score '+cls+'"><div class="nota-emoji">'+emoji+'</div><div class="nota-titulo">'+titulo+'</div><div class="nota-sub">'+sub+'</div></div><div class="nota-items">'+itens.map(function(it){return '<div class="nota-item"><div class="nota-dot" style="background:'+(it.ok===true?'var(--success)':it.ok===false?'var(--danger)':'var(--warn)')+'"></div><div class="nota-item-text">'+it.txt+'</div></div>';}).join('')+'</div><div style="margin-top:14px;font-size:11px;color:var(--text2);text-align:center;padding-bottom:16px">Analise auxiliar sem valor legal.</div>';
+}
+
+var BANCOS={'001':'Banco do Brasil','033':'Santander','104':'Caixa Economica','237':'Bradesco','341':'Itau','356':'BMG','422':'Safra','756':'Sicoob','748':'Sicredi','077':'Inter','260':'Nubank','336':'C6 Bank','290':'PagBank'};
+function autoParseBoleto(){var cod=document.getElementById('boleto-codigo').value.replace(/[\s.]/g,'');if(cod.length>=44)parseBoleto();}
+function parseBoleto(){
+  var cod=document.getElementById('boleto-codigo').value.replace(/[\s.]/g,'');
+  if(cod.length<44){toast('Codigo incompleto');return;}
+  var banco=cod.substring(0,3),valor=0,vencimento='';
+  if(cod.length===44){
+    var fator=parseInt(cod.substring(5,9));
+    valor=parseInt(cod.substring(9,19))/100;
+    if(fator>0){var base=new Date(1997,9,7);base.setDate(base.getDate()+fator);vencimento=base.toLocaleDateString('pt-BR');}
+  }else{valor=parseInt(cod.substring(37,47))/100;}
+  var nomeBanco=BANCOS[banco]||('Banco '+banco);
+  var valorFmt=valor>0?'R$ '+valor.toLocaleString('pt-BR',{minimumFractionDigits:2}):'Nao informado';
+  var wrap=document.getElementById('boleto-result');
+  wrap.style.display='block';
+  var codS=cod.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  wrap.innerHTML='<div class="boleto-result"><div style="font-size:11px;font-weight:700;color:#1DC98A;margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px">Dados do Boleto</div><div class="boleto-row"><span class="boleto-lbl">Banco</span><span class="boleto-val">'+nomeBanco+'</span></div><div class="boleto-row"><span class="boleto-lbl">Valor</span><span class="boleto-val big">'+valorFmt+'</span></div>'+(vencimento?'<div class="boleto-row"><span class="boleto-lbl">Vencimento</span><span class="boleto-val">'+vencimento+'</span></div>':'')+'<div class="boleto-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span class="boleto-lbl">Codigo</span><span style="font-size:11px;font-family:monospace;color:#fff;word-break:break-all">'+cod+'</span></div></div><div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost btn-sm" style="color:#fff" onclick="navigator.clipboard.writeText(\''+codS+'\');toast(\'Codigo copiado!\')">Copiar codigo</button></div>';
+  toast('Boleto analisado!');
+}
+function lerBoletoImg(input){
+  if(!input.files[0])return;
+  toast('Lendo codigo...');
+  var qs=new Html5Qrcode('boleto-reader-tmp');
+  qs.scanFile(input.files[0],true).then(function(txt){document.getElementById('boleto-codigo').value=txt;parseBoleto();}).catch(function(){toast('Codigo nao encontrado');});
+}
+
+function togglePixRapido(){
+  var body=document.getElementById('pix-rapido-body');
+  var card=document.getElementById('pix-rapido-card');
+  var open=body.style.display==='none'||body.style.display==='';
+  body.style.display=open?'block':'none';
+  var seta=document.getElementById('pix-seta');
+  if(seta)seta.textContent=open?'▲':'▼';
+  if(open){setTimeout(function(){card.scrollIntoView({behavior:'smooth',block:'start'});},80);}
+}
+function gerarPixRapido(){
+  var chave=document.getElementById('pr-chave').value.trim();
+  if(!chave){toast('Informe a chave Pix');return;}
+  if(typeof QRCode==='undefined'){toast('Aguarde o carregamento...');return;}
+  document.getElementById('pix-chave').value=chave;
+  document.getElementById('pix-nome').value=document.getElementById('pr-nome').value.trim()||'RECEBEDOR';
+  document.getElementById('pix-valor').value=document.getElementById('pr-valor').value||'';
+  document.getElementById('pix-cidade').value='BRASIL';document.getElementById('pix-desc').value='';
+  var payload=buildPix();if(!payload)return;
+  var out=document.getElementById('pr-output');out.style.display='flex';
+  var qrDiv=document.getElementById('pr-qr-div');qrDiv.innerHTML='';
+  new QRCode(qrDiv,{text:payload,width:200,height:200,colorDark:'#000000',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.H});
+}
+function baixarPixRapido(){
+  var canvas=document.querySelector('#pr-qr-div canvas');
+  if(!canvas){toast('Gere o QR primeiro');return;}
+  var a=document.createElement('a');a.download='pix_rapido.png';a.href=canvas.toDataURL();a.click();
+  toast('QR Pix salvo!');
+}
+
+var categorias={
+  comp:{units:{'Metros':1,'Quilometros':1000,'Centimetros':0.01,'Milimetros':0.001,'Polegadas':0.0254,'Pes':0.3048,'Milhas':1609.34}},
+  peso:{units:{'Quilogramas':1,'Gramas':0.001,'Miligramas':0.000001,'Libras':0.453592,'Oncas':0.0283495,'Toneladas':1000}},
+  temp:{units:{'Celsius':'C','Fahrenheit':'F','Kelvin':'K'}},
+  area:{units:{'Metros2':1,'Quilometros2':1e6,'Centimetros2':0.0001,'Hectares':10000,'Pes2':0.092903,'Acres':4046.86}},
+  moeda:{units:{'Real BRL':1,'Dolar USD':5.10,'Euro EUR':5.55,'Libra GBP':6.50,'Peso ARS':0.006}}
+};
+var categoriaAtual='comp';
+function setCategoria(cat,el){categoriaAtual=cat;document.querySelectorAll('.ctab').forEach(function(c){c.classList.remove('active');});el.classList.add('active');preencherUnidades();converter();}
+function preencherUnidades(){
+  var units=Object.keys(categorias[categoriaAtual].units);
+  var de=document.getElementById('conv-de'),para=document.getElementById('conv-para');
+  de.innerHTML=units.map(function(u){return '<option>'+u+'</option>';}).join('');
+  para.innerHTML=units.map(function(u,i){return '<option'+(i===1?' selected':'')+'>'+u+'</option>';}).join('');
+}
+function converter(){
+  var val=parseFloat(document.getElementById('conv-valor').value);
+  if(isNaN(val)){document.getElementById('conv-result').textContent='-';return;}
+  var de=document.getElementById('conv-de').value,para=document.getElementById('conv-para').value;
+  var units=categorias[categoriaAtual].units;
+  var result;
+  if(categoriaAtual==='temp'){
+    var tf=units[de],tt=units[para];
+    var c=tf==='C'?val:tf==='F'?(val-32)*5/9:val-273.15;
+    result=tt==='C'?c:tt==='F'?c*9/5+32:c+273.15;
+  }else{result=(val*units[de])/units[para];}
+  var fmt=Math.abs(result)<0.001?result.toExponential(4):parseFloat(result.toFixed(4)).toString();
+  document.getElementById('conv-result').textContent=val+' '+de+' = '+fmt+' '+para;
+}
+
+function salvarNota(){
+  var txt=document.getElementById('nota-texto').value.trim();
+  if(!txt){toast('Digite algo');return;}
+  var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
+  notas.unshift({txt:txt,data:new Date().toLocaleString('pt-BR')});
+  localStorage.setItem('ub-notas',JSON.stringify(notas));
+  document.getElementById('nota-texto').value='';
+  carregarNotas();toast('Nota salva!');
+}
+function carregarNotas(){
+  var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
+  var lista=document.getElementById('notas-lista');if(!lista)return;
+  if(!notas.length){lista.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:13px">Nenhuma nota ainda</div>';return;}
+  lista.innerHTML=notas.map(function(n,i){return '<div class="nota-card"><button class="nota-card-del" onclick="deletarNota('+i+')">x</button><div class="nota-card-text">'+n.txt+'</div><div class="nota-card-date">'+n.data+'</div></div>';}).join('');
+}
+function deletarNota(i){
+  var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
+  notas.splice(i,1);localStorage.setItem('ub-notas',JSON.stringify(notas));
+  carregarNotas();toast('Removida');
+}
+
+function carregarScript(src){
+  return new Promise(function(res,rej){
+    var s=document.createElement('script');s.src=src;
+    s.onload=res;s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+
+preencherUnidades();
+
+// ===== SCANNER =====
+var scannerImg=null,scannerCanvas=null,scannerCtx=null,scannerCorners=null,scannerDragging=-1,scannerResultCanvas=null;
+
+function scannerPreview(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      scannerImg=img;
+      scannerSetupCanvas();
+      document.getElementById('scanner-step1').style.display='none';
+      document.getElementById('scanner-step2').style.display='block';
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function scannerSetupCanvas(){
+  var canvas=document.getElementById('scanner-canvas');
+  var maxW=canvas.parentElement.clientWidth-32;
+  var scale=Math.min(1,maxW/scannerImg.width);
+  canvas.width=Math.round(scannerImg.width*scale);
+  canvas.height=Math.round(scannerImg.height*scale);
+  scannerCanvas=canvas;scannerCtx=canvas.getContext('2d');
+  var m=30;
+  scannerCorners=[{x:m,y:m},{x:canvas.width-m,y:m},{x:canvas.width-m,y:canvas.height-m},{x:m,y:canvas.height-m}];
+  scannerDraw();
+  canvas.addEventListener('touchstart',scannerTS,{passive:false});
+  canvas.addEventListener('touchmove',scannerTM,{passive:false});
+  canvas.addEventListener('touchend',function(){scannerDragging=-1;});
+  canvas.addEventListener('mousedown',scannerTS);
+  canvas.addEventListener('mousemove',function(e){if(scannerDragging>=0)scannerTM(e);});
+  canvas.addEventListener('mouseup',function(){scannerDragging=-1;});
+}
+
+function scannerDraw(){
+  if(!scannerCtx||!scannerImg)return;
+  var c=scannerCanvas;
+  scannerCtx.clearRect(0,0,c.width,c.height);
+  scannerCtx.drawImage(scannerImg,0,0,c.width,c.height);
+  scannerCtx.fillStyle='rgba(0,0,0,.45)';
+  scannerCtx.fillRect(0,0,c.width,c.height);
+  scannerCtx.save();
+  scannerCtx.beginPath();
+  scannerCtx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
+  for(var i=1;i<4;i++)scannerCtx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
+  scannerCtx.closePath();
+  scannerCtx.clip();
+  scannerCtx.drawImage(scannerImg,0,0,c.width,c.height);
+  scannerCtx.restore();
+  scannerCtx.beginPath();
+  scannerCtx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
+  for(var i=1;i<4;i++)scannerCtx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
+  scannerCtx.closePath();
+  scannerCtx.strokeStyle='#6C3CE1';scannerCtx.lineWidth=2.5;scannerCtx.stroke();
+  var clrs=['#FF6B6B','#FFD93D','#6BCB77','#4D96FF'];
+  scannerCorners.forEach(function(p,i){
+    scannerCtx.beginPath();scannerCtx.arc(p.x,p.y,14,0,Math.PI*2);
+    scannerCtx.fillStyle=clrs[i];scannerCtx.fill();
+    scannerCtx.strokeStyle='#fff';scannerCtx.lineWidth=2.5;scannerCtx.stroke();
+  });
+}
+
+function scannerPt(e){
+  var rect=scannerCanvas.getBoundingClientRect();
+  var cx=e.touches?e.touches[0].clientX:e.clientX;
+  var cy=e.touches?e.touches[0].clientY:e.clientY;
+  return{x:(cx-rect.left)*(scannerCanvas.width/rect.width),y:(cy-rect.top)*(scannerCanvas.height/rect.height)};
+}
+function scannerTS(e){
+  e.preventDefault();
+  var pt=scannerPt(e);scannerDragging=-1;
+  scannerCorners.forEach(function(c,i){if(Math.hypot(pt.x-c.x,pt.y-c.y)<28)scannerDragging=i;});
+}
+function scannerTM(e){
+  e.preventDefault();if(scannerDragging<0)return;
+  var pt=scannerPt(e);
+  pt.x=Math.max(0,Math.min(scannerCanvas.width,pt.x));
+  pt.y=Math.max(0,Math.min(scannerCanvas.height,pt.y));
+  scannerCorners[scannerDragging]=pt;scannerDraw();
+}
+
+function gaussElim(A,b){
+  var n=b.length;
+  for(var i=0;i<n;i++)A[i].push(b[i]);
+  for(var col=0;col<n;col++){
+    var mr=col;
+    for(var r=col+1;r<n;r++)if(Math.abs(A[r][col])>Math.abs(A[mr][col]))mr=r;
+    var tmp=A[col];A[col]=A[mr];A[mr]=tmp;
+    for(var r=col+1;r<n;r++){
+      var f=A[r][col]/A[col][col];
+      for(var k=col;k<=n;k++)A[r][k]-=f*A[col][k];
+    }
+  }
+  var x=new Array(n);
+  for(var i=n-1;i>=0;i--){
+    x[i]=A[i][n]/A[i][i];
+    for(var k=i-1;k>=0;k--)A[k][n]-=A[k][i]*x[i];
+  }
+  return x;
+}
+
+function getPerspM(src,dst){
+  var A=[],b=[];
+  for(var i=0;i<4;i++){
+    var sx=src[i].x,sy=src[i].y,dx=dst[i].x,dy=dst[i].y;
+    A.push([sx,sy,1,0,0,0,-dx*sx,-dx*sy]);b.push(dx);
+    A.push([0,0,0,sx,sy,1,-dy*sx,-dy*sy]);b.push(dy);
+  }
+  var h=gaussElim(A,b);
+  return[h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],1];
+}
+
+function ptDist(a,b){return Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2));}
+
+function aplicarScanFiltro(tipo){
+  var sc=scannerImg.width/scannerCanvas.width;
+  var sp=scannerCorners.map(function(c){return{x:c.x*sc,y:c.y*sc};});
+  var w=Math.round(Math.max(ptDist(sp[0],sp[1]),ptDist(sp[3],sp[2])));
+  var h=Math.round(Math.max(ptDist(sp[0],sp[3]),ptDist(sp[1],sp[2])));
+  var dp=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
+  var M=getPerspM(dp,sp);
+  var oc=document.createElement('canvas');oc.width=w;oc.height=h;
+  var octx=oc.getContext('2d');
+  var sc2=document.createElement('canvas');sc2.width=scannerImg.width;sc2.height=scannerImg.height;
+  var sc2x=sc2.getContext('2d');sc2x.drawImage(scannerImg,0,0);
+  var sd=sc2x.getImageData(0,0,sc2.width,sc2.height);
+  var od=octx.createImageData(w,h);
+  for(var y=0;y<h;y++){
+    for(var x=0;x<w;x++){
+      var dn=M[6]*x+M[7]*y+M[8];
+      var sx=Math.round((M[0]*x+M[1]*y+M[2])/dn);
+      var sy=Math.round((M[3]*x+M[4]*y+M[5])/dn);
+      if(sx>=0&&sx<sc2.width&&sy>=0&&sy<sc2.height){
+        var si=(sy*sc2.width+sx)*4;
+        var di=(y*w+x)*4;
+        var r=sd.data[si],g=sd.data[si+1],b=sd.data[si+2];
+        if(tipo==='pb'){
+          var gr=Math.round(.299*r+.587*g+.114*b);
+          od.data[di]=od.data[di+1]=od.data[di+2]=gr;
+        }else if(tipo==='doc'){
+          var gr=Math.round(.299*r+.587*g+.114*b);
+          var v=Math.min(255,Math.max(0,Math.round((gr-80)*2.2)));
+          od.data[di]=od.data[di+1]=od.data[di+2]=v;
+        }else{
+          od.data[di]=r;od.data[di+1]=g;od.data[di+2]=b;
+        }
+        od.data[di+3]=255;
+      }
+    }
+  }
+  octx.putImageData(od,0,0);
+  return oc;
+}
+
+function processarScan(tipo,btn){
+  document.querySelectorAll('.scan-btn-tipo').forEach(function(b){b.classList.remove('sel');});
+  if(btn)btn.classList.add('sel');
+  document.getElementById('scanner-step2').style.display='none';
+  document.getElementById('scanner-processing').style.display='block';
+  setTimeout(function(){
+    try{
+      scannerResultCanvas=aplicarScanFiltro(tipo);
+      var img=document.getElementById('scanner-result-img');
+      img.src=scannerResultCanvas.toDataURL('image/jpeg',.92);
+      img.style.display='block';
+      document.getElementById('scanner-processing').style.display='none';
+      document.getElementById('scanner-step3').style.display='block';
+    }catch(e){
+      toast('Erro: '+e.message);
+      document.getElementById('scanner-processing').style.display='none';
+      document.getElementById('scanner-step2').style.display='block';
+    }
+  },80);
+}
+
+function salvarScannerPDF(){
+  if(!scannerResultCanvas)return;
+  try{
+    var J=window.jspdf.jsPDF;
+    var w=scannerResultCanvas.width,h=scannerResultCanvas.height;
+    var ori=w>h?'l':'p';
+    var pdf=new J({orientation:ori,unit:'px',format:[w,h]});
+    pdf.addImage(scannerResultCanvas.toDataURL('image/jpeg',.92),'JPEG',0,0,w,h);
+    pdf.save('scan_'+Date.now()+'.pdf');
+    toast('PDF salvo!');
+  }catch(e){toast('Erro ao salvar: '+e.message);}
+}
+
+function scannerNovo(){
+  scannerImg=null;scannerResultCanvas=null;
+  document.getElementById('scanner-step1').style.display='block';
+  document.getElementById('scanner-step2').style.display='none';
+  document.getElementById('scanner-step3').style.display='none';
+  document.getElementById('scanner-processing').style.display='none';
+  document.getElementById('scanner-result-img').style.display='none';
+  try{document.getElementById('scanner-cam-input').value='';}catch(e){}
+  try{document.getElementById('scanner-file-input').value='';}catch(e){}
+}
+
+
+// ===== CPF / CNPJ =====
+function docsTab(t){switchTabs('#screen-docs .tab','#screen-docs .pane',t==='cpf'?0:1);}
+
+function cpfMask(el){
+  var v=el.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9)v=v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6,9)+'-'+v.slice(9);
+  else if(v.length>6)v=v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6);
+  else if(v.length>3)v=v.slice(0,3)+'.'+v.slice(3);
+  el.value=v;
+}
+
+function cnpjMask(el){
+  var v=el.value.replace(/\D/g,'').slice(0,14);
+  if(v.length>12)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8,12)+'-'+v.slice(12);
+  else if(v.length>8)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8);
+  else if(v.length>5)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5);
+  else if(v.length>2)v=v.slice(0,2)+'.'+v.slice(2);
+  el.value=v;
+}
+
+function limparDoc(tipo){
+  document.getElementById(tipo+'-input').value='';
+  var r=document.getElementById(tipo+'-result');
+  r.style.display='none';r.innerHTML='';
+}
+
+function calcCPF(cpf){
+  cpf=cpf.replace(/\D/g,'');
+  if(cpf.length!==11)return false;
+  if(/^(\d)\1{10}$/.test(cpf))return false;
+  var s=0;
+  for(var i=0;i<9;i++)s+=parseInt(cpf[i])*(10-i);
+  var r=(s*10)%11;if(r>=10)r=0;
+  if(r!==parseInt(cpf[9]))return false;
+  s=0;
+  for(var i=0;i<10;i++)s+=parseInt(cpf[i])*(11-i);
+  r=(s*10)%11;if(r>=10)r=0;
+  return r===parseInt(cpf[10]);
+}
+
+function validarCPF(){
+  var val=document.getElementById('cpf-input').value;
+  var nums=val.replace(/\D/g,'');
+  var wrap=document.getElementById('cpf-result');
+  wrap.style.display='block';
+  if(nums.length!==11){
+    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x26A0;</div><div class="doc-status">CPF incompleto</div><div class="doc-detalhe">Digite os 11 digitos do CPF</div></div>';
+    return;
+  }
+  var ok=calcCPF(nums);
+  var fmt=nums.slice(0,3)+'.'+nums.slice(3,6)+'.'+nums.slice(6,9)+'-'+nums.slice(9);
+  if(ok){
+    wrap.innerHTML='<div class="doc-result valido"><div class="doc-emoji">&#x2705;</div><div class="doc-status">CPF Valido</div><div class="doc-detalhe">'+fmt+'<br>Digitos verificadores corretos</div></div>';
+  }else{
+    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x274C;</div><div class="doc-status">CPF Invalido</div><div class="doc-detalhe">'+fmt+'<br>Os digitos verificadores nao conferem</div></div>';
+  }
+}
+
+function calcCNPJ(cnpj){
+  cnpj=cnpj.replace(/\D/g,'');
+  if(cnpj.length!==14)return false;
+  if(/^(\d)\1{13}$/.test(cnpj))return false;
+  var calc=function(c,n){
+    var s=0,p=n;
+    for(var i=0;i<c.length;i++){s+=parseInt(c[i])*p--;if(p<2)p=9;}
+    var r=s%11;return r<2?0:11-r;
+  };
+  var base=cnpj.slice(0,12);
+  var d1=calc(base,5);
+  var d2=calc(base+d1,6);
+  return d1===parseInt(cnpj[12])&&d2===parseInt(cnpj[13]);
+}
+
+function validarCNPJ(){
+  var val=document.getElementById('cnpj-input').value;
+  var nums=val.replace(/\D/g,'');
+  var wrap=document.getElementById('cnpj-result');
+  wrap.style.display='block';
+  if(nums.length!==14){
+    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x26A0;</div><div class="doc-status">CNPJ incompleto</div><div class="doc-detalhe">Digite os 14 digitos do CNPJ</div></div>';
+    return;
+  }
+  var ok=calcCNPJ(nums);
+  var fmt=nums.slice(0,2)+'.'+nums.slice(2,5)+'.'+nums.slice(5,8)+'/'+nums.slice(8,12)+'-'+nums.slice(12);
+  if(ok){
+    wrap.innerHTML='<div class="doc-result valido"><div class="doc-emoji">&#x2705;</div><div class="doc-status">CNPJ Valido</div><div class="doc-detalhe">'+fmt+'<br>Digitos verificadores corretos</div></div>';
+  }else{
+    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x274C;</div><div class="doc-status">CNPJ Invalido</div><div class="doc-detalhe">'+fmt+'<br>Os digitos verificadores nao conferem</div></div>';
+  }
+}
+
+
+// ===== LEMBRETES =====
+var lembInterval = null;
+
+function initLembretes(){
+  var now = new Date();
+  var dataInput = document.getElementById('lemb-data');
+  var horaInput = document.getElementById('lemb-hora');
+  if(dataInput) dataInput.value = now.toISOString().slice(0,10);
+  if(horaInput){
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()+5<=59?now.getMinutes()+5:0).padStart(2,'0');
+    horaInput.value = h+':'+m;
+  }
+  verificarPermissaoNotif();
+  renderLembretes();
+  if(lembInterval) clearInterval(lembInterval);
+  lembInterval = setInterval(checarLembretes, 30000);
+}
+
+function verificarPermissaoNotif(){
+  var aviso = document.getElementById('notif-aviso');
+  if(!aviso) return;
+  if(!('Notification' in window)){aviso.style.display='none';return;}
+  aviso.style.display = Notification.permission === 'granted' ? 'none' : 'block';
+}
+
+function pedirPermissaoNotif(){
+  if(!('Notification' in window)){toast('Notificacoes nao suportadas neste navegador');return;}
+  Notification.requestPermission().then(function(p){
+    if(p==='granted'){
+      document.getElementById('notif-aviso').style.display='none';
+      toast('Notificacoes ativadas!');
+    } else {
+      toast('Permissao negada. Ative nas configuracoes do Chrome.');
+    }
+  });
+}
+
+function salvarLembrete(){
+  var txt = document.getElementById('lemb-texto').value.trim();
+  var data = document.getElementById('lemb-data').value;
+  var hora = document.getElementById('lemb-hora').value;
+  if(!txt){toast('Escreva o que precisa lembrar');return;}
+  if(!data||!hora){toast('Defina data e hora');return;}
+  var dt = new Date(data+'T'+hora+':00');
+  if(dt <= new Date()){toast('Escolha uma data/hora no futuro');return;}
+  var lembs = JSON.parse(localStorage.getItem('ooh_lembretes')||'[]');
+  lembs.push({id:Date.now(), txt:txt, dt:dt.getTime(), disparado:false});
+  lembs.sort(function(a,b){return a.dt-b.dt;});
+  localStorage.setItem('ooh_lembretes', JSON.stringify(lembs));
+  document.getElementById('lemb-texto').value='';
+  renderLembretes();
+  toast('Lembrete salvo!');
+  checarLembretes();
+}
+
+function renderLembretes(){
+  var lista = document.getElementById('lemb-lista');
+  if(!lista) return;
+  var lembs = JSON.parse(localStorage.getItem('ooh_lembretes')||'[]');
+  var agora = Date.now();
+  // Remove disparados ha mais de 1 hora
+  lembs = lembs.filter(function(l){return !l.disparado || (agora - l.dt) < 3600000;});
+  localStorage.setItem('ooh_lembretes', JSON.stringify(lembs));
+  if(!lembs.length){
+    lista.innerHTML='<div style="text-align:center;padding:24px;color:var(--text2);font-size:14px">Nenhum lembrete agendado</div>';
+    return;
+  }
+  lista.innerHTML = lembs.map(function(l){
+    var dt = new Date(l.dt);
+    var passou = dt.getTime() < agora;
+    var dtStr = dt.toLocaleDateString('pt-BR') + ' as ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    var bg = l.disparado ? 'rgba(16,185,129,.1)' : passou ? 'rgba(239,68,68,.1)' : 'var(--surface2)';
+    var bdr = l.disparado ? 'var(--success)' : passou ? 'var(--danger)' : 'var(--border)';
+    var badge = l.disparado ? '<span style="color:var(--success);font-size:11px">&#x2705; Disparado</span>' :
+                passou ? '<span style="color:var(--danger);font-size:11px">&#x26A0; Atrasado</span>' :
+                '<span style="color:var(--warn);font-size:11px">&#x23F3; Aguardando</span>';
+    return '<div style="background:'+bg+';border:1px solid '+bdr+';border-radius:12px;padding:14px;margin-bottom:10px;position:relative">'+
+      '<button onclick="deletarLembrete('+l.id+')" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer">&#x2715;</button>'+
+      '<div style="font-size:14px;color:#fff;font-weight:600;margin-bottom:4px;padding-right:24px">'+l.txt+'</div>'+
+      '<div style="font-size:12px;color:var(--text2)">&#x1F4C5; '+dtStr+'</div>'+
+      '<div style="margin-top:6px">'+badge+'</div>'+
+      '</div>';
+  }).join('');
+}
+
+function deletarLembrete(id){
+  var lembs = JSON.parse(localStorage.getItem('ooh_lembretes')||'[]');
+  lembs = lembs.filter(function(l){return l.id!==id;});
+  localStorage.setItem('ooh_lembretes', JSON.stringify(lembs));
+  renderLembretes();
+}
+
+function checarLembretes(){
+  var lembs = JSON.parse(localStorage.getItem('ooh_lembretes')||'[]');
+  var agora = Date.now();
+  var atualizado = false;
+  lembs.forEach(function(l){
+    if(!l.disparado && l.dt <= agora){
+      l.disparado = true;
+      atualizado = true;
+      dispararAlarme(l);
+    }
+  });
+  if(atualizado){
+    localStorage.setItem('ooh_lembretes', JSON.stringify(lembs));
+    renderLembretes();
+  }
+}
+
+function dispararAlarme(l){
+  // Notificacao visual
+  toast('&#x23F0; LEMBRETE: ' + l.txt, 6000);
+  // Notificacao do sistema
+  if('Notification' in window && Notification.permission === 'granted'){
+    new Notification('Ooh! Lembrete', {
+      body: l.txt,
+      icon: '/UniBox/icon-512.png',
+      badge: '/UniBox/icon-512.png',
+      vibrate: [300, 100, 300]
+    });
+  }
+  // Vibrar o celular
+  if('vibrate' in navigator) navigator.vibrate([500,200,500,200,500]);
+}
+
+// Inicia verificacao global quando app abre
+window.addEventListener('load', function(){
+  checarLembretes();
+  setInterval(checarLembretes, 30000);
+});
+
+
+// ===== TIMER & CRONOMETRO =====
+var timerAtivo=null, timerSeg=0, timerRodando=false;
+var timerMultiplos=[];
+var cronoMs=0, cronoRodando=false, cronoInterval=null, cronoVoltaMs=0;
+var cronoVoltas=[];
+
+function timerTab(t){
+  switchTabs('#screen-timer .tab','#screen-timer .pane',t==='timer'?0:1);
+  if(t==='crono')renderCronoVoltas();
+}
+
+function setTimer(min,seg){
+  document.getElementById('timer-min').value=min;
+  document.getElementById('timer-seg').value=seg;
+  resetTimer();
+}
+
+function toggleTimer(){
+  if(timerRodando){
+    pausarTimer();
+  } else {
+    iniciarTimer();
+  }
+}
+
+function iniciarTimer(){
+  if(!timerRodando){
+    var m=parseInt(document.getElementById('timer-min').value)||0;
+    var s=parseInt(document.getElementById('timer-seg').value)||0;
+    if(timerSeg===0) timerSeg=(m*60)+s;
+    if(timerSeg<=0){toast('Defina um tempo');return;}
+    timerRodando=true;
+    document.getElementById('btn-timer-start').innerHTML='&#x23F8; Pausar';
+    document.getElementById('timer-status').textContent='Contando...';
+    timerAtivo=setInterval(function(){
+      timerSeg--;
+      atualizarDisplayTimer();
+      if(timerSeg<=0){
+        clearInterval(timerAtivo);timerRodando=false;
+        document.getElementById('btn-timer-start').innerHTML='&#x25B6; Iniciar';
+        document.getElementById('timer-display').style.color='#10B981';
+        document.getElementById('timer-status').textContent='Tempo esgotado!';
+        dispararTimerAlarme('Timer concluido!');
+      }
+    },1000);
+  }
+}
+
+function pausarTimer(){
+  clearInterval(timerAtivo);timerRodando=false;
+  document.getElementById('btn-timer-start').innerHTML='&#x25B6; Continuar';
+  document.getElementById('timer-status').textContent='Pausado';
+}
+
+function resetTimer(){
+  clearInterval(timerAtivo);timerRodando=false;timerSeg=0;
+  document.getElementById('btn-timer-start').innerHTML='&#x25B6; Iniciar';
+  document.getElementById('timer-display').textContent='00:00';
+  document.getElementById('timer-display').style.color='#fff';
+  document.getElementById('timer-status').textContent='Defina o tempo';
+}
+
+function atualizarDisplayTimer(){
+  var m=Math.floor(timerSeg/60);
+  var s=timerSeg%60;
+  var txt=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('timer-display').textContent=txt;
+  if(timerSeg<=10) document.getElementById('timer-display').style.color='#EF4444';
+  else document.getElementById('timer-display').style.color='#fff';
+}
+
+function adicionarTimer(){
+  var m=parseInt(document.getElementById('timer-min').value)||0;
+  var s=parseInt(document.getElementById('timer-seg').value)||0;
+  var total=(m*60)+s;
+  if(total<=0){toast('Defina um tempo');return;}
+  var id=Date.now();
+  timerMultiplos.push({id:id,total:total,restante:total,rodando:true,label:'Timer '+(timerMultiplos.length+1)});
+  var interval=setInterval(function(){
+    var t=timerMultiplos.find(function(x){return x.id===id;});
+    if(!t){clearInterval(interval);return;}
+    if(!t.rodando)return;
+    t.restante--;
+    renderTimersLista();
+    if(t.restante<=0){
+      clearInterval(interval);
+      dispararTimerAlarme(t.label+' concluido!');
+      setTimeout(function(){
+        timerMultiplos=timerMultiplos.filter(function(x){return x.id!==id;});
+        renderTimersLista();
+      },5000);
+    }
+  },1000);
+  renderTimersLista();
+  toast('Timer adicionado!');
+}
+
+function renderTimersLista(){
+  var lista=document.getElementById('timers-lista');
+  if(!lista)return;
+  if(!timerMultiplos.length){lista.innerHTML='';return;}
+  lista.innerHTML=timerMultiplos.map(function(t){
+    var m=Math.floor(t.restante/60),s=t.restante%60;
+    var done=t.restante<=0;
+    return '<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid '+(done?'var(--success)':'var(--border)')+'">'+
+      '<div style="font-family:monospace;font-size:22px;font-weight:700;color:'+(done?'#10B981':t.restante<=10?'#EF4444':'#fff')+'">'+
+      (done?'&#x2705;':String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'))+'</div>'+
+      '<div style="flex:1;font-size:13px;color:var(--text2)">'+t.label+'</div>'+
+      '<button onclick="removerTimer('+t.id+')" style="background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer">&#x2715;</button>'+
+      '</div>';
+  }).join('');
+}
+
+function removerTimer(id){
+  timerMultiplos=timerMultiplos.filter(function(t){return t.id!==id;});
+  renderTimersLista();
+}
+
+function dispararTimerAlarme(msg){
+  toast('&#x23F0; '+msg, 5000);
+  if('vibrate' in navigator) navigator.vibrate([500,200,500,200,500,200,500]);
+  if('Notification' in window && Notification.permission==='granted'){
+    new Notification('Ooh! '+msg,{icon:'/UniBox/icon-512.png',vibrate:[300,100,300]});
+  }
+}
+
+// CRONOMETRO
+function toggleCrono(){
+  if(cronoRodando){
+    clearInterval(cronoInterval);cronoRodando=false;
+    document.getElementById('btn-crono-start').innerHTML='&#x25B6; Continuar';
+    document.getElementById('crono-status').textContent='Pausado';
+  } else {
+    cronoRodando=true;
+    var inicio=Date.now()-cronoMs;
+    cronoInterval=setInterval(function(){
+      cronoMs=Date.now()-inicio;
+      var total=Math.floor(cronoMs/100);
+      var dec=total%10;
+      var s=Math.floor(total/10)%60;
+      var m=Math.floor(total/600);
+      document.getElementById('crono-display').textContent=
+        String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+dec;
+    },100);
+    document.getElementById('btn-crono-start').innerHTML='&#x23F8; Pausar';
+    document.getElementById('crono-status').textContent='Rodando...';
+  }
+}
+
+function voltaCrono(){
+  if(!cronoRodando&&cronoMs===0)return;
+  cronoVoltas.push({n:cronoVoltas.length+1,ms:cronoMs,diff:cronoMs-cronoVoltaMs});
+  cronoVoltaMs=cronoMs;
+  renderCronoVoltas();
+}
+
+function resetCrono(){
+  clearInterval(cronoInterval);cronoRodando=false;cronoMs=0;cronoVoltaMs=0;cronoVoltas=[];
+  document.getElementById('crono-display').textContent='00:00.0';
+  document.getElementById('btn-crono-start').innerHTML='&#x25B6; Iniciar';
+  document.getElementById('crono-status').textContent='Pronto';
+  renderCronoVoltas();
+}
+
+function renderCronoVoltas(){
+  var el=document.getElementById('crono-voltas');
+  if(!el)return;
+  if(!cronoVoltas.length){el.innerHTML='<div style="color:var(--text2);font-size:13px">Nenhuma volta registrada</div>';return;}
+  el.innerHTML=cronoVoltas.slice().reverse().map(function(v){
+    var fmt=function(ms){var t=Math.floor(ms/100);return String(Math.floor(t/600)).padStart(2,'0')+':'+String(Math.floor(t/10)%60).padStart(2,'0')+'.'+t%10;};
+    return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px">'+
+      '<span style="color:var(--text2)">Volta '+v.n+'</span>'+
+      '<span style="color:var(--text2);font-size:12px">+'+fmt(v.diff)+'</span>'+
+      '<span style="font-family:monospace;font-weight:700;color:#fff">'+fmt(v.ms)+'</span>'+
+      '</div>';
+  }).join('');
+}
+
+
+// ===== PREVISAO DO TEMPO =====
+var tempoCodigoMap = {
+  0:'Ceu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',
+  45:'Neblina',48:'Neblina com gelo',
+  51:'Garoa leve',53:'Garoa moderada',55:'Garoa intensa',
+  61:'Chuva leve',63:'Chuva moderada',65:'Chuva forte',
+  71:'Neve leve',73:'Neve moderada',75:'Neve forte',
+  80:'Pancadas leves',81:'Pancadas moderadas',82:'Pancadas fortes',
+  95:'Trovoada',96:'Trovoada com granizo',99:'Trovoada com granizo forte'
+};
+var tempoIconeMap = {
+  0:'☀️',1:'🌤️',2:'⛅',3:'☁️',
+  45:'🌫️',48:'🌫️',
+  51:'🌦️',53:'🌦️',55:'🌧️',
+  61:'🌧️',63:'🌧️',65:'🌧️',
+  71:'🌨️',73:'🌨️',75:'❄️',
+  80:'🌦️',81:'🌧️',82:'⛈️',
+  95:'⛈️',96:'⛈️',99:'⛈️'
+};
+
+function tempoIcone(cod){return tempoIconeMap[cod]||'🌡️';}
+function tempoDesc(cod){return tempoCodigoMap[cod]||'Desconhecido';}
+
+function usarGPS(){
+  if(!navigator.geolocation){toast('GPS nao disponivel');return;}
+  mostrarTempoLoading();
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lon=pos.coords.longitude;
+    // Reverse geocoding com Nominatim
+    fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json&accept-language=pt')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var cidade=d.address.city||d.address.town||d.address.village||d.address.county||'Minha localizacao';
+        var estado=d.address.state_code||d.address.state||'';
+        buscarTempoCoords(lat,lon,cidade+(estado?', '+estado:''));
+      })
+      .catch(function(){buscarTempoCoords(lat,lon,'Minha localizacao');});
+  },function(){
+    esconderTempoLoading();
+    toast('Nao foi possivel obter sua localizacao');
+  });
+}
+
+function buscarCidade(){
+  var cidade=document.getElementById('tempo-cidade').value.trim();
+  if(!cidade){toast('Digite o nome da cidade');return;}
+  mostrarTempoLoading();
+  fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(cidade)+'&count=1&language=pt&format=json')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.results||!d.results.length){esconderTempoLoading();toast('Cidade nao encontrada');return;}
+      var r=d.results[0];
+      var nome=r.name+(r.admin1?', '+r.admin1:'')+(r.country_code?', '+r.country_code:'');
+      buscarTempoCoords(r.latitude,r.longitude,nome);
+    })
+    .catch(function(){esconderTempoLoading();toast('Erro ao buscar cidade');});
+}
+
+function buscarTempoCoords(lat,lon,nomeCidade){
+  var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
+    '&current=temperature_2m,apparent_temperature,weather_code,windspeed_10m,relativehumidity_2m,precipitation_probability'+
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max'+
+    '&timezone=auto&forecast_days=7';
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      esconderTempoLoading();
+      renderTempo(d,nomeCidade);
+    })
+    .catch(function(){esconderTempoLoading();toast('Erro ao buscar previsao');});
+}
+
+function renderTempo(d,cidade){
+  var c=d.current;
+  document.getElementById('tempo-vazio').style.display='none';
+  document.getElementById('tempo-resultado').style.display='block';
+  document.getElementById('tempo-local').textContent='📍 '+cidade;
+  document.getElementById('tempo-icone').textContent=tempoIcone(c.weather_code);
+  document.getElementById('tempo-temp').textContent=Math.round(c.temperature_2m)+'°C';
+  document.getElementById('tempo-desc').textContent=tempoDesc(c.weather_code);
+  document.getElementById('tempo-sensacao').textContent='Sensacao: '+Math.round(c.apparent_temperature)+'°C';
+
+  // Detalhes
+  var dets=[
+    {ic:'💧',val:c.relativehumidity_2m+'%',lbl:'Umidade'},
+    {ic:'💨',val:Math.round(c.windspeed_10m)+' km/h',lbl:'Vento'},
+    {ic:'🌧️',val:(c.precipitation_probability||0)+'%',lbl:'Chuva'},
+  ];
+  document.getElementById('tempo-detalhes').innerHTML=dets.map(function(x){
+    return '<div style="background:var(--surface2);border-radius:12px;padding:12px 16px;text-align:center;min-width:90px">'+
+      '<div style="font-size:24px">'+x.ic+'</div>'+
+      '<div style="font-size:16px;font-weight:700;color:#fff">'+x.val+'</div>'+
+      '<div style="font-size:11px;color:var(--text2)">'+x.lbl+'</div></div>';
+  }).join('');
+
+  // 7 dias
+  var dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+  var semana=d.daily;
+  document.getElementById('tempo-semana').innerHTML=semana.time.map(function(dt,i){
+    var data=new Date(dt+'T12:00:00');
+    var dia=i===0?'Hoje':i===1?'Amanha':dias[data.getDay()];
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:12px;margin-bottom:8px">'+
+      '<div style="font-size:28px">'+tempoIcone(semana.weather_code[i])+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:14px;font-weight:700;color:#fff">'+dia+'</div>'+
+        '<div style="font-size:12px;color:var(--text2)">'+tempoDesc(semana.weather_code[i])+'</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:15px;font-weight:700;color:#fff">'+Math.round(semana.temperature_2m_max[i])+'°</div>'+
+        '<div style="font-size:12px;color:var(--text2)">'+Math.round(semana.temperature_2m_min[i])+'°</div>'+
+      '</div>'+
+      '<div style="text-align:right;min-width:36px">'+
+        '<div style="font-size:12px;color:#60A5FA">💧'+semana.precipitation_probability_max[i]+'%</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function mostrarTempoLoading(){
+  document.getElementById('tempo-loading').style.display='block';
+  document.getElementById('tempo-resultado').style.display='none';
+  document.getElementById('tempo-vazio').style.display='none';
+}
+function esconderTempoLoading(){
+  document.getElementById('tempo-loading').style.display='none';
+}
+
+
+// ===== ASSISTENTE CULINARIO =====
+var cookData = {
+  graos:[
+    {n:'Arroz Branco',min:12,seg:0,d:'Agua fervendo, fogo medio-baixo'},
+    {n:'Arroz Integral',min:40,seg:0,d:'Precisa de mais agua — 2 xicaras por 1'},
+    {n:'Arroz para Sushi',min:15,seg:0,d:'Lavar bem antes, agua 1:1'},
+    {n:'Risoto',min:18,seg:0,d:'Mexer sempre, adicionar caldo aos poucos'},
+    {n:'Feijao Preto',min:90,seg:0,d:'Panela normal — ou 40min na pressao'},
+    {n:'Feijao Carioca',min:80,seg:0,d:'Panela normal — ou 35min na pressao'},
+    {n:'Lentilha',min:20,seg:0,d:'Nao precisa molhar, cozinha rapido'},
+    {n:'Grao de Bico',min:120,seg:0,d:'Deixar de molho 8h antes'},
+    {n:'Quinoa',min:15,seg:0,d:'2 partes de agua para 1 de quinoa'},
+  ],
+  massas:[
+    {n:'Espaguete al dente',min:8,seg:0,d:'Agua bem salgada, fervendo forte'},
+    {n:'Espaguete bem cozido',min:11,seg:0,d:'Ideal para criancas'},
+    {n:'Penne',min:10,seg:0,d:'Al dente — 12min para mais mole'},
+    {n:'Fusilli / Parafuso',min:9,seg:0,d:'Agitar a panela no meio do cozimento'},
+    {n:'Talharim',min:7,seg:0,d:'Massa fina, cozinha rapido'},
+    {n:'Macarrao Instantaneo',min:3,seg:0,d:'Nao jogar o tempero fora ainda'},
+    {n:'Lasanha (montar+forno)',min:40,seg:0,d:'Cobrir com papel aluminio os primeiros 30min'},
+  ],
+  ovos:[
+    {n:'Ovo Mole',min:5,seg:0,d:'Gema liquida, clara firme — perfeito'},
+    {n:'Ovo Medio',min:7,seg:0,d:'Gema cremosa no centro'},
+    {n:'Ovo Duro',min:10,seg:0,d:'Colocar em agua fria logo apos para descascar facil'},
+    {n:'Ovo Poché',min:3,seg:30,d:'Agua quase fervendo com um fio de vinagre'},
+    {n:'Ovo Frito',min:2,seg:30,d:'Frigideira quente com pouco oleo'},
+    {n:'Omelete',min:3,seg:0,d:'Fogo medio, dobrar quando as bordas firmarem'},
+  ],
+  carnes:[
+    {n:'Frango 1kg (forno)',min:60,seg:0,d:'200°C — cobrir nos primeiros 40min'},
+    {n:'Frango 2kg (forno)',min:90,seg:0,d:'200°C — descobrir nos ultimos 20min'},
+    {n:'Frango Grelhado',min:12,seg:0,d:'6min cada lado em fogo medio-alto'},
+    {n:'Carne ao Ponto',min:45,seg:0,d:'180°C no forno — ou 6min cada lado na grelha'},
+    {n:'Peixe Forno',min:20,seg:0,d:'200°C — nao virar para nao desmanchar'},
+    {n:'Linguica',min:25,seg:0,d:'Furar antes para nao estourar'},
+    {n:'Costela (forno)',min:180,seg:0,d:'160°C, embrulhada em aluminio'},
+  ],
+  legumes:[
+    {n:'Batata Cozida',min:20,seg:0,d:'Em cubos — inteira leva 35min'},
+    {n:'Brocolis Cozido',min:8,seg:0,d:'Al dente — 5min se preferir mais firme'},
+    {n:'Cenoura Cozida',min:15,seg:0,d:'Em rodelas — inteira leva 25min'},
+    {n:'Abobrinha',min:6,seg:0,d:'Nao deixar passar — fica mole rapido'},
+    {n:'Beterraba',min:45,seg:0,d:'Inteira com casca — pressao: 20min'},
+    {n:'Mandioca',min:30,seg:0,d:'Retirar o fio central antes de cozinhar'},
+    {n:'Bolo (forma media)',min:35,seg:0,d:'180°C — testar com palito antes de tirar'},
+  ]
+};
+
+var cookCatAtual = 'graos';
+
+function setCookCat(cat, btn){
+  cookCatAtual = cat;
+  document.querySelectorAll('.cook-cat').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  renderCookPresets();
+}
+
+function renderCookPresets(){
+  var el = document.getElementById('cook-presets');
+  if(!el) return;
+  var items = cookData[cookCatAtual]||[];
+  el.innerHTML = items.map(function(item){
+    var t = item.min>0 ? item.min+'min'+(item.seg>0?' '+item.seg+'s':'') : item.seg+'s';
+    return '<div class="cook-item" onclick="setTimer('+item.min+','+item.seg+');toast('⏱ '+item.n+' — '+t+'')">' +
+      '<div><div class="cook-nome">'+item.n+'</div><div class="cook-dica">💡 '+item.d+'</div></div>'+
+      '<div class="cook-tempo">'+t+'</div>'+
+      '</div>';
+  }).join('');
+}
+
+// Renderiza ao entrar na tela
+var _origGoTo = goTo;
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/UniBox/sw.js')
+      .then(function(r){console.log('SW registrado',r.scope);})
+      .catch(function(e){console.log('SW erro',e);});
+  });
+}
+</script>
+</body>
+</html>

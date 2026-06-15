@@ -1,0 +1,14 @@
+{
+  "name": "Ooh!",
+  "short_name": "Ooh!",
+  "description": "Veja o que você não sabia que precisava",
+  "start_url": "/Ooh/index.html",
+  "scope": "/Ooh/",
+  "display": "standalone",
+  "background_color": "#0F0F14",
+  "theme_color": "#6C3CE1",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
