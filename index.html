@@ -1842,8 +1842,9 @@ function renderCookPresets(){
   var items = cookData[cookCatAtual]||[];
   el.innerHTML = items.map(function(item){
     var t = item.min>0 ? item.min+'min'+(item.seg>0?' '+item.seg+'s':'') : item.seg+'s';
-    return '<div class="cook-item" onclick="setTimer('+item.min+','+item.seg+');toast('⏱ '+item.n+' — '+t+'')">' +
-      '<div><div class="cook-nome">'+item.n+'</div><div class="cook-dica">💡 '+item.d+'</div></div>'+
+    var msg = item.n + ' — ' + t;
+    return '<div class="cook-item" onclick="setTimer('+item.min+','+item.seg+');toast(&quot;'+msg+'&quot;)">' +
+      '<div><div class="cook-nome">'+item.n+'</div><div class="cook-dica">&#x1F4A1; '+item.d+'</div></div>'+
       '<div class="cook-tempo">'+t+'</div>'+
       '</div>';
   }).join('');
@@ -1861,7 +1862,7 @@ var _origGoTo = goTo;
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('/UniBox/sw.js')
+    navigator.serviceWorker.register('/Ooh/sw.js')
       .then(function(r){console.log('SW registrado',r.scope);})
       .catch(function(e){console.log('SW erro',e);});
   });
