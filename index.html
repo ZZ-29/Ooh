@@ -172,7 +172,7 @@ select{appearance:none;-webkit-appearance:none}
         <span class="ooh-o1">O</span><span class="ooh-o2">o</span><span class="ooh-h">h</span><span class="ooh-exc">!</span>
       </div>
     </div>
-    <div class="home-sub">veja o que voce nao sabia que precisava</div>
+    <div class="home-sub">Praticidade em suas mãos</div>
   </div>
   <div class="tools-grid">
     <div class="tool-card qr" onclick="goTo('qr')">
@@ -209,7 +209,7 @@ select{appearance:none;-webkit-appearance:none}
     <div class="tool-card" onclick="goTo('timer')" style="background:linear-gradient(145deg,#DC2626,#991B1B)">
       <div class="tool-icon">&#x1F373;</div>
       <div class="tool-name">Timer</div>
-      <div class="tool-desc">Cronometro e cozinha</div>
+      <div class="tool-desc">Cronômetro e cozinha</div>
     </div>
     <div class="tool-card" onclick="goTo('tempo')" style="background:linear-gradient(145deg,#0369A1,#075985)">
       <div class="tool-icon">&#x26C5;</div>
@@ -281,7 +281,7 @@ select{appearance:none;-webkit-appearance:none}
     </div>
     <!-- Detalhes -->
     <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
-    <!-- Previsao 7 dias -->
+    <!-- Previsão 7 dias -->
     <div style="padding:0 16px 24px">
       <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PROXIMOS 7 DIAS</div>
       <div id="tempo-semana"></div>
@@ -346,7 +346,7 @@ select{appearance:none;-webkit-appearance:none}
     </div>
     <!-- Detalhes -->
     <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
-    <!-- Previsao 7 dias -->
+    <!-- Previsão 7 dias -->
     <div style="padding:0 16px 24px">
       <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PROXIMOS 7 DIAS</div>
       <div id="tempo-semana"></div>
@@ -367,7 +367,7 @@ select{appearance:none;-webkit-appearance:none}
       <div style="font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:700">ASSISTENTE DE COZINHA</div>
       <!-- Categorias -->
       <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px">
-        <button class="cook-cat active" onclick="setCookCat('graos',this)">🌾 Graos</button>
+        <button class="cook-cat active" onclick="setCookCat('graos',this)">🌾 Grãos</button>
         <button class="cook-cat" onclick="setCookCat('massas',this)">🍝 Massas</button>
         <button class="cook-cat" onclick="setCookCat('ovos',this)">🥚 Ovos</button>
         <button class="cook-cat" onclick="setCookCat('carnes',this)">🥩 Carnes</button>
@@ -938,7 +938,7 @@ function parseBoleto(){
     if(fator>0){var base=new Date(1997,9,7);base.setDate(base.getDate()+fator);vencimento=base.toLocaleDateString('pt-BR');}
   }else{valor=parseInt(cod.substring(37,47))/100;}
   var nomeBanco=BANCOS[banco]||('Banco '+banco);
-  var valorFmt=valor>0?'R$ '+valor.toLocaleString('pt-BR',{minimumFractionDigits:2}):'Nao informado';
+  var valorFmt=valor>0?'R$ '+valor.toLocaleString('pt-BR',{minimumFractionDigits:2}):'Não informado';
   var wrap=document.getElementById('boleto-result');
   wrap.style.display='block';
   var codS=cod.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
@@ -1364,7 +1364,7 @@ function verificarPermissaoNotif(){
 }
 
 function pedirPermissaoNotif(){
-  if(!('Notification' in window)){toast('Notificacoes nao suportadas neste navegador');return;}
+  if(!('Notification' in window)){toast('Notificações não suportadas neste navegador');return;}
   Notification.requestPermission().then(function(p){
     if(p==='granted'){
       document.getElementById('notif-aviso').style.display='none';
@@ -1681,14 +1681,14 @@ function usarGPS(){
     fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json&accept-language=pt')
       .then(function(r){return r.json();})
       .then(function(d){
-        var cidade=d.address.city||d.address.town||d.address.village||d.address.county||'Minha localizacao';
+        var cidade=d.address.city||d.address.town||d.address.village||d.address.county||'Minha localização';
         var estado=d.address.state_code||d.address.state||'';
         buscarTempoCoords(lat,lon,cidade+(estado?', '+estado:''));
       })
-      .catch(function(){buscarTempoCoords(lat,lon,'Minha localizacao');});
+      .catch(function(){buscarTempoCoords(lat,lon,'Minha localização');});
   },function(){
     esconderTempoLoading();
-    toast('Nao foi possivel obter sua localizacao');
+    toast('Não foi possível obter sua localização');
   });
 }
 
@@ -1786,7 +1786,7 @@ var cookData = {
     {n:'Risoto',min:18,seg:0,d:'Mexer sempre, adicionar caldo aos poucos'},
     {n:'Feijao Preto',min:90,seg:0,d:'Panela normal — ou 40min na pressao'},
     {n:'Feijao Carioca',min:80,seg:0,d:'Panela normal — ou 35min na pressao'},
-    {n:'Lentilha',min:20,seg:0,d:'Nao precisa molhar, cozinha rapido'},
+    {n:'Lentilha',min:20,seg:0,d:'Não precisa molhar, cozinha rápido'},
     {n:'Grao de Bico',min:120,seg:0,d:'Deixar de molho 8h antes'},
     {n:'Quinoa',min:15,seg:0,d:'2 partes de agua para 1 de quinoa'},
   ],
@@ -1795,14 +1795,14 @@ var cookData = {
     {n:'Espaguete bem cozido',min:11,seg:0,d:'Ideal para criancas'},
     {n:'Penne',min:10,seg:0,d:'Al dente — 12min para mais mole'},
     {n:'Fusilli / Parafuso',min:9,seg:0,d:'Agitar a panela no meio do cozimento'},
-    {n:'Talharim',min:7,seg:0,d:'Massa fina, cozinha rapido'},
-    {n:'Macarrao Instantaneo',min:3,seg:0,d:'Nao jogar o tempero fora ainda'},
+    {n:'Talharim',min:7,seg:0,d:'Massa fina, cozinha rápido'},
+    {n:'Macarrão Instantâneo',min:3,seg:0,d:'Não jogar o tempero fora ainda'},
     {n:'Lasanha (montar+forno)',min:40,seg:0,d:'Cobrir com papel aluminio os primeiros 30min'},
   ],
   ovos:[
     {n:'Ovo Mole',min:5,seg:0,d:'Gema liquida, clara firme — perfeito'},
     {n:'Ovo Medio',min:7,seg:0,d:'Gema cremosa no centro'},
-    {n:'Ovo Duro',min:10,seg:0,d:'Colocar em agua fria logo apos para descascar facil'},
+    {n:'Ovo Duro',min:10,seg:0,d:'Colocar em água fria logo após para descascar fácil'},
     {n:'Ovo Poché',min:3,seg:30,d:'Agua quase fervendo com um fio de vinagre'},
     {n:'Ovo Frito',min:2,seg:30,d:'Frigideira quente com pouco oleo'},
     {n:'Omelete',min:3,seg:0,d:'Fogo medio, dobrar quando as bordas firmarem'},
@@ -1812,15 +1812,15 @@ var cookData = {
     {n:'Frango 2kg (forno)',min:90,seg:0,d:'200°C — descobrir nos ultimos 20min'},
     {n:'Frango Grelhado',min:12,seg:0,d:'6min cada lado em fogo medio-alto'},
     {n:'Carne ao Ponto',min:45,seg:0,d:'180°C no forno — ou 6min cada lado na grelha'},
-    {n:'Peixe Forno',min:20,seg:0,d:'200°C — nao virar para nao desmanchar'},
-    {n:'Linguica',min:25,seg:0,d:'Furar antes para nao estourar'},
+    {n:'Peixe Forno',min:20,seg:0,d:'200°C — não virar para não desmanchar'},
+    {n:'Linguica',min:25,seg:0,d:'Furar antes para não estourar'},
     {n:'Costela (forno)',min:180,seg:0,d:'160°C, embrulhada em aluminio'},
   ],
   legumes:[
     {n:'Batata Cozida',min:20,seg:0,d:'Em cubos — inteira leva 35min'},
     {n:'Brocolis Cozido',min:8,seg:0,d:'Al dente — 5min se preferir mais firme'},
     {n:'Cenoura Cozida',min:15,seg:0,d:'Em rodelas — inteira leva 25min'},
-    {n:'Abobrinha',min:6,seg:0,d:'Nao deixar passar — fica mole rapido'},
+    {n:'Abobrinha',min:6,seg:0,d:'Não deixar passar — fica mole rápido'},
     {n:'Beterraba',min:45,seg:0,d:'Inteira com casca — pressao: 20min'},
     {n:'Mandioca',min:30,seg:0,d:'Retirar o fio central antes de cozinhar'},
     {n:'Bolo (forma media)',min:35,seg:0,d:'180°C — testar com palito antes de tirar'},
