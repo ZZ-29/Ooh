@@ -683,7 +683,7 @@ function goTo(s){
   if(s!=='qr')pararCam();
   if(s==='extras')carregarNotas();
   if(s==='lembretes')initLembretes();
-  if(s==='veiculos'){veiRenderResumo(veiAtual);veiRenderHist(veiAtual);}
+  if(s==='veiculos'){veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
 }
 
@@ -1807,100 +1807,178 @@ function renderCookPresets(){
 var _origGoTo = goTo;
 
 // ============ VEÍCULOS ============
-var veiAtual = 'yaris';
+var veiIdAtivo = null;
 
-function veiTab(v){
-  veiAtual = v;
-  document.querySelectorAll('#screen-veiculos .tab').forEach(function(t,i){
-    t.classList.toggle('active', ['yaris','scooter','ranger'][i]===v);
-  });
-  document.querySelectorAll('#screen-veiculos .pane').forEach(function(p,i){
-    p.classList.toggle('active', ['yaris','scooter','ranger'][i]===v);
-  });
-  veiRenderResumo(v);
-  veiRenderHist(v);
-}
+function veiGetLista(){ return JSON.parse(localStorage.getItem('vei_lista')||'[]'); }
+function veiSetLista(l){ localStorage.setItem('vei_lista', JSON.stringify(l)); }
+function veiGetLogs(id){ return JSON.parse(localStorage.getItem('vei_logs_'+id)||'[]'); }
+function veiSetLogs(id,l){ localStorage.setItem('vei_logs_'+id, JSON.stringify(l)); }
 
-function veiSalvar(v){
-  var data   = document.getElementById(v+'-data').value;
-  var comb   = document.getElementById(v+'-comb').value;
-  var litros = parseFloat(document.getElementById(v+'-litros').value);
-  var preco  = parseFloat(document.getElementById(v+'-preco').value);
-  var km     = parseFloat(document.getElementById(v+'-km').value);
-  if(!data||!litros||!preco){toast('Preencha data, litros e preço');return;}
-  var total  = litros * preco;
-  var lista  = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
-  lista.unshift({data:data, comb:comb, litros:litros, preco:preco, km:km||0, total:total});
-  localStorage.setItem('vei_'+v, JSON.stringify(lista));
-  // Limpa campos exceto data e comb
-  ['litros','preco','km'].forEach(function(f){ document.getElementById(v+'-f').value=''; });
-  document.getElementById(v+'-litros').value='';
-  document.getElementById(v+'-preco').value='';
-  document.getElementById(v+'-km').value='';
-  toast('Abastecimento salvo!');
-  veiRenderResumo(v);
-  veiRenderHist(v);
-}
-
-function veiRenderResumo(v){
-  var el = document.getElementById('vei-resumo-'+v);
-  if(!el) return;
-  var lista = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
-  if(!lista.length){ el.innerHTML='<div style="color:var(--text2);font-size:13px;padding:4px 0">Nenhum registro ainda.</div>'; return; }
-  var agora = new Date();
-  var mes   = agora.getMonth()+1;
-  var ano   = agora.getFullYear();
-  var totalMes=0, totalAno=0, litrosMes=0, litrosAno=0;
-  var kmAtual=0, kmAnterior=0;
-  lista.forEach(function(r,i){
-    var d = new Date(r.data+'T12:00:00');
-    if(d.getFullYear()===ano){ totalAno+=r.total; litrosAno+=r.litros; }
-    if(d.getFullYear()===ano && d.getMonth()+1===mes){ totalMes+=r.total; litrosMes+=r.litros; }
-    if(i===0) kmAtual=r.km;
-    if(i===lista.length-1) kmAnterior=r.km;
-  });
-  var kmRodado = kmAtual > kmAnterior ? kmAtual - kmAnterior : 0;
-  var custoPorKm = kmRodado>0 ? (totalAno/kmRodado).toFixed(2) : '--';
-  function chip(label, val, cor){
-    return '<div style="background:var(--surface2);border-radius:10px;padding:8px 12px;border-left:3px solid '+cor+'">'+
-      '<div style="font-size:10px;color:var(--text2)">'+label+'</div>'+
-      '<div style="font-size:15px;font-weight:700;color:#fff">'+val+'</div></div>';
+function veiRenderLista(){
+  var lista = veiGetLista();
+  var el = document.getElementById('vei-lista');
+  if(!lista.length){
+    el.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:14px">'+
+      '&#x26FD;<br><br>Nenhum veículo cadastrado.<br>Adicione seu primeiro veículo abaixo.</div>';
+    return;
   }
-  el.innerHTML =
-    chip('Gasto este mês','R$ '+totalMes.toFixed(2),'#F8AA22') +
-    chip('Gasto este ano','R$ '+totalAno.toFixed(2),'#A78BFA') +
-    chip('Litros/m³ no ano',litrosAno.toFixed(1)+'L','#10B981') +
-    chip('Custo por km','R$ '+custoPorKm+'/km','#3B82F6');
-}
-
-function veiRenderHist(v){
-  var el = document.getElementById('vei-hist-'+v);
-  if(!el) return;
-  var lista = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
-  if(!lista.length){ el.innerHTML='<div style="color:var(--text2);font-size:13px">Nenhum registro.</div>'; return; }
-  var combLabel={'gasolina':'⛽ Gasolina','etanol':'🌿 Etanol','gnv':'💨 GNV'};
-  el.innerHTML = lista.slice(0,20).map(function(r,i){
-    var d = r.data ? r.data.split('-').reverse().join('/') : '';
-    return '<div style="background:var(--surface);border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'+
+  el.innerHTML = lista.map(function(v){
+    var logs = veiGetLogs(v.id);
+    var agora = new Date();
+    var totalMes = 0;
+    logs.forEach(function(r){
+      var d = new Date(r.data+'T12:00:00');
+      if(d.getFullYear()===agora.getFullYear() && d.getMonth()===agora.getMonth()) totalMes+=r.total;
+    });
+    var combs = v.combustiveis.map(function(c){
+      return {gasolina:'⛽',etanol:'🌿',gnv:'💨',diesel:'🛢️'}[c]||c;
+    }).join(' ');
+    return '<div onclick="veiAbrirDetalhe('+JSON.stringify(v.id)+')" style="background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer">'+
       '<div>'+
-        '<div style="font-size:13px;font-weight:600">'+(combLabel[r.comb]||r.comb)+'</div>'+
-        '<div style="font-size:11px;color:var(--text2)">'+d+' · '+r.litros.toFixed(2)+'L · R$'+r.preco.toFixed(2)+'/L'+(r.km?' · '+r.km+'km':'')+'</div>'+
+        '<div style="font-size:16px;font-weight:700">'+v.nome+'</div>'+
+        '<div style="font-size:12px;color:var(--text2);margin-top:2px">'+combs+'</div>'+
       '</div>'+
       '<div style="text-align:right">'+
-        '<div style="font-size:15px;font-weight:700;color:#F8AA22">R$ '+r.total.toFixed(2)+'</div>'+
-        '<div onclick="veiExcluir('+JSON.stringify(v)+','+i+')" style="font-size:11px;color:var(--danger);cursor:pointer;margin-top:2px">excluir</div>'+
+        '<div style="font-size:13px;color:var(--text2)">este mês</div>'+
+        '<div style="font-size:17px;font-weight:700;color:#F8AA22">R$ '+totalMes.toFixed(2)+'</div>'+
       '</div>'+
     '</div>';
   }).join('');
 }
 
-function veiExcluir(v, i){
-  var lista = JSON.parse(localStorage.getItem('vei_'+v)||'[]');
-  lista.splice(i,1);
-  localStorage.setItem('vei_'+v, JSON.stringify(lista));
-  veiRenderResumo(v);
-  veiRenderHist(v);
+function veiAbrirCadastro(){
+  document.getElementById('vei-form-cadastro').style.display='block';
+  document.getElementById('vei-novo-nome').focus();
+}
+function veiFecharCadastro(){
+  document.getElementById('vei-form-cadastro').style.display='none';
+  document.getElementById('vei-novo-nome').value='';
+  ['gasolina','etanol','gnv','diesel'].forEach(function(c){
+    document.getElementById('vei-comb-'+c).checked=false;
+  });
+}
+function veiSalvarCadastro(){
+  var nome = document.getElementById('vei-novo-nome').value.trim();
+  if(!nome){toast('Digite o nome do veículo');return;}
+  var combs = ['gasolina','etanol','gnv','diesel'].filter(function(c){
+    return document.getElementById('vei-comb-'+c).checked;
+  });
+  if(!combs.length){toast('Selecione pelo menos um combustível');return;}
+  var lista = veiGetLista();
+  var id = 'v_'+Date.now();
+  lista.push({id:id, nome:nome, combustiveis:combs});
+  veiSetLista(lista);
+  veiFecharCadastro();
+  veiRenderLista();
+  toast('Veículo adicionado!');
+}
+
+function veiAbrirDetalhe(id){
+  veiIdAtivo = id;
+  var lista = veiGetLista();
+  var v = lista.find(function(x){return x.id===id;});
+  if(!v) return;
+  document.getElementById('vei-detalhe-titulo').textContent = v.nome;
+  // Preenche select de combustível
+  var sel = document.getElementById('abast-comb');
+  var labels = {gasolina:'⛽ Gasolina',etanol:'🌿 Etanol',gnv:'💨 GNV (m³)',diesel:'🛢️ Diesel'};
+  sel.innerHTML = v.combustiveis.map(function(c){
+    return '<option value="'+c+'">'+labels[c]+'</option>';
+  }).join('');
+  // Data padrão = hoje
+  var hoje = new Date();
+  document.getElementById('abast-data').value = hoje.toISOString().split('T')[0];
+  veiRenderResumo();
+  veiRenderHist();
+  goTo('vei-detalhe');
+}
+
+function veiRenderResumo(){
+  var el = document.getElementById('vei-detalhe-resumo');
+  var logs = veiGetLogs(veiIdAtivo);
+  if(!logs.length){ el.innerHTML=''; return; }
+  var agora = new Date();
+  var totalMes=0, totalAno=0, litrosMes=0, litrosAno=0;
+  var kmArr = logs.filter(function(r){return r.km>0;}).map(function(r){return r.km;});
+  logs.forEach(function(r){
+    var d = new Date(r.data+'T12:00:00');
+    if(d.getFullYear()===agora.getFullYear()){
+      totalAno+=r.total; litrosAno+=r.litros;
+      if(d.getMonth()===agora.getMonth()){ totalMes+=r.total; litrosMes+=r.litros; }
+    }
+  });
+  var kmRodado = kmArr.length>1 ? Math.max.apply(null,kmArr)-Math.min.apply(null,kmArr) : 0;
+  var custoPorKm = (kmRodado>0 && totalAno>0) ? 'R$ '+(totalAno/kmRodado).toFixed(2)+'/km' : '--';
+  function chip(label,val,cor){
+    return '<div style="background:var(--surface2);border-radius:10px;padding:8px 12px;border-left:3px solid '+cor+'">'+
+      '<div style="font-size:10px;color:var(--text2)">'+label+'</div>'+
+      '<div style="font-size:15px;font-weight:700;color:#fff">'+val+'</div></div>';
+  }
+  el.innerHTML =
+    chip('Gasto este mês','R$ '+totalMes.toFixed(2),'#F8AA22')+
+    chip('Gasto este ano','R$ '+totalAno.toFixed(2),'#A78BFA')+
+    chip('Litros no ano',litrosAno.toFixed(1)+'L','#10B981')+
+    chip('Custo por km',custoPorKm,'#3B82F6');
+}
+
+function abastSalvar(){
+  var data   = document.getElementById('abast-data').value;
+  var comb   = document.getElementById('abast-comb').value;
+  var litros = parseFloat(document.getElementById('abast-litros').value);
+  var preco  = parseFloat(document.getElementById('abast-preco').value);
+  var km     = parseFloat(document.getElementById('abast-km').value)||0;
+  if(!data||!litros||!preco){toast('Preencha data, litros e preço');return;}
+  var logs = veiGetLogs(veiIdAtivo);
+  logs.unshift({data:data,comb:comb,litros:litros,preco:preco,km:km,total:litros*preco});
+  veiSetLogs(veiIdAtivo,logs);
+  document.getElementById('abast-litros').value='';
+  document.getElementById('abast-preco').value='';
+  document.getElementById('abast-km').value='';
+  toast('Abastecimento salvo!');
+  veiRenderResumo();
+  veiRenderHist();
+}
+
+function veiRenderHist(){
+  var el = document.getElementById('vei-detalhe-hist');
+  var logs = veiGetLogs(veiIdAtivo);
+  var labels={gasolina:'⛽ Gasolina',etanol:'🌿 Etanol',gnv:'💨 GNV',diesel:'🛢️ Diesel'};
+  if(!logs.length){el.innerHTML='<div style="color:var(--text2);font-size:13px">Nenhum registro ainda.</div>';return;}
+  el.innerHTML = logs.slice(0,30).map(function(r,i){
+    var d = r.data ? r.data.split('-').reverse().join('/') : '';
+    var unid = r.comb==='gnv'?'m³':'L';
+    return '<div style="background:var(--surface);border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:600">'+(labels[r.comb]||r.comb)+'</div>'+
+        '<div style="font-size:11px;color:var(--text2)">'+d+' · '+r.litros.toFixed(2)+unid+' · R$'+r.preco.toFixed(2)+'/'+unid+(r.km?' · '+r.km+'km':'')+'</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:15px;font-weight:700;color:#F8AA22">R$ '+r.total.toFixed(2)+'</div>'+
+        '<div onclick="abastExcluir('+i+')" style="font-size:11px;color:var(--danger);cursor:pointer;margin-top:2px">excluir</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function abastExcluir(i){
+  var logs = veiGetLogs(veiIdAtivo);
+  logs.splice(i,1);
+  veiSetLogs(veiIdAtivo,logs);
+  veiRenderResumo();
+  veiRenderHist();
   toast('Registro removido');
+}
+
+function veiExcluirVeiculo(){
+  var lista = veiGetLista();
+  var v = lista.find(function(x){return x.id===veiIdAtivo;});
+  if(!v) return;
+  if(!confirm('Excluir '+v.nome+' e todos os registros?')) return;
+  veiSetLista(lista.filter(function(x){return x.id!==veiIdAtivo;}));
+  localStorage.removeItem('vei_logs_'+veiIdAtivo);
+  veiIdAtivo=null;
+  goTo('veiculos');
+  toast('Veículo excluído');
 }
 // ============ FIM VEÍCULOS ============
 
@@ -1920,6 +1998,7 @@ if('serviceWorker' in navigator){
 }
 </script>
 
+
 <!-- VEÍCULOS -->
 <div class="screen" id="screen-veiculos">
   <div class="page-head">
@@ -1928,100 +2007,87 @@ if('serviceWorker' in navigator){
     <h1>Veículos</h1>
   </div>
 
-  <!-- Abas por veículo -->
-  <div class="tabs" style="padding:0 16px">
-    <div class="tab active" onclick="veiTab('yaris')">🚗 Yaris</div>
-    <div class="tab" onclick="veiTab('scooter')">🛵 Scooter</div>
-    <div class="tab" onclick="veiTab('ranger')">🚙 Ranger</div>
+  <!-- Lista de veículos -->
+  <div id="vei-lista" style="padding:0 16px 12px"></div>
+
+  <!-- Botão adicionar -->
+  <div style="padding:0 16px 16px">
+    <button class="btn btn-success" style="width:100%;gap:8px" onclick="veiAbrirCadastro()">
+      &#x2B; Adicionar veículo
+    </button>
   </div>
 
-  <!-- Painel Yaris -->
-  <div class="pane active" id="vei-pane-yaris">
-    <div style="padding:12px 16px 4px;font-size:11px;color:var(--text2);font-weight:700">TOYOTA YARIS — FLEX (Gasolina / Etanol)</div>
-    <div id="vei-resumo-yaris" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
-    <div style="padding:0 16px 12px">
-      <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
-        <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <div><label class="lbl">Data</label><input type="date" id="yaris-data" class="inp"></div>
-          <div><label class="lbl">Combustível</label>
-            <select id="yaris-comb" class="inp">
-              <option value="gasolina">Gasolina</option>
-              <option value="etanol">Etanol</option>
-            </select>
-          </div>
-          <div><label class="lbl">Litros</label><input type="number" id="yaris-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-          <div><label class="lbl">R$/litro</label><input type="number" id="yaris-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-          <div><label class="lbl">Km atual</label><input type="number" id="yaris-km" class="inp" placeholder="Ex: 45230" min="0"></div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn btn-success" style="width:100%" onclick="veiSalvar('yaris')">&#x2714; Salvar</button>
-          </div>
+  <!-- Formulário de cadastro (oculto por padrão) -->
+  <div id="vei-form-cadastro" style="display:none;padding:0 16px 24px">
+    <div style="background:var(--surface);border-radius:var(--radius);padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px">NOVO VEÍCULO</div>
+      <div style="margin-bottom:10px">
+        <label class="lbl">Nome do veículo</label>
+        <input type="text" id="vei-novo-nome" class="inp" placeholder="Ex: Onix, Moto Honda, Ranger...">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="lbl">Combustíveis que usa</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
+            <input type="checkbox" id="vei-comb-gasolina" value="gasolina"> ⛽ Gasolina
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
+            <input type="checkbox" id="vei-comb-etanol" value="etanol"> 🌿 Etanol
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
+            <input type="checkbox" id="vei-comb-gnv" value="gnv"> 💨 GNV
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:var(--surface2);padding:8px 12px;border-radius:20px;border:1px solid var(--border)">
+            <input type="checkbox" id="vei-comb-diesel" value="diesel"> 🛢️ Diesel
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" style="flex:1" onclick="veiFecharCadastro()">Cancelar</button>
+        <button class="btn btn-success" style="flex:2" onclick="veiSalvarCadastro()">&#x2714; Salvar veículo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETALHE DO VEÍCULO -->
+<div class="screen" id="screen-vei-detalhe">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('veiculos')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#059669,#047857)">&#x26FD;</div>
+    <h1 id="vei-detalhe-titulo">Veículo</h1>
+  </div>
+
+  <!-- Resumo de gastos -->
+  <div id="vei-detalhe-resumo" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
+
+  <!-- Formulário de abastecimento -->
+  <div style="padding:0 16px 12px">
+    <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div><label class="lbl">Data</label><input type="date" id="abast-data" class="inp"></div>
+        <div>
+          <label class="lbl">Combustível</label>
+          <select id="abast-comb" class="inp"></select>
+        </div>
+        <div><label class="lbl">Litros / m³</label><input type="number" id="abast-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+        <div><label class="lbl">R$ por litro/m³</label><input type="number" id="abast-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
+        <div><label class="lbl">Km atual</label><input type="number" id="abast-km" class="inp" placeholder="Odômetro" min="0"></div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn btn-success" style="width:100%" onclick="abastSalvar()">&#x2714; Salvar</button>
         </div>
       </div>
     </div>
-    <div style="padding:0 16px 24px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px">HISTÓRICO</div>
-      <div id="vei-hist-yaris"></div>
-    </div>
   </div>
 
-  <!-- Painel Scooter -->
-  <div class="pane" id="vei-pane-scooter">
-    <div style="padding:12px 16px 4px;font-size:11px;color:var(--text2);font-weight:700">YAMAHA SCOOTER — GASOLINA</div>
-    <div id="vei-resumo-scooter" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
-    <div style="padding:0 16px 12px">
-      <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
-        <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <div><label class="lbl">Data</label><input type="date" id="scooter-data" class="inp"></div>
-          <div><label class="lbl">Combustível</label>
-            <select id="scooter-comb" class="inp">
-              <option value="gasolina">Gasolina</option>
-            </select>
-          </div>
-          <div><label class="lbl">Litros</label><input type="number" id="scooter-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-          <div><label class="lbl">R$/litro</label><input type="number" id="scooter-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-          <div><label class="lbl">Km atual</label><input type="number" id="scooter-km" class="inp" placeholder="Ex: 12500" min="0"></div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn btn-success" style="width:100%" onclick="veiSalvar('scooter')">&#x2714; Salvar</button>
-          </div>
-        </div>
-      </div>
+  <!-- Histórico -->
+  <div style="padding:0 16px 24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700">HISTÓRICO</div>
+      <button onclick="veiExcluirVeiculo()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer">🗑 Excluir veículo</button>
     </div>
-    <div style="padding:0 16px 24px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px">HISTÓRICO</div>
-      <div id="vei-hist-scooter"></div>
-    </div>
-  </div>
-
-  <!-- Painel Ranger -->
-  <div class="pane" id="vei-pane-ranger">
-    <div style="padding:12px 16px 4px;font-size:11px;color:var(--text2);font-weight:700">FORD RANGER — GASOLINA / GNV</div>
-    <div id="vei-resumo-ranger" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
-    <div style="padding:0 16px 12px">
-      <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
-        <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <div><label class="lbl">Data</label><input type="date" id="ranger-data" class="inp"></div>
-          <div><label class="lbl">Combustível</label>
-            <select id="ranger-comb" class="inp">
-              <option value="gasolina">Gasolina</option>
-              <option value="gnv">GNV (m³)</option>
-            </select>
-          </div>
-          <div><label class="lbl">Litros / m³</label><input type="number" id="ranger-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-          <div><label class="lbl">R$/litro ou m³</label><input type="number" id="ranger-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-          <div><label class="lbl">Km atual</label><input type="number" id="ranger-km" class="inp" placeholder="Ex: 78000" min="0"></div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn btn-success" style="width:100%" onclick="veiSalvar('ranger')">&#x2714; Salvar</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div style="padding:0 16px 24px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px">HISTÓRICO</div>
-      <div id="vei-hist-ranger"></div>
-    </div>
+    <div id="vei-detalhe-hist"></div>
   </div>
 </div>
 
