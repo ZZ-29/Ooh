@@ -2155,7 +2155,11 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/Ooh/sw.js')
       .then(function(r){console.log('SW registrado',r.scope);})
       .catch(function(e){console.log('SW erro',e);});
+  
+  navigator.serviceWorker.addEventListener('message',function(e){
+    if(e.data&&e.data.type==='RELOAD') location.reload();
   });
+});
 }
 
 // iOS install banner
