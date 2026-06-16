@@ -761,7 +761,7 @@ function goTo(s){
   if(s!=='qr')pararCam();
   if(s==='extras')carregarNotas();
   if(s==='lembretes')initLembretes();
-  if(s==='veiculos'){veiRenderLista();}
+  if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
 }
@@ -1915,6 +1915,7 @@ function veiSetLogs(id,l){ localStorage.setItem('vei_logs_'+id, JSON.stringify(l
 
 function veiRenderLista(){
   var lista = veiGetLista();
+  document.getElementById('vei-form-cadastro').style.display='none';
   var el = document.getElementById('vei-lista');
   if(!lista.length){
     el.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:14px">'+
@@ -1952,10 +1953,13 @@ function veiAbrirCadastro(){
   document.getElementById('vei-novo-nome').focus();
 }
 function veiFecharCadastro(){
-  document.getElementById('vei-form-cadastro').style.display='none';
-  document.getElementById('vei-novo-nome').value='';
+  var f=document.getElementById('vei-form-cadastro');
+  if(f)f.style.display='none';
+  var n=document.getElementById('vei-novo-nome');
+  if(n)n.value='';
   ['gasolina','etanol','gnv','diesel'].forEach(function(c){
-    document.getElementById('vei-comb-'+c).classList.remove('sel');
+    var b=document.getElementById('vei-comb-'+c);
+    if(b)b.classList.remove('sel');
   });
 }
 function veiToggleComb(btn){
