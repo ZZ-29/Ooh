@@ -2272,9 +2272,19 @@ function calcClearHist(){calcHistArr=[];calcRenderHist();}
 // ===== TRADUTOR =====
 function tradProcessar(input){
   if(!input.files||!input.files[0]) return;
-  var reader=new FileReader();
-  reader.onload=function(e){
-    var b64=e.target.result;
+  var img=new Image();
+  var url=URL.createObjectURL(input.files[0]);
+  img.onload=function(){
+    // Comprime para max 1200px e 70% qualidade
+    var canvas=document.createElement('canvas');
+    var max=1200;
+    var w=img.width,h=img.height;
+    if(w>max){h=Math.round(h*max/w);w=max;}
+    if(h>max){w=Math.round(w*max/h);h=max;}
+    canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    var b64=canvas.toDataURL('image/jpeg',0.7);
+    URL.revokeObjectURL(url);
     document.getElementById('trad-preview').src=b64;
     document.getElementById('trad-preview').style.display='block';
     document.getElementById('trad-vazio').style.display='none';
@@ -2282,16 +2292,18 @@ function tradProcessar(input){
     document.getElementById('trad-loading').style.display='block';
     tradOCR(b64);
   };
-  reader.readAsDataURL(input.files[0]);
+  img.src=url;
 }
 function tradOCR(b64){
+  var ctrl=new AbortController();
+  var timer=setTimeout(function(){ctrl.abort();},15000);
   var fd=new FormData();
   fd.append('base64Image',b64);
   fd.append('language','eng');
   fd.append('detectOrientation','true');
   fd.append('apikey','helloworld');
-  fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd})
-    .then(function(r){return r.json();})
+  fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd,signal:ctrl.signal})
+    .then(function(r){clearTimeout(timer);return r.json();})
     .then(function(d){
       if(d.IsErroredOnProcessing||!d.ParsedResults||!d.ParsedResults[0]||!d.ParsedResults[0].ParsedText.trim()){
         document.getElementById('trad-loading').style.display='none';
@@ -2301,9 +2313,11 @@ function tradOCR(b64){
       }
       tradTranslate(d.ParsedResults[0].ParsedText.trim());
     })
-    .catch(function(){
+    .catch(function(e){
+      clearTimeout(timer);
       document.getElementById('trad-loading').style.display='none';
-      toast('Erro ao processar imagem');
+      document.getElementById('trad-vazio').style.display='block';
+      toast(e&&e.name==='AbortError'?'Timeout — tente novamente':'Erro ao processar imagem');
     });
 }
 function tradTranslate(texto){
