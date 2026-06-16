@@ -1762,33 +1762,40 @@ function buscarCidade(){
 function buscarTempoCoords(lat,lon,nomeCidade){
   var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
     '&current=temperature_2m,apparent_temperature,weather_code,windspeed_10m,relativehumidity_2m'+
-    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max'+
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'+
     '&timezone=auto&forecast_days=7';
   fetch(url)
     .then(function(r){return r.json();})
     .then(function(d){
       esconderTempoLoading();
-      if(!d||!d.current){toast('Erro ao obter previsão');return;}
-      renderTempo(d,nomeCidade);
+      if(!d||!d.current){toast('Erro ao obter dados do tempo');return;}
+      try{renderTempo(d,nomeCidade);}
+      catch(e){toast('Erro ao exibir previsão');}
     })
-    .catch(function(){esconderTempoLoading();toast('Erro ao buscar previsão');});
+    .catch(function(){esconderTempoLoading();toast('Sem conexão para buscar previsão');});
 }
 
 function renderTempo(d,cidade){
-  var c=d.current;
+  var c=d.current||{};
+  var daily=d.daily||{};
+
+  // Mostra container
   document.getElementById('tempo-vazio').style.display='none';
   document.getElementById('tempo-resultado').style.display='block';
-  document.getElementById('tempo-local').textContent='📍 '+cidade;
-  document.getElementById('tempo-icone').textContent=tempoIcone(c.weather_code);
-  document.getElementById('tempo-temp').textContent=Math.round(c.temperature_2m)+'°C';
-  document.getElementById('tempo-desc').textContent=tempoDesc(c.weather_code);
-  document.getElementById('tempo-sensacao').textContent='Sensacao: '+Math.round(c.apparent_temperature)+'°C';
 
-  // Detalhes
+  // Dados atuais — cada campo com fallback seguro
+  document.getElementById('tempo-local').textContent='📍 '+cidade;
+  document.getElementById('tempo-icone').textContent=tempoIcone(c.weather_code||0);
+  document.getElementById('tempo-temp').textContent=(c.temperature_2m!=null?Math.round(c.temperature_2m):'--')+'°C';
+  document.getElementById('tempo-desc').textContent=tempoDesc(c.weather_code||0);
+  document.getElementById('tempo-sensacao').textContent='Sensação: '+(c.apparent_temperature!=null?Math.round(c.apparent_temperature)+'°C':'--');
+
+  // Chips de detalhes
+  var chuvaHoje=Array.isArray(daily.precipitation_probability_max)?daily.precipitation_probability_max[0]:0;
   var dets=[
-    {ic:'💧',val:c.relativehumidity_2m+'%',lbl:'Umidade'},
-    {ic:'💨',val:Math.round(c.windspeed_10m)+' km/h',lbl:'Vento'},
-    {ic:'🌧️',val:(d.daily&&d.daily.precipitation_probability_max?d.daily.precipitation_probability_max[0]:0)+'%',lbl:'Chuva hoje'},
+    {ic:'💧',val:(c.relativehumidity_2m!=null?c.relativehumidity_2m:'--')+'%',lbl:'Umidade'},
+    {ic:'💨',val:(c.windspeed_10m!=null?Math.round(c.windspeed_10m):'--')+' km/h',lbl:'Vento'},
+    {ic:'🌧️',val:(chuvaHoje||0)+'%',lbl:'Chuva hoje'},
   ];
   document.getElementById('tempo-detalhes').innerHTML=dets.map(function(x){
     return '<div style="background:var(--surface2);border-radius:12px;padding:12px 16px;text-align:center;min-width:90px">'+
@@ -1797,24 +1804,32 @@ function renderTempo(d,cidade){
       '<div style="font-size:11px;color:var(--text2)">'+x.lbl+'</div></div>';
   }).join('');
 
-  // 7 dias
+  // 7 dias — seguro mesmo sem dados diários
   var dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
-  var semana=d.daily;
-  document.getElementById('tempo-semana').innerHTML=semana.time.map(function(dt,i){
+  var times=Array.isArray(daily.time)?daily.time:[];
+  if(!times.length){
+    document.getElementById('tempo-semana').innerHTML='<div style="color:var(--text2);font-size:13px;padding:8px 0">Previsão semanal indisponível</div>';
+    return;
+  }
+  document.getElementById('tempo-semana').innerHTML=times.map(function(dt,i){
     var data=new Date(dt+'T12:00:00');
-    var dia=i===0?'Hoje':i===1?'Amanha':dias[data.getDay()];
+    var dia=i===0?'Hoje':i===1?'Amanhã':dias[data.getDay()];
+    var cod=(daily.weather_code&&daily.weather_code[i])||0;
+    var tmax=daily.temperature_2m_max&&daily.temperature_2m_max[i]!=null?Math.round(daily.temperature_2m_max[i])+'°':'--';
+    var tmin=daily.temperature_2m_min&&daily.temperature_2m_min[i]!=null?Math.round(daily.temperature_2m_min[i])+'°':'--';
+    var chuva=daily.precipitation_probability_max&&daily.precipitation_probability_max[i]!=null?daily.precipitation_probability_max[i]+'%':'--';
     return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:12px;margin-bottom:8px">'+
-      '<div style="font-size:28px">'+tempoIcone(semana.weather_code[i])+'</div>'+
+      '<div style="font-size:28px">'+tempoIcone(cod)+'</div>'+
       '<div style="flex:1">'+
         '<div style="font-size:14px;font-weight:700;color:#fff">'+dia+'</div>'+
-        '<div style="font-size:12px;color:var(--text2)">'+tempoDesc(semana.weather_code[i])+'</div>'+
+        '<div style="font-size:12px;color:var(--text2)">'+tempoDesc(cod)+'</div>'+
       '</div>'+
       '<div style="text-align:right">'+
-        '<div style="font-size:15px;font-weight:700;color:#fff">'+Math.round(semana.temperature_2m_max[i])+'°</div>'+
-        '<div style="font-size:12px;color:var(--text2)">'+Math.round(semana.temperature_2m_min[i])+'°</div>'+
+        '<div style="font-size:15px;font-weight:700;color:#fff">'+tmax+'</div>'+
+        '<div style="font-size:12px;color:var(--text2)">'+tmin+'</div>'+
       '</div>'+
       '<div style="text-align:right;min-width:36px">'+
-        '<div style="font-size:12px;color:#60A5FA">💧'+semana.precipitation_probability_max[i]+'%</div>'+
+        '<div style="font-size:12px;color:#60A5FA">💧'+chuva+'</div>'+
       '</div>'+
     '</div>';
   }).join('');
