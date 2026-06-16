@@ -1753,27 +1753,46 @@ function buscarCidade(){
     .catch(function(){esconderTempoLoading();toast('Erro ao buscar cidade');});
 }
 
+function wttrToWmo(c){
+  var m={113:0,116:2,119:3,122:3,143:45,176:80,200:95,248:45,260:48,263:51,266:53,293:61,296:63,299:65,353:80,356:81,359:82,386:95,389:96};
+  return m[c]||0;
+}
 function buscarTempoCoords(lat,lon,nomeCidade){
-  toast('🧪 TESTE render...',3000);
-  esconderTempoLoading();
-  // TESTE: dados fixos sem chamar API
-  var fakeData={
-    current:{temperature_2m:22,apparent_temperature:21,weather_code:1,windspeed_10m:15,relativehumidity_2m:70},
-    daily:{
-      time:['2026-06-16','2026-06-17','2026-06-18'],
-      weather_code:[1,2,3],
-      temperature_2m_max:[24,25,23],
-      temperature_2m_min:[18,19,17],
-      precipitation_probability_max:[10,30,60]
-    }
-  };
-  try{renderTempo(fakeData,'Teste '+lat.toFixed(1));}
-  catch(e){
-    var el=document.createElement('div');
-    el.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000;color:#f00;z-index:99999;padding:20px;font-size:16px;overflow:auto;word-break:break-all';
-    el.innerHTML='<b>ERRO renderTempo:</b><br>'+e.message+'<br><br>'+e.stack+'<br><br><button onclick="this.parentNode.remove()" style="padding:12px 24px;font-size:16px">Fechar</button>';
-    document.body.appendChild(el);
-  }
+  toast('🌐 Buscando clima...',3000);
+  var ctrl=new AbortController();
+  var timer=setTimeout(function(){ctrl.abort();},10000);
+  var url='https://wttr.in/'+lat+','+lon+'?format=j1';
+  fetch(url,{signal:ctrl.signal})
+    .then(function(r){clearTimeout(timer);return r.json();})
+    .then(function(d){
+      esconderTempoLoading();
+      if(!d||!d.current_condition||!d.current_condition[0]){toast('Dados indisponíveis');return;}
+      var cur=d.current_condition[0];
+      var adapted={
+        current:{
+          temperature_2m:parseFloat(cur.temp_C),
+          apparent_temperature:parseFloat(cur.FeelsLikeC),
+          weather_code:wttrToWmo(parseInt(cur.weatherCode)),
+          windspeed_10m:parseFloat(cur.windspeedKmph),
+          relativehumidity_2m:parseInt(cur.humidity)
+        },
+        daily:{
+          time:(d.weather||[]).map(function(w){return w.date;}),
+          weather_code:(d.weather||[]).map(function(w){return wttrToWmo(parseInt((w.hourly&&w.hourly[4]?w.hourly[4].weatherCode:113)));}),
+          temperature_2m_max:(d.weather||[]).map(function(w){return parseFloat(w.maxtempC);}),
+          temperature_2m_min:(d.weather||[]).map(function(w){return parseFloat(w.mintempC);}),
+          precipitation_probability_max:(d.weather||[]).map(function(w){
+            return Math.max.apply(null,(w.hourly||[{chanceofrain:0}]).map(function(h){return parseInt(h.chanceofrain||0);}));
+          })
+        }
+      };
+      try{renderTempo(adapted,nomeCidade);}
+      catch(e){toast('render:'+e.message,5000);}
+    })
+    .catch(function(e){
+      clearTimeout(timer);esconderTempoLoading();
+      toast('Clima: '+(e&&e.name==='AbortError'?'sem resposta (10s)':e.message),5000);
+    });
 }
 
 function renderTempo(d,cidade){
