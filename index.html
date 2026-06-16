@@ -510,6 +510,13 @@ select{appearance:none;-webkit-appearance:none}
     <div class="scan-hint">Le QR Codes, EAN-13, EAN-8, Code 128, UPC e mais</div>
     <div style="padding:0 16px 12px"><button class="btn btn-primary" onclick="toggleCam()" id="btn-cam">Ativar camera</button></div>
     <div style="padding:0 16px"><div id="cam-reader" style="display:none"></div></div>
+    <div id="zoom-wrap" style="display:none;padding:6px 16px 0;display:none">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;color:var(--text2)">&#x1F50D;</span>
+        <input type="range" id="qr-zoom" min="1" max="4" step="0.1" value="1" style="flex:1;accent-color:var(--primary)" oninput="setQRZoom(this.value)">
+        <span style="font-size:12px;color:var(--text2);width:30px" id="zoom-val">1x</span>
+      </div>
+    </div>
     <div class="divider" style="margin-top:16px"></div>
     <div style="padding:0 16px 14px"><label class="file-pick"><span>&#x1F5BC; Imagem com QR ou codigo de barras</span><input type="file" id="qr-img-file" accept="image/*" onchange="lerQRimg(this)"></label></div>
     <div id="qr-scan-result" style="display:none;padding:0 16px" class="result ok"></div>
@@ -678,6 +685,7 @@ var camAtiva=false,html5QrScanner=null;
 
 
 function goTo(s){
+  if(s!=='home')history.pushState({screen:s},'','');
   document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(x){x.classList.remove('active');});
   document.getElementById('screen-'+s).classList.add('active');
@@ -690,6 +698,10 @@ function goTo(s){
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
 }
 
+
+window.addEventListener('popstate',function(){
+  goTo('home');
+});
 function qrTab(t){var idx=t==='gerar'?0:t==='ler'?1:2;switchTabs('#screen-qr .tab','#screen-qr .pane',idx);if(t!=='ler')pararCam();}
 function camTab(t){switchTabs('#screen-cam .tab','#screen-cam .pane',t==='ocr'?0:1);}
 function extrasTab(t){switchTabs('#screen-extras .tab','#screen-extras .pane',t==='conv'?0:1);if(t==='notas')carregarNotas();}
@@ -776,10 +788,18 @@ function baixarQR(){
 }
 
 function toggleCam(){camAtiva?pararCam():iniciarCam();}
+function setQRZoom(v){
+  document.getElementById('zoom-val').textContent=parseFloat(v).toFixed(1)+'x';
+  var vid=document.querySelector('#cam-reader video');
+  if(vid)vid.style.transform='scale('+v+')';
+}
 function iniciarCam(){
   var reader=document.getElementById('cam-reader');
   reader.style.display='block';reader.innerHTML='';
   document.getElementById('btn-cam').textContent='Parar camera';
+  document.getElementById('zoom-wrap').style.display='block';
+  document.getElementById('qr-zoom').value=1;
+  document.getElementById('zoom-val').textContent='1x';
   camAtiva=true;
   html5QrScanner=new Html5Qrcode('cam-reader');
   var fmts=[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.ITF];
@@ -791,6 +811,7 @@ function pararCam(){
   if(html5QrScanner){html5QrScanner.stop().catch(function(){});html5QrScanner=null;}
   var r=document.getElementById('cam-reader');r.style.display='none';r.innerHTML='';
   var b=document.getElementById('btn-cam');if(b)b.textContent='Ativar camera';
+  document.getElementById('zoom-wrap').style.display='none';
   camAtiva=false;
 }
 function lerQRimg(input){
@@ -804,7 +825,7 @@ function mostrarResultadoQR(txt){
   res.style.display='block';res.textContent=txt;ac.style.display='flex';ac.innerHTML='';
   var b1=document.createElement('button');b1.className='btn btn-ghost btn-sm';b1.textContent='Copiar';b1.style.color='#fff';
   b1.onclick=function(){navigator.clipboard.writeText(txt);toast('Copiado!');};ac.appendChild(b1);
-  if(/^https?:\/\//.test(txt)){var b2=document.createElement('button');b2.className='btn btn-primary btn-sm';b2.textContent='Abrir link';b2.onclick=function(){window.open(txt,'_blank');};ac.appendChild(b2);}
+  if(/^https?:\/\//.test(txt)){window.open(txt,'_blank');toast('🔗 Link aberto!',2000);}
 }
 
 var ocrFileAtual=null;
@@ -1922,6 +1943,7 @@ function veiRenderResumo(){
   }
   el.innerHTML =
     chip('Gasto este mês','R$ '+totalMes.toFixed(2),'#F8AA22')+
+    chip('Litros este mês',litrosMes.toFixed(1)+'L','#F8AA22')+
     chip('Gasto este ano','R$ '+totalAno.toFixed(2),'#A78BFA')+
     chip('Litros no ano',litrosAno.toFixed(1)+'L','#10B981')+
     chip('Custo por km',custoPorKm,'#3B82F6');
@@ -2002,6 +2024,17 @@ if('serviceWorker' in navigator){
       .catch(function(e){console.log('SW erro',e);});
   });
 }
+
+// iOS install banner
+(function(){
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isStandalone=window.navigator.standalone===true;
+  var dismissed=localStorage.getItem('ios-dismissed');
+  if(isIOS && !isStandalone && !dismissed){
+    setTimeout(function(){document.getElementById('ios-banner').style.display='block';},2000);
+  }
+})();
+
 </script>
 
 
@@ -2086,6 +2119,20 @@ if('serviceWorker' in navigator){
       <button onclick="veiExcluirVeiculo()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer">🗑 Excluir veículo</button>
     </div>
     <div id="vei-detalhe-hist"></div>
+  </div>
+</div>
+
+
+<!-- iOS Install Banner -->
+<div id="ios-banner" style="display:none;position:fixed;bottom:calc(var(--nav-h) + 8px);left:12px;right:12px;background:#1a3a5c;border:1px solid #2a5080;border-radius:14px;padding:12px 14px;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.5)">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+    <div style="font-size:13px;font-weight:700;color:#fff">&#x1F4F1; Instalar no iPhone / iPad</div>
+    <button onclick="document.getElementById('ios-banner').style.display='none';localStorage.setItem('ios-dismissed','1')" style="background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;line-height:1;padding:0">&#x2715;</button>
+  </div>
+  <div style="font-size:12px;color:var(--text2);line-height:1.6">
+    1&#xFE0F;&#x20E3; Toque em <strong style="color:#fff">Compartilhar</strong> &#x1F4E4;<br>
+    2&#xFE0F;&#x20E3; Escolha <strong style="color:#fff">"Adicionar à Tela de Início"</strong><br>
+    3&#xFE0F;&#x20E3; Toque em <strong style="color:#fff">Adicionar</strong> &#x2714;
   </div>
 </div>
 
