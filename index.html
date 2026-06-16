@@ -162,6 +162,17 @@ select{appearance:none;-webkit-appearance:none}
 .divider{height:1px;background:var(--border);margin:0 16px 14px}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.calc-btn{background:var(--surface2);border:none;border-radius:14px;color:#fff;font-size:24px;font-weight:600;padding:0;height:72px;cursor:pointer;transition:background .12s,transform .08s;-webkit-tap-highlight-color:transparent}
+.calc-btn:active{transform:scale(.93);background:var(--surface3)}
+.calc-fn{background:#2a3a5a;color:#fff}
+.calc-fn:active{background:#344870}
+.calc-op{background:#7C3AED;color:#fff}
+.calc-op:active{background:#6D28D9}
+.calc-op.calc-op-active{background:#A78BFA;color:#1a0040}
+.calc-eq{background:#F8AA22;color:#1a0a00}
+.calc-eq:active{background:#e09910}
+
 </style>
 </head>
 <body>
@@ -219,6 +230,11 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-name">Tempo</div>
       <div class="tool-desc">Previsão sem anúncio</div>
     </div>
+    <div class="tool-card" onclick="goTo('calc')" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">
+      <div class="tool-icon">&#x1F9EE;</div>
+      <div class="tool-name">Calculadora</div>
+      <div class="tool-desc">Operações e porcentagem</div>
+    </div>
     <div class="tool-card" onclick="goTo('veiculos')" style="background:linear-gradient(145deg,#059669,#047857);grid-column:1/-1;flex-direction:row;align-items:center;gap:16px">
       <div class="tool-icon" style="font-size:36px;flex-shrink:0">&#x26FD;</div>
       <div><div class="tool-name">Veículos</div><div class="tool-desc">Gastos de combustível por mês e ano</div></div>
@@ -249,6 +265,57 @@ select{appearance:none;-webkit-appearance:none}
 
 
 
+
+<!-- CALCULADORA -->
+<div class="screen" id="screen-calc">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">&#x1F9EE;</div>
+    <h1>Calculadora</h1>
+  </div>
+  <div style="padding:0 16px 16px;max-width:380px;margin:0 auto">
+    <!-- Display -->
+    <div style="background:var(--surface);border-radius:16px;padding:16px 20px 12px;margin-bottom:12px;border:1px solid var(--border)">
+      <div id="calc-expr" style="font-size:13px;color:var(--text2);min-height:18px;text-align:right;word-break:break-all"></div>
+      <div id="calc-display" style="font-size:48px;font-weight:700;text-align:right;color:#fff;line-height:1.1;word-break:break-all;min-height:58px">0</div>
+    </div>
+    <!-- Botões -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      <!-- Row 1 -->
+      <button class="calc-btn calc-fn" onclick="calcAC()">AC</button>
+      <button class="calc-btn calc-fn" onclick="calcPlusMinus()">+/-</button>
+      <button class="calc-btn calc-fn" onclick="calcPercent()">%</button>
+      <button class="calc-btn calc-op" onclick="calcOp('/')">&#xF7;</button>
+      <!-- Row 2 -->
+      <button class="calc-btn" onclick="calcNum('7')">7</button>
+      <button class="calc-btn" onclick="calcNum('8')">8</button>
+      <button class="calc-btn" onclick="calcNum('9')">9</button>
+      <button class="calc-btn calc-op" onclick="calcOp('*')">&#xD7;</button>
+      <!-- Row 3 -->
+      <button class="calc-btn" onclick="calcNum('4')">4</button>
+      <button class="calc-btn" onclick="calcNum('5')">5</button>
+      <button class="calc-btn" onclick="calcNum('6')">6</button>
+      <button class="calc-btn calc-op" onclick="calcOp('-')">&#x2212;</button>
+      <!-- Row 4 -->
+      <button class="calc-btn" onclick="calcNum('1')">1</button>
+      <button class="calc-btn" onclick="calcNum('2')">2</button>
+      <button class="calc-btn" onclick="calcNum('3')">3</button>
+      <button class="calc-btn calc-op" onclick="calcOp('+')">+</button>
+      <!-- Row 5 -->
+      <button class="calc-btn" onclick="calcNum('0')" style="grid-column:span 2">0</button>
+      <button class="calc-btn" onclick="calcDot()">.</button>
+      <button class="calc-btn calc-eq" onclick="calcEquals()">=</button>
+    </div>
+    <!-- Histórico -->
+    <div style="margin-top:14px">
+      <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between">
+        <span>HISTÓRICO</span>
+        <span onclick="calcClearHist()" style="cursor:pointer;color:var(--danger)">limpar</span>
+      </div>
+      <div id="calc-hist" style="font-size:13px;color:var(--text2);max-height:120px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
 
 <!-- TEMPO -->
 <div class="screen" id="screen-tempo">
@@ -696,6 +763,7 @@ function goTo(s){
   if(s==='lembretes')initLembretes();
   if(s==='veiculos'){veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
+  if(s==='calc'){calcRenderHist();}
 }
 
 
@@ -2041,6 +2109,69 @@ if('serviceWorker' in navigator){
     setTimeout(function(){document.getElementById('ios-banner').style.display='block';},2000);
   }
 })();
+
+
+// -- Calculadora
+var calcVal='0', calcPrev=null, calcOper=null, calcNewNum=true, calcHistArr=[];
+var calcOpSymbols={'/':'\u00f7','*':'\u00d7','-':'\u2212','+':'+'};
+function calcDisplay(v){
+  var s=parseFloat(v);
+  var txt=isFinite(s)?String(s):'Erro';
+  if(txt.length>12)txt=parseFloat(s.toPrecision(8)).toString();
+  document.getElementById('calc-display').textContent=txt;
+}
+function calcNum(n){
+  if(calcNewNum){calcVal=n;calcNewNum=false;}
+  else{if(calcVal==='0'&&n!=='.')calcVal=n;else if(calcVal.length<15)calcVal+=n;}
+  calcDisplay(calcVal);
+}
+function calcDot(){
+  if(calcNewNum){calcVal='0.';calcNewNum=false;}
+  else if(calcVal.indexOf('.')===-1)calcVal+='.';
+  calcDisplay(calcVal);
+}
+function calcAC(){
+  calcVal='0';calcPrev=null;calcOper=null;calcNewNum=true;
+  document.getElementById('calc-expr').textContent='';
+  calcDisplay('0');
+  document.querySelectorAll('.calc-op').forEach(function(b){b.classList.remove('calc-op-active');});
+}
+function calcPlusMinus(){calcVal=String(parseFloat(calcVal)*-1);calcDisplay(calcVal);}
+function calcPercent(){calcVal=String(parseFloat(calcVal)/100);calcDisplay(calcVal);}
+function calcOp(op){
+  if(calcOper&&!calcNewNum)calcEquals(true);
+  calcPrev=parseFloat(calcVal);
+  calcOper=op;
+  calcNewNum=true;
+  document.getElementById('calc-expr').textContent=calcVal+' '+calcOpSymbols[op];
+  document.querySelectorAll('.calc-op').forEach(function(b){b.classList.remove('calc-op-active');});
+  if(event&&event.target)event.target.classList.add('calc-op-active');
+}
+function calcEquals(silent){
+  if(calcOper===null)return;
+  var a=calcPrev, b=parseFloat(calcVal), res;
+  if(calcOper==='/')res=b!==0?a/b:NaN;
+  else if(calcOper==='*')res=a*b;
+  else if(calcOper==='-')res=a-b;
+  else res=a+b;
+  var sym=calcOpSymbols[calcOper];
+  var expr=String(a)+' '+sym+' '+String(b)+' = '+(isFinite(res)?res:'Erro');
+  if(!silent){
+    calcHistArr.unshift(expr);if(calcHistArr.length>20)calcHistArr.pop();
+    calcRenderHist();
+    document.getElementById('calc-expr').textContent='';
+    document.querySelectorAll('.calc-op').forEach(function(b){b.classList.remove('calc-op-active');});
+  }
+  calcVal=isFinite(res)?String(res):'0';
+  calcDisplay(calcVal);
+  calcPrev=null;calcOper=null;calcNewNum=true;
+}
+function calcRenderHist(){
+  var el=document.getElementById('calc-hist');
+  if(!calcHistArr.length){el.innerHTML='<span style="color:var(--text2)">Nenhum c\u00e1lculo ainda</span>';return;}
+  el.innerHTML=calcHistArr.map(function(h){return '<div style="padding:3px 0;border-bottom:1px solid var(--border)">'+h+'</div>';}).join('');
+}
+function calcClearHist(){calcHistArr=[];calcRenderHist();}
 
 </script>
 
