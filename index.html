@@ -244,6 +244,11 @@ select{appearance:none;-webkit-appearance:none}
       <div><div class="tool-name">Extras</div><div class="tool-desc">Conversor de unidades, moedas e notas</div></div>
     </div>
   </div>
+  <div class="tool-card" onclick="goTo('tradutor')" style="background:linear-gradient(145deg,#6D28D9,#4C1D95)">
+    <div class="tool-icon">🔤</div>
+    <div class="tool-name">Tradutor</div>
+    <div class="tool-desc">Inglês → Português</div>
+  </div>
   <div style="padding:12px 16px 20px">
     <div class="pix-rapido-card" id="pix-rapido-card">
       <div id="pix-rapido-body" style="display:none">
@@ -265,6 +270,46 @@ select{appearance:none;-webkit-appearance:none}
 
 
 
+
+
+<!-- TRADUTOR -->
+<div class="screen" id="screen-tradutor">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#6D28D9,#4C1D95)">&#x1F524;</div>
+    <h1>Tradutor</h1>
+  </div>
+  <div style="padding:16px">
+    <label style="display:block;background:#6D28D9;color:#fff;text-align:center;padding:18px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:14px">
+      &#x1F4F7; Fotografar texto
+      <input type="file" accept="image/*" capture="environment" id="trad-input" style="display:none" onchange="tradProcessar(this)">
+    </label>
+    <img id="trad-preview" style="display:none;width:100%;border-radius:12px;margin-bottom:12px;max-height:220px;object-fit:cover">
+    <div id="trad-loading" style="display:none;text-align:center;padding:24px">
+      <div class="spinner" style="margin:0 auto 10px"></div>
+      <div style="color:var(--text2);font-size:14px">Lendo e traduzindo...</div>
+    </div>
+    <div id="trad-resultado" style="display:none">
+      <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:1px;margin-bottom:8px">&#x1F1FA;&#x1F1F8; ORIGINAL</div>
+        <div id="trad-original" style="font-size:13px;color:var(--text2);line-height:1.6"></div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1e3a5f,#1e4d6b);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-size:11px;color:#60A5FA;font-weight:700;letter-spacing:1px;margin-bottom:8px">&#x1F1E7;&#x1F1F7; TRADUÇÃO</div>
+        <div id="trad-traducao" style="font-size:15px;color:#fff;line-height:1.6;font-weight:500"></div>
+      </div>
+      <button type="button" onclick="tradCopiar()" style="width:100%;background:var(--surface2);border:none;color:var(--text);padding:13px;border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:8px">&#x1F4CB; Copiar tradução</button>
+      <label style="display:block;background:var(--surface2);color:var(--text);text-align:center;padding:13px;border-radius:10px;font-size:14px;cursor:pointer">
+        &#x1F504; Nova foto
+        <input type="file" accept="image/*" capture="environment" style="display:none" onchange="tradProcessar(this)">
+      </label>
+    </div>
+    <div id="trad-vazio" style="text-align:center;padding:48px 16px">
+      <div style="font-size:64px;margin-bottom:14px">&#x1F4F7;</div>
+      <div style="color:var(--text2);font-size:14px;line-height:1.7">Tire foto de um texto em inglês<br>para traduzir para português</div>
+    </div>
+  </div>
+</div>
 
 <!-- CALCULADORA -->
 <div class="screen" id="screen-calc">
@@ -2221,6 +2266,66 @@ function calcRenderHist(){
   el.innerHTML=calcHistArr.map(function(h){return '<div style="padding:3px 0;border-bottom:1px solid var(--border)">'+h+'</div>';}).join('');
 }
 function calcClearHist(){calcHistArr=[];calcRenderHist();}
+
+
+
+// ===== TRADUTOR =====
+function tradProcessar(input){
+  if(!input.files||!input.files[0]) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var b64=e.target.result;
+    document.getElementById('trad-preview').src=b64;
+    document.getElementById('trad-preview').style.display='block';
+    document.getElementById('trad-vazio').style.display='none';
+    document.getElementById('trad-resultado').style.display='none';
+    document.getElementById('trad-loading').style.display='block';
+    tradOCR(b64);
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+function tradOCR(b64){
+  var fd=new FormData();
+  fd.append('base64Image',b64);
+  fd.append('language','eng');
+  fd.append('detectOrientation','true');
+  fd.append('apikey','helloworld');
+  fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.IsErroredOnProcessing||!d.ParsedResults||!d.ParsedResults[0]||!d.ParsedResults[0].ParsedText.trim()){
+        document.getElementById('trad-loading').style.display='none';
+        document.getElementById('trad-vazio').style.display='block';
+        toast('Texto não reconhecido — tente foto mais próxima');
+        return;
+      }
+      tradTranslate(d.ParsedResults[0].ParsedText.trim());
+    })
+    .catch(function(){
+      document.getElementById('trad-loading').style.display='none';
+      toast('Erro ao processar imagem');
+    });
+}
+function tradTranslate(texto){
+  fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(texto.substring(0,500))+'&langpair=en|pt-BR')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      document.getElementById('trad-loading').style.display='none';
+      var tr=d.responseData&&d.responseData.translatedText?d.responseData.translatedText:'—';
+      document.getElementById('trad-original').textContent=texto;
+      document.getElementById('trad-traducao').textContent=tr;
+      document.getElementById('trad-resultado').style.display='block';
+    })
+    .catch(function(){
+      document.getElementById('trad-loading').style.display='none';
+      toast('Erro ao traduzir');
+    });
+}
+function tradCopiar(){
+  var t=document.getElementById('trad-traducao').textContent;
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('Copiado!');});}
+  else{toast('Copie manualmente o texto acima');}
+}
 
 </script>
 
