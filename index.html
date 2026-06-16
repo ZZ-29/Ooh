@@ -1725,23 +1725,17 @@ function tempoIcone(cod){return tempoIconeMap[cod]||'🌡️';}
 function tempoDesc(cod){return tempoCodigoMap[cod]||'Desconhecido';}
 
 function usarGPS(){
-  if(!navigator.geolocation){toast('GPS nao disponivel');return;}
+  if(!navigator.geolocation){toast('GPS indisponível');return;}
   mostrarTempoLoading();
+  toast('📡 Obtendo GPS...',3000);
   navigator.geolocation.getCurrentPosition(function(pos){
     var lat=pos.coords.latitude,lon=pos.coords.longitude;
-    // Reverse geocoding com Nominatim
-    fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json&accept-language=pt')
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var cidade=d.address.city||d.address.town||d.address.village||d.address.county||'Minha localização';
-        var estado=d.address.state_code||d.address.state||'';
-        buscarTempoCoords(lat,lon,cidade+(estado?', '+estado:''));
-      })
-      .catch(function(){buscarTempoCoords(lat,lon,'Minha localização');});
-  },function(){
+    toast('📍 GPS OK: '+lat.toFixed(2)+','+lon.toFixed(2),3000);
+    buscarTempoCoords(lat,lon,'Minha localização');
+  },function(err){
     esconderTempoLoading();
-    toast('Não foi possível obter sua localização');
-  });
+    toast('GPS erro: '+err.message);
+  },{timeout:10000,maximumAge:60000});
 }
 
 function buscarCidade(){
