@@ -357,7 +357,7 @@ select{appearance:none;-webkit-appearance:none}
     <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
     <!-- Previsão 7 dias -->
     <div style="padding:0 16px 24px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PRÓXIMOS 7 DIAS</div>
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PRÓXIMOS 7 DIAS</div><!-- v4 -->
       <div id="tempo-semana"></div>
     </div>
   </div>
@@ -1782,9 +1782,11 @@ function renderTempo(d,cidade){
   var c=d.current||{};
   var daily=d.daily||{};
 
-  // Mostra container
+  // Mostra container + reset scroll
   document.getElementById('tempo-vazio').style.display='none';
   document.getElementById('tempo-resultado').style.display='block';
+  var scr=document.getElementById('screen-tempo');
+  if(scr) scr.scrollTop=0;
 
   // Dados atuais — cada campo com fallback seguro
   document.getElementById('tempo-local').textContent='📍 '+cidade;
