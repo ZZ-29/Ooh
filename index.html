@@ -825,7 +825,14 @@ function mostrarResultadoQR(txt){
   res.style.display='block';res.textContent=txt;ac.style.display='flex';ac.innerHTML='';
   var b1=document.createElement('button');b1.className='btn btn-ghost btn-sm';b1.textContent='Copiar';b1.style.color='#fff';
   b1.onclick=function(){navigator.clipboard.writeText(txt);toast('Copiado!');};ac.appendChild(b1);
-  if(/^https?:\/\//.test(txt)){window.open(txt,'_blank');toast('🔗 Link aberto!',2000);}
+  if(/^https?:\/\//.test(txt)){
+    var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    if(isIOS){
+      var b2=document.createElement('button');b2.className='btn btn-primary btn-sm';b2.textContent='🔗 Abrir link';b2.onclick=function(){window.open(txt,'_blank');};ac.appendChild(b2);
+    } else {
+      window.open(txt,'_blank');toast('🔗 Link aberto!',2000);
+    }
+  }
 }
 
 var ocrFileAtual=null;
