@@ -1761,13 +1761,14 @@ function buscarCidade(){
 
 function buscarTempoCoords(lat,lon,nomeCidade){
   var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
-    '&current=temperature_2m,apparent_temperature,weather_code,windspeed_10m,relativehumidity_2m,precipitation_probability'+
+    '&current=temperature_2m,apparent_temperature,weather_code,windspeed_10m,relativehumidity_2m'+
     '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max'+
     '&timezone=auto&forecast_days=7';
   fetch(url)
     .then(function(r){return r.json();})
     .then(function(d){
       esconderTempoLoading();
+      if(!d||!d.current){toast('Erro ao obter previsão');return;}
       renderTempo(d,nomeCidade);
     })
     .catch(function(){esconderTempoLoading();toast('Erro ao buscar previsão');});
@@ -1787,7 +1788,7 @@ function renderTempo(d,cidade){
   var dets=[
     {ic:'💧',val:c.relativehumidity_2m+'%',lbl:'Umidade'},
     {ic:'💨',val:Math.round(c.windspeed_10m)+' km/h',lbl:'Vento'},
-    {ic:'🌧️',val:(c.precipitation_probability||0)+'%',lbl:'Chuva'},
+    {ic:'🌧️',val:(d.daily&&d.daily.precipitation_probability_max?d.daily.precipitation_probability_max[0]:0)+'%',lbl:'Chuva hoje'},
   ];
   document.getElementById('tempo-detalhes').innerHTML=dets.map(function(x){
     return '<div style="background:var(--surface2);border-radius:12px;padding:12px 16px;text-align:center;min-width:90px">'+
