@@ -225,7 +225,11 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-name">Timer</div>
       <div class="tool-desc">Cronômetro e cozinha</div>
     </div>
-    
+    <div class="tool-card" onclick="goTo('tempo')" style="background:linear-gradient(145deg,#0369A1,#075985)">
+      <div class="tool-icon">&#x26C5;</div>
+      <div class="tool-name">Tempo</div>
+      <div class="tool-desc">Previsão sem anúncio</div>
+    </div>
     <div class="tool-card" onclick="goTo('calc')" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">
       <div class="tool-icon">&#x1F9EE;</div>
       <div class="tool-name">Calculadora</div>
@@ -313,6 +317,57 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 </div>
 
+<!-- TEMPO -->
+<div class="screen" id="screen-tempo">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#0369A1,#075985)">&#x26C5;</div>
+    <h1>Previsão do Tempo</h1>
+  </div>
+
+  <!-- Busca -->
+  <div style="padding:0 16px 4px">
+    <div style="display:flex;gap:8px">
+      <input type="text" id="tempo-cidade" placeholder="Buscar cidade..." style="flex:1" 
+        onkeydown="if(event.key==='Enter')buscarCidade()">
+      <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="usarGPS()">
+      &#x1F4CD; Usar minha localização
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div id="tempo-loading" style="display:none;text-align:center;padding:40px">
+    <div class="spinner" style="margin:0 auto 12px"></div>
+    <div style="color:var(--text2);font-size:14px">Buscando previsão...</div>
+  </div>
+
+  <!-- Resultado -->
+  <div id="tempo-resultado" style="display:none">
+    <!-- Atual -->
+    <div style="padding:0 16px;text-align:center;margin-bottom:4px">
+      <div id="tempo-local" style="font-size:15px;color:var(--text2);margin-bottom:4px"></div>
+      <div id="tempo-icone" style="font-size:80px;line-height:1;margin-bottom:8px"></div>
+      <div id="tempo-temp" style="font-size:72px;font-weight:900;color:#fff;line-height:1"></div>
+      <div id="tempo-desc" style="font-size:16px;color:#A78BFA;margin:6px 0 4px;font-weight:600"></div>
+      <div id="tempo-sensacao" style="font-size:13px;color:var(--text2)"></div>
+    </div>
+    <!-- Detalhes -->
+    <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
+    <!-- Previsão 7 dias -->
+    <div style="padding:0 16px 24px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PRÓXIMOS 7 DIAS</div><!-- v4 -->
+      <div id="tempo-semana"></div>
+    </div>
+  </div>
+
+  <!-- Vazio -->
+  <div id="tempo-vazio" style="text-align:center;padding:40px 16px">
+    <div style="font-size:60px;margin-bottom:12px">&#x1F30D;</div>
+    <div style="color:var(--text2);font-size:14px;line-height:1.6">Busque uma cidade ou use sua localizacao para ver a previsão do tempo sem publicidade</div>
+  </div>
+</div>
 
 <!-- TIMER -->
 <div class="screen" id="screen-timer">
@@ -1645,6 +1700,152 @@ function renderCronoVoltas(){
   }).join('');
 }
 
+
+// ===== PREVISAO DO TEMPO =====
+var tempoCodigoMap = {
+  0:'Ceu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',
+  45:'Neblina',48:'Neblina com gelo',
+  51:'Garoa leve',53:'Garoa moderada',55:'Garoa intensa',
+  61:'Chuva leve',63:'Chuva moderada',65:'Chuva forte',
+  71:'Neve leve',73:'Neve moderada',75:'Neve forte',
+  80:'Pancadas leves',81:'Pancadas moderadas',82:'Pancadas fortes',
+  95:'Trovoada',96:'Trovoada com granizo',99:'Trovoada com granizo forte'
+};
+var tempoIconeMap = {
+  0:'☀️',1:'🌤️',2:'⛅',3:'☁️',
+  45:'🌫️',48:'🌫️',
+  51:'🌦️',53:'🌦️',55:'🌧️',
+  61:'🌧️',63:'🌧️',65:'🌧️',
+  71:'🌨️',73:'🌨️',75:'❄️',
+  80:'🌦️',81:'🌧️',82:'⛈️',
+  95:'⛈️',96:'⛈️',99:'⛈️'
+};
+
+function tempoIcone(cod){return tempoIconeMap[cod]||'🌡️';}
+function tempoDesc(cod){return tempoCodigoMap[cod]||'Desconhecido';}
+
+function usarGPS(){
+  if(!navigator.geolocation){toast('GPS indisponível');return;}
+  mostrarTempoLoading();
+  toast('📡 Obtendo GPS...',3000);
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lon=pos.coords.longitude;
+    toast('📍 GPS OK: '+lat.toFixed(2)+','+lon.toFixed(2),3000);
+    buscarTempoCoords(lat,lon,'Minha localização');
+  },function(err){
+    esconderTempoLoading();
+    toast('GPS erro: '+err.message);
+  },{timeout:10000,maximumAge:60000});
+}
+
+function buscarCidade(){
+  var cidade=document.getElementById('tempo-cidade').value.trim();
+  if(!cidade){toast('Digite o nome da cidade');return;}
+  mostrarTempoLoading();
+  fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(cidade)+'&count=1&language=pt&format=json')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.results||!d.results.length){esconderTempoLoading();toast('Cidade nao encontrada');return;}
+      var r=d.results[0];
+      var nome=r.name+(r.admin1?', '+r.admin1:'')+(r.country_code?', '+r.country_code:'');
+      buscarTempoCoords(r.latitude,r.longitude,nome);
+    })
+    .catch(function(){esconderTempoLoading();toast('Erro ao buscar cidade');});
+}
+
+function buscarTempoCoords(lat,lon,nomeCidade){
+  toast('🧪 TESTE render...',3000);
+  esconderTempoLoading();
+  // TESTE: dados fixos sem chamar API
+  var fakeData={
+    current:{temperature_2m:22,apparent_temperature:21,weather_code:1,windspeed_10m:15,relativehumidity_2m:70},
+    daily:{
+      time:['2026-06-16','2026-06-17','2026-06-18'],
+      weather_code:[1,2,3],
+      temperature_2m_max:[24,25,23],
+      temperature_2m_min:[18,19,17],
+      precipitation_probability_max:[10,30,60]
+    }
+  };
+  try{renderTempo(fakeData,'Teste '+lat.toFixed(1));}
+  catch(e){
+    var el=document.createElement('div');
+    el.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000;color:#f00;z-index:99999;padding:20px;font-size:16px;overflow:auto;word-break:break-all';
+    el.innerHTML='<b>ERRO renderTempo:</b><br>'+e.message+'<br><br>'+e.stack+'<br><br><button onclick="this.parentNode.remove()" style="padding:12px 24px;font-size:16px">Fechar</button>';
+    document.body.appendChild(el);
+  }
+}
+
+function renderTempo(d,cidade){
+  var c=d.current||{};
+  var daily=d.daily||{};
+
+  // Mostra container + reset scroll
+  document.getElementById('tempo-vazio').style.display='none';
+  document.getElementById('tempo-resultado').style.display='block';
+  var scr=document.getElementById('screen-tempo');
+  if(scr) scr.scrollTop=0;
+
+  // Dados atuais — cada campo com fallback seguro
+  document.getElementById('tempo-local').textContent='📍 '+cidade;
+  document.getElementById('tempo-icone').textContent=tempoIcone(c.weather_code||0);
+  document.getElementById('tempo-temp').textContent=(c.temperature_2m!=null?Math.round(c.temperature_2m):'--')+'°C';
+  document.getElementById('tempo-desc').textContent=tempoDesc(c.weather_code||0);
+  document.getElementById('tempo-sensacao').textContent='Sensação: '+(c.apparent_temperature!=null?Math.round(c.apparent_temperature)+'°C':'--');
+
+  // Chips de detalhes
+  var chuvaHoje=Array.isArray(daily.precipitation_probability_max)?daily.precipitation_probability_max[0]:0;
+  var dets=[
+    {ic:'💧',val:(c.relativehumidity_2m!=null?c.relativehumidity_2m:'--')+'%',lbl:'Umidade'},
+    {ic:'💨',val:(c.windspeed_10m!=null?Math.round(c.windspeed_10m):'--')+' km/h',lbl:'Vento'},
+    {ic:'🌧️',val:(chuvaHoje||0)+'%',lbl:'Chuva hoje'},
+  ];
+  document.getElementById('tempo-detalhes').innerHTML=dets.map(function(x){
+    return '<div style="background:var(--surface2);border-radius:12px;padding:12px 16px;text-align:center;min-width:90px">'+
+      '<div style="font-size:24px">'+x.ic+'</div>'+
+      '<div style="font-size:16px;font-weight:700;color:#fff">'+x.val+'</div>'+
+      '<div style="font-size:11px;color:var(--text2)">'+x.lbl+'</div></div>';
+  }).join('');
+
+  // 7 dias — seguro mesmo sem dados diários
+  var dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+  var times=Array.isArray(daily.time)?daily.time:[];
+  if(!times.length){
+    document.getElementById('tempo-semana').innerHTML='<div style="color:var(--text2);font-size:13px;padding:8px 0">Previsão semanal indisponível</div>';
+    return;
+  }
+  document.getElementById('tempo-semana').innerHTML=times.map(function(dt,i){
+    var data=new Date(dt+'T12:00:00');
+    var dia=i===0?'Hoje':i===1?'Amanhã':dias[data.getDay()];
+    var cod=(daily.weather_code&&daily.weather_code[i])||0;
+    var tmax=daily.temperature_2m_max&&daily.temperature_2m_max[i]!=null?Math.round(daily.temperature_2m_max[i])+'°':'--';
+    var tmin=daily.temperature_2m_min&&daily.temperature_2m_min[i]!=null?Math.round(daily.temperature_2m_min[i])+'°':'--';
+    var chuva=daily.precipitation_probability_max&&daily.precipitation_probability_max[i]!=null?daily.precipitation_probability_max[i]+'%':'--';
+    return '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:12px;margin-bottom:8px">'+
+      '<div style="font-size:28px">'+tempoIcone(cod)+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-size:14px;font-weight:700;color:#fff">'+dia+'</div>'+
+        '<div style="font-size:12px;color:var(--text2)">'+tempoDesc(cod)+'</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:15px;font-weight:700;color:#fff">'+tmax+'</div>'+
+        '<div style="font-size:12px;color:var(--text2)">'+tmin+'</div>'+
+      '</div>'+
+      '<div style="text-align:right;min-width:36px">'+
+        '<div style="font-size:12px;color:#60A5FA">💧'+chuva+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function mostrarTempoLoading(){
+  document.getElementById('tempo-loading').style.display='block';
+  document.getElementById('tempo-resultado').style.display='none';
+  document.getElementById('tempo-vazio').style.display='none';
+}
+function esconderTempoLoading(){
+  document.getElementById('tempo-loading').style.display='none';
+}
 
 
 // ===== ASSISTENTE CULINARIO =====
