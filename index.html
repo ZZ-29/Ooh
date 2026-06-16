@@ -1768,11 +1768,14 @@ function buscarTempoCoords(lat,lon,nomeCidade){
     .then(function(r){return r.json();})
     .then(function(d){
       esconderTempoLoading();
-      if(!d||!d.current){toast('Erro ao obter dados do tempo');return;}
+      // DEBUG
+      var dbg='cur:'+(d&&d.current?'OK':'FAIL')+' day:'+(d&&d.daily&&d.daily.time?d.daily.time.length+'d':'FAIL')+(d&&d.error?' ['+d.reason+']':'');
+      toast(dbg,5000);
+      if(!d||!d.current){return;}
       try{renderTempo(d,nomeCidade);}
-      catch(e){toast('Erro ao exibir previsão');}
+      catch(e){toast('RENDER ERR:'+e.message,5000);}
     })
-    .catch(function(){esconderTempoLoading();toast('Sem conexão para buscar previsão');});
+    .catch(function(e){esconderTempoLoading();toast('FETCH ERR:'+(e?e.message:'?'),5000);});
 }
 
 function renderTempo(d,cidade){
