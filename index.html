@@ -1934,9 +1934,9 @@ function veiRenderLista(){
       return {gasolina:'⛽',etanol:'🌿',gnv:'💨',diesel:'🛢️'}[c]||c;
     }).join(' ');
     var vid = v.id;
-    return '<div onclick="veiAbrirDetalhe(\'' + vid + '\')" style="background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:2px solid #059669;display:flex;justify-content:space-between;align-items:center;cursor:pointer">'+
+    return '<button type="button" onclick="veiAbrirDetalhe(\'' + vid + '\')" style="background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:2px solid #059669;display:flex;justify-content:space-between;align-items:center;cursor:pointer;width:100%;text-align:left">'+
       '<div>'+
-        '<div style="font-size:17px;font-weight:700">'+v.nome+'</div>'+
+        '<div style="font-size:17px;font-weight:700;color:var(--text)">'+v.nome+'</div>'+
         '<div style="font-size:13px;color:var(--text2);margin-top:4px">'+combs+'</div>'+
         '<div style="font-size:12px;color:#10B981;margin-top:6px;font-weight:600">⛽ Toque aqui para abastecer</div>'+
       '</div>'+
@@ -1945,7 +1945,7 @@ function veiRenderLista(){
         '<div style="font-size:20px;font-weight:800;color:#F8AA22">R$ '+totalMes.toFixed(2)+'</div>'+
         '<div style="font-size:22px;color:#059669;line-height:1">›</div>'+
       '</div>'+
-    '</div>';
+    '</button>';
   }).join('');
 }
 
