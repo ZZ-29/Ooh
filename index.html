@@ -281,25 +281,11 @@ select{appearance:none;-webkit-appearance:none}
   </div>
   <div style="padding:16px">
 
-    <!-- Tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:14px">
-      <button type="button" id="trad-tab-txt" onclick="tradTab('txt')" style="flex:1;padding:10px;border-radius:10px;border:none;background:#6D28D9;color:#fff;font-weight:700;font-size:14px;cursor:pointer">&#x270F;&#xFE0F; Texto</button>
-      <button type="button" id="trad-tab-cam" onclick="tradTab('cam')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #6D28D9;background:transparent;color:#A78BFA;font-weight:700;font-size:14px;cursor:pointer">&#x1F4F7; Câmera</button>
-    </div>
-
-    <!-- Painel Texto -->
-    <div id="trad-painel-txt">
-      <textarea id="trad-texto-input" placeholder="Cole ou digite o texto em inglês aqui..." style="width:100%;min-height:130px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;padding:12px;resize:vertical;box-sizing:border-box;font-family:inherit"></textarea>
-      <button type="button" onclick="tradTexto()" style="width:100%;margin-top:8px;background:#6D28D9;border:none;color:#fff;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer">&#x1F310; Traduzir</button>
-    </div>
-
-    <!-- Painel Câmera -->
-    <div id="trad-painel-cam" style="display:none">
-      <label style="display:block;background:#6D28D9;color:#fff;text-align:center;padding:18px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:12px">
-        &#x1F4F7; Fotografar texto
-        <input type="file" accept="image/*" capture="environment" id="trad-input" style="display:none" onchange="tradProcessar(this)">
-      </label>
-      <img id="trad-preview" style="display:none;width:100%;border-radius:12px;margin-bottom:12px;max-height:200px;object-fit:cover">
+    <!-- Só texto -->
+    <div>
+      <textarea id="trad-texto-input" placeholder="Cole ou digite o texto em inglês aqui..." style="width:100%;min-height:150px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;padding:12px;resize:vertical;box-sizing:border-box;font-family:inherit"></textarea>
+      <button type="button" onclick="tradTexto()" style="width:100%;margin-top:10px;background:#6D28D9;border:none;color:#fff;padding:16px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer">&#x1F310; Traduzir</button>
+      <button type="button" onclick="document.getElementById('trad-texto-input').value='';document.getElementById('trad-resultado').style.display='none'" style="width:100%;margin-top:8px;background:var(--surface2);border:none;color:var(--text2);padding:11px;border-radius:10px;font-size:13px;cursor:pointer">&#x1F5D1; Limpar</button>
     </div>
 
     <!-- Loading -->
@@ -2283,17 +2269,7 @@ function calcClearHist(){calcHistArr=[];calcRenderHist();}
 
 
 // ===== TRADUTOR =====
-function tradTab(t){
-  document.getElementById('trad-painel-txt').style.display=t==='txt'?'block':'none';
-  document.getElementById('trad-painel-cam').style.display=t==='cam'?'block':'none';
-  document.getElementById('trad-tab-txt').style.background=t==='txt'?'#6D28D9':'transparent';
-  document.getElementById('trad-tab-txt').style.color=t==='txt'?'#fff':'#A78BFA';
-  document.getElementById('trad-tab-txt').style.border=t==='txt'?'none':'2px solid #6D28D9';
-  document.getElementById('trad-tab-cam').style.background=t==='cam'?'#6D28D9':'transparent';
-  document.getElementById('trad-tab-cam').style.color=t==='cam'?'#fff':'#A78BFA';
-  document.getElementById('trad-tab-cam').style.border=t==='cam'?'none':'2px solid #6D28D9';
-  document.getElementById('trad-resultado').style.display='none';
-}
+
 function tradTexto(){
   var txt=document.getElementById('trad-texto-input').value.trim();
   if(!txt){toast('Digite ou cole um texto');return;}
@@ -2301,38 +2277,7 @@ function tradTexto(){
   document.getElementById('trad-resultado').style.display='none';
   tradTranslate(txt);
 }
-function tradProcessar(input){
-  if(!input.files||!input.files[0]) return;
-  var img=new Image();
-  var url=URL.createObjectURL(input.files[0]);
-  img.onload=function(){
-    document.getElementById('trad-preview').src=url;
-    document.getElementById('trad-preview').style.display='block';
-    document.getElementById('trad-resultado').style.display='none';
-    // Usa TextDetector nativo do Chrome Android (sem API externa)
-    if('TextDetector' in window){
-      document.getElementById('trad-loading').style.display='block';
-      var detector=new TextDetector();
-      detector.detect(img).then(function(results){
-        document.getElementById('trad-loading').style.display='none';
-        if(!results||!results.length){
-          toast('Nenhum texto detectado — cole na aba Texto');return;
-        }
-        var texto=results.map(function(r){return r.rawValue;}).join(' ');
-        document.getElementById('trad-texto-input').value=texto;
-        tradTab('txt');
-        tradTranslate(texto);
-      }).catch(function(){
-        document.getElementById('trad-loading').style.display='none';
-        toast('Erro ao ler texto — cole na aba Texto');
-      });
-    } else {
-      // Dispositivo sem TextDetector: mostra foto e pede para copiar
-      toast('Cole o texto na aba ✏️ Texto para traduzir',4000);
-    }
-  };
-  img.src=url;
-}
+
 function tradTranslate(texto){
   fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(texto.substring(0,500))+'&langpair=en|pt-BR')
     .then(function(r){return r.json();})
