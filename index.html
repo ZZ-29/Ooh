@@ -2306,44 +2306,32 @@ function tradProcessar(input){
   var img=new Image();
   var url=URL.createObjectURL(input.files[0]);
   img.onload=function(){
-    var canvas=document.createElement('canvas');
-    var max=1200,w=img.width,h=img.height;
-    if(w>max){h=Math.round(h*max/w);w=max;}
-    if(h>max){w=Math.round(w*max/h);h=max;}
-    canvas.width=w;canvas.height=h;
-    canvas.getContext('2d').drawImage(img,0,0,w,h);
-    var b64=canvas.toDataURL('image/jpeg',0.7);
-    URL.revokeObjectURL(url);
-    document.getElementById('trad-preview').src=b64;
+    document.getElementById('trad-preview').src=url;
     document.getElementById('trad-preview').style.display='block';
-    document.getElementById('trad-loading').style.display='block';
     document.getElementById('trad-resultado').style.display='none';
-    tradOCR(b64);
+    // Usa TextDetector nativo do Chrome Android (sem API externa)
+    if('TextDetector' in window){
+      document.getElementById('trad-loading').style.display='block';
+      var detector=new TextDetector();
+      detector.detect(img).then(function(results){
+        document.getElementById('trad-loading').style.display='none';
+        if(!results||!results.length){
+          toast('Nenhum texto detectado — cole na aba Texto');return;
+        }
+        var texto=results.map(function(r){return r.rawValue;}).join(' ');
+        document.getElementById('trad-texto-input').value=texto;
+        tradTab('txt');
+        tradTranslate(texto);
+      }).catch(function(){
+        document.getElementById('trad-loading').style.display='none';
+        toast('Erro ao ler texto — cole na aba Texto');
+      });
+    } else {
+      // Dispositivo sem TextDetector: mostra foto e pede para copiar
+      toast('Cole o texto na aba ✏️ Texto para traduzir',4000);
+    }
   };
   img.src=url;
-}
-function tradOCR(b64){
-  var ctrl=new AbortController();
-  var timer=setTimeout(function(){ctrl.abort();},15000);
-  var fd=new FormData();
-  fd.append('base64Image',b64);
-  fd.append('language','eng');
-  fd.append('apikey','helloworld');
-  fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd,signal:ctrl.signal})
-    .then(function(r){clearTimeout(timer);return r.json();})
-    .then(function(d){
-      if(d.IsErroredOnProcessing||!d.ParsedResults||!d.ParsedResults[0]||!d.ParsedResults[0].ParsedText.trim()){
-        document.getElementById('trad-loading').style.display='none';
-        toast('Texto não reconhecido — use a aba Texto para colar');return;
-      }
-      document.getElementById('trad-texto-input').value=d.ParsedResults[0].ParsedText.trim();
-      tradTranslate(d.ParsedResults[0].ParsedText.trim());
-    })
-    .catch(function(e){
-      clearTimeout(timer);
-      document.getElementById('trad-loading').style.display='none';
-      toast(e&&e.name==='AbortError'?'OCR timeout — cole o texto na aba Texto':'Erro no OCR');
-    });
 }
 function tradTranslate(texto){
   fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(texto.substring(0,500))+'&langpair=en|pt-BR')
