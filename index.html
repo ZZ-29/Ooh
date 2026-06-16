@@ -277,37 +277,50 @@ select{appearance:none;-webkit-appearance:none}
   <div class="page-head">
     <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
     <div class="icon" style="background:linear-gradient(145deg,#6D28D9,#4C1D95)">&#x1F524;</div>
-    <h1>Tradutor</h1>
+    <h1>Tradutor EN→PT</h1>
   </div>
   <div style="padding:16px">
-    <label style="display:block;background:#6D28D9;color:#fff;text-align:center;padding:18px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:14px">
-      &#x1F4F7; Fotografar texto
-      <input type="file" accept="image/*" capture="environment" id="trad-input" style="display:none" onchange="tradProcessar(this)">
-    </label>
-    <img id="trad-preview" style="display:none;width:100%;border-radius:12px;margin-bottom:12px;max-height:220px;object-fit:cover">
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button type="button" id="trad-tab-txt" onclick="tradTab('txt')" style="flex:1;padding:10px;border-radius:10px;border:none;background:#6D28D9;color:#fff;font-weight:700;font-size:14px;cursor:pointer">&#x270F;&#xFE0F; Texto</button>
+      <button type="button" id="trad-tab-cam" onclick="tradTab('cam')" style="flex:1;padding:10px;border-radius:10px;border:2px solid #6D28D9;background:transparent;color:#A78BFA;font-weight:700;font-size:14px;cursor:pointer">&#x1F4F7; Câmera</button>
+    </div>
+
+    <!-- Painel Texto -->
+    <div id="trad-painel-txt">
+      <textarea id="trad-texto-input" placeholder="Cole ou digite o texto em inglês aqui..." style="width:100%;min-height:130px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;padding:12px;resize:vertical;box-sizing:border-box;font-family:inherit"></textarea>
+      <button type="button" onclick="tradTexto()" style="width:100%;margin-top:8px;background:#6D28D9;border:none;color:#fff;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer">&#x1F310; Traduzir</button>
+    </div>
+
+    <!-- Painel Câmera -->
+    <div id="trad-painel-cam" style="display:none">
+      <label style="display:block;background:#6D28D9;color:#fff;text-align:center;padding:18px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:12px">
+        &#x1F4F7; Fotografar texto
+        <input type="file" accept="image/*" capture="environment" id="trad-input" style="display:none" onchange="tradProcessar(this)">
+      </label>
+      <img id="trad-preview" style="display:none;width:100%;border-radius:12px;margin-bottom:12px;max-height:200px;object-fit:cover">
+    </div>
+
+    <!-- Loading -->
     <div id="trad-loading" style="display:none;text-align:center;padding:24px">
       <div class="spinner" style="margin:0 auto 10px"></div>
-      <div style="color:var(--text2);font-size:14px">Lendo e traduzindo...</div>
+      <div style="color:var(--text2);font-size:14px">Traduzindo...</div>
     </div>
-    <div id="trad-resultado" style="display:none">
+
+    <!-- Resultado -->
+    <div id="trad-resultado" style="display:none;margin-top:12px">
       <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:1px;margin-bottom:8px">&#x1F1FA;&#x1F1F8; ORIGINAL</div>
+        <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:1px;margin-bottom:6px">&#x1F1FA;&#x1F1F8; ORIGINAL</div>
         <div id="trad-original" style="font-size:13px;color:var(--text2);line-height:1.6"></div>
       </div>
       <div style="background:linear-gradient(135deg,#1e3a5f,#1e4d6b);border-radius:12px;padding:14px;margin-bottom:10px">
-        <div style="font-size:11px;color:#60A5FA;font-weight:700;letter-spacing:1px;margin-bottom:8px">&#x1F1E7;&#x1F1F7; TRADUÇÃO</div>
+        <div style="font-size:11px;color:#60A5FA;font-weight:700;letter-spacing:1px;margin-bottom:6px">&#x1F1E7;&#x1F1F7; TRADUÇÃO</div>
         <div id="trad-traducao" style="font-size:15px;color:#fff;line-height:1.6;font-weight:500"></div>
       </div>
-      <button type="button" onclick="tradCopiar()" style="width:100%;background:var(--surface2);border:none;color:var(--text);padding:13px;border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:8px">&#x1F4CB; Copiar tradução</button>
-      <label style="display:block;background:var(--surface2);color:var(--text);text-align:center;padding:13px;border-radius:10px;font-size:14px;cursor:pointer">
-        &#x1F504; Nova foto
-        <input type="file" accept="image/*" capture="environment" style="display:none" onchange="tradProcessar(this)">
-      </label>
+      <button type="button" onclick="tradCopiar()" style="width:100%;background:var(--surface2);border:none;color:var(--text);padding:13px;border-radius:10px;font-size:14px;cursor:pointer">&#x1F4CB; Copiar tradução</button>
     </div>
-    <div id="trad-vazio" style="text-align:center;padding:48px 16px">
-      <div style="font-size:64px;margin-bottom:14px">&#x1F4F7;</div>
-      <div style="color:var(--text2);font-size:14px;line-height:1.7">Tire foto de um texto em inglês<br>para traduzir para português</div>
-    </div>
+
   </div>
 </div>
 
@@ -2270,15 +2283,31 @@ function calcClearHist(){calcHistArr=[];calcRenderHist();}
 
 
 // ===== TRADUTOR =====
+function tradTab(t){
+  document.getElementById('trad-painel-txt').style.display=t==='txt'?'block':'none';
+  document.getElementById('trad-painel-cam').style.display=t==='cam'?'block':'none';
+  document.getElementById('trad-tab-txt').style.background=t==='txt'?'#6D28D9':'transparent';
+  document.getElementById('trad-tab-txt').style.color=t==='txt'?'#fff':'#A78BFA';
+  document.getElementById('trad-tab-txt').style.border=t==='txt'?'none':'2px solid #6D28D9';
+  document.getElementById('trad-tab-cam').style.background=t==='cam'?'#6D28D9':'transparent';
+  document.getElementById('trad-tab-cam').style.color=t==='cam'?'#fff':'#A78BFA';
+  document.getElementById('trad-tab-cam').style.border=t==='cam'?'none':'2px solid #6D28D9';
+  document.getElementById('trad-resultado').style.display='none';
+}
+function tradTexto(){
+  var txt=document.getElementById('trad-texto-input').value.trim();
+  if(!txt){toast('Digite ou cole um texto');return;}
+  document.getElementById('trad-loading').style.display='block';
+  document.getElementById('trad-resultado').style.display='none';
+  tradTranslate(txt);
+}
 function tradProcessar(input){
   if(!input.files||!input.files[0]) return;
   var img=new Image();
   var url=URL.createObjectURL(input.files[0]);
   img.onload=function(){
-    // Comprime para max 1200px e 70% qualidade
     var canvas=document.createElement('canvas');
-    var max=1200;
-    var w=img.width,h=img.height;
+    var max=1200,w=img.width,h=img.height;
     if(w>max){h=Math.round(h*max/w);w=max;}
     if(h>max){w=Math.round(w*max/h);h=max;}
     canvas.width=w;canvas.height=h;
@@ -2287,9 +2316,8 @@ function tradProcessar(input){
     URL.revokeObjectURL(url);
     document.getElementById('trad-preview').src=b64;
     document.getElementById('trad-preview').style.display='block';
-    document.getElementById('trad-vazio').style.display='none';
-    document.getElementById('trad-resultado').style.display='none';
     document.getElementById('trad-loading').style.display='block';
+    document.getElementById('trad-resultado').style.display='none';
     tradOCR(b64);
   };
   img.src=url;
@@ -2300,24 +2328,21 @@ function tradOCR(b64){
   var fd=new FormData();
   fd.append('base64Image',b64);
   fd.append('language','eng');
-  fd.append('detectOrientation','true');
   fd.append('apikey','helloworld');
   fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd,signal:ctrl.signal})
     .then(function(r){clearTimeout(timer);return r.json();})
     .then(function(d){
       if(d.IsErroredOnProcessing||!d.ParsedResults||!d.ParsedResults[0]||!d.ParsedResults[0].ParsedText.trim()){
         document.getElementById('trad-loading').style.display='none';
-        document.getElementById('trad-vazio').style.display='block';
-        toast('Texto não reconhecido — tente foto mais próxima');
-        return;
+        toast('Texto não reconhecido — use a aba Texto para colar');return;
       }
+      document.getElementById('trad-texto-input').value=d.ParsedResults[0].ParsedText.trim();
       tradTranslate(d.ParsedResults[0].ParsedText.trim());
     })
     .catch(function(e){
       clearTimeout(timer);
       document.getElementById('trad-loading').style.display='none';
-      document.getElementById('trad-vazio').style.display='block';
-      toast(e&&e.name==='AbortError'?'Timeout — tente novamente':'Erro ao processar imagem');
+      toast(e&&e.name==='AbortError'?'OCR timeout — cole o texto na aba Texto':'Erro no OCR');
     });
 }
 function tradTranslate(texto){
@@ -2332,7 +2357,7 @@ function tradTranslate(texto){
     })
     .catch(function(){
       document.getElementById('trad-loading').style.display='none';
-      toast('Erro ao traduzir');
+      toast('Erro ao traduzir — verifique conexão');
     });
 }
 function tradCopiar(){
@@ -2341,138 +2366,3 @@ function tradCopiar(){
   else{toast('Copie manualmente o texto acima');}
 }
 
-</script>
-
-
-<!-- VEÍCULOS -->
-<div class="screen" id="screen-veiculos">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#059669,#047857)">&#x26FD;</div>
-    <h1>Veículos</h1>
-  </div>
-
-  <!-- Lista de veículos -->
-  <div id="vei-lista" style="padding:0 16px 12px"></div>
-
-  <!-- Botão adicionar -->
-  <div style="padding:0 16px 16px">
-    <button class="btn btn-success" style="width:100%;gap:8px" onclick="veiAbrirCadastro()">
-      &#x2B; Adicionar veículo
-    </button>
-  </div>
-
-  <!-- Formulário de cadastro (oculto por padrão) -->
-  <div id="vei-form-cadastro" style="display:none;padding:0 16px 24px">
-    <div style="background:var(--surface);border-radius:var(--radius);padding:16px;border:1px solid var(--border)">
-      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px">NOVO VEÍCULO</div>
-      <div style="margin-bottom:10px">
-        <label class="lbl">Nome do veículo</label>
-        <input type="text" id="vei-novo-nome" class="inp" placeholder="Ex: Onix, Moto Honda, Ranger...">
-      </div>
-      <div style="margin-bottom:14px">
-        <label class="lbl">Combustíveis que usa (toque para selecionar)</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
-          <button type="button" class="comb-btn" id="vei-comb-gasolina" onclick="veiToggleComb(this)">⛽ Gasolina</button>
-          <button type="button" class="comb-btn" id="vei-comb-etanol" onclick="veiToggleComb(this)">🌿 Etanol</button>
-          <button type="button" class="comb-btn" id="vei-comb-gnv" onclick="veiToggleComb(this)">💨 GNV</button>
-          <button type="button" class="comb-btn" id="vei-comb-diesel" onclick="veiToggleComb(this)">🛢️ Diesel</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost" style="flex:1" onclick="veiFecharCadastro()">Cancelar</button>
-        <button class="btn btn-success" style="flex:2" onclick="veiSalvarCadastro()">&#x2714; Salvar veículo</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- DETALHE DO VEÍCULO -->
-<div class="screen" id="screen-vei-detalhe">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('veiculos')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#059669,#047857)">&#x26FD;</div>
-    <h1 id="vei-detalhe-titulo">Veículo</h1>
-  </div>
-
-  <!-- Resumo chips -->
-  <div style="padding:0 16px 4px">
-    <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:6px">RESUMO</div>
-    <div id="vei-detalhe-resumo" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
-  </div>
-
-  <!-- Formulário de abastecimento -->
-  <div style="padding:12px 16px 4px">
-    <div style="background:var(--surface);border-radius:14px;padding:14px 16px;border:1px solid var(--border)">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:12px">⛽ REGISTRAR ABASTECIMENTO</div>
-
-      <!-- Data + Combustível -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div>
-          <label class="lbl">📅 Data</label>
-          <input type="date" id="abast-data" class="inp">
-        </div>
-        <div>
-          <label class="lbl">🔥 Combustível</label>
-          <select id="abast-comb" class="inp"></select>
-        </div>
-      </div>
-
-      <!-- Litros -->
-      <div style="margin-bottom:8px">
-        <label class="lbl">💧 Quantidade (litros / m³)</label>
-        <input type="number" id="abast-litros" class="inp" placeholder="Ex: 30.50"
-          step="0.01" min="0" oninput="abastCalcTotal()" style="font-size:18px">
-      </div>
-
-      <!-- Preço unitário -->
-      <div style="margin-bottom:8px">
-        <label class="lbl">💲 Preço por litro / m³  (R$)</label>
-        <input type="number" id="abast-preco" class="inp" placeholder="Ex: 5.89"
-          step="0.01" min="0" oninput="abastCalcTotal()" style="font-size:18px">
-      </div>
-
-      <!-- Total calculado em tempo real -->
-      <div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)">
-        <span style="font-size:13px;color:var(--text2)">💰 Total desta abastecida</span>
-        <span id="abast-total-preview" style="font-size:22px;font-weight:800;color:#F8AA22">R$ 0,00</span>
-      </div>
-
-      <!-- Km (opcional) -->
-      <div style="margin-bottom:12px">
-        <label class="lbl">🛣️ Km do odômetro (opcional)</label>
-        <input type="number" id="abast-km" class="inp" placeholder="Ex: 45820" min="0">
-      </div>
-
-      <button class="btn btn-success" style="width:100%;font-size:16px;padding:14px" onclick="abastSalvar()">
-        ✔ Salvar abastecimento
-      </button>
-    </div>
-  </div>
-
-  <!-- Histórico -->
-  <div style="padding:12px 16px 24px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700">📋 HISTÓRICO</div>
-      <button onclick="veiExcluirVeiculo()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer">🗑 Excluir veículo</button>
-    </div>
-    <div id="vei-detalhe-hist"></div>
-  </div>
-</div>
-
-
-<!-- iOS Install Banner -->
-<div id="ios-banner" style="display:none;position:fixed;bottom:calc(var(--nav-h) + 8px);left:12px;right:12px;background:#1a3a5c;border:1px solid #2a5080;border-radius:14px;padding:12px 14px;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.5)">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-    <div style="font-size:13px;font-weight:700;color:#fff">&#x1F4F1; Instalar no iPhone / iPad</div>
-    <button onclick="document.getElementById('ios-banner').style.display='none';localStorage.setItem('ios-dismissed','1')" style="background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;line-height:1;padding:0">&#x2715;</button>
-  </div>
-  <div style="font-size:12px;color:var(--text2);line-height:1.6">
-    1&#xFE0F;&#x20E3; Toque em <strong style="color:#fff">Compartilhar</strong> &#x1F4E4;<br>
-    2&#xFE0F;&#x20E3; Escolha <strong style="color:#fff">"Adicionar à Tela de Início"</strong><br>
-    3&#xFE0F;&#x20E3; Toque em <strong style="color:#fff">Adicionar</strong> &#x2714;
-  </div>
-</div>
-
-</body>
-</html>
