@@ -1702,27 +1702,14 @@ function renderCronoVoltas(){
 
 
 // ===== PREVISAO DO TEMPO =====
-var tempoCodigoMap = {
-  0:'Ceu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',
-  45:'Neblina',48:'Neblina com gelo',
-  51:'Garoa leve',53:'Garoa moderada',55:'Garoa intensa',
-  61:'Chuva leve',63:'Chuva moderada',65:'Chuva forte',
-  71:'Neve leve',73:'Neve moderada',75:'Neve forte',
-  80:'Pancadas leves',81:'Pancadas moderadas',82:'Pancadas fortes',
-  95:'Trovoada',96:'Trovoada com granizo',99:'Trovoada com granizo forte'
-};
-var tempoIconeMap = {
-  0:'☀️',1:'🌤️',2:'⛅',3:'☁️',
-  45:'🌫️',48:'🌫️',
-  51:'🌦️',53:'🌦️',55:'🌧️',
-  61:'🌧️',63:'🌧️',65:'🌧️',
-  71:'🌨️',73:'🌨️',75:'❄️',
-  80:'🌦️',81:'🌧️',82:'⛈️',
-  95:'⛈️',96:'⛈️',99:'⛈️'
-};
-
-function tempoIcone(cod){return tempoIconeMap[cod]||'🌡️';}
-function tempoDesc(cod){return tempoCodigoMap[cod]||'Desconhecido';}
+function tempoIcone(cod){
+  var m={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+  return m[cod]||'🌡️';
+}
+function tempoDesc(cod){
+  var m={0:'Céu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',45:'Neblina',48:'Neblina com gelo',51:'Garoa leve',53:'Garoa moderada',55:'Garoa intensa',61:'Chuva leve',63:'Chuva moderada',65:'Chuva forte',71:'Neve leve',73:'Neve moderada',75:'Neve forte',80:'Pancadas leves',81:'Pancadas moderadas',82:'Pancadas fortes',95:'Trovoada',96:'Trovoada com granizo',99:'Trovoada com granizo forte'};
+  return m[cod]||'Desconhecido';
+}
 
 function usarGPS(){
   if(!navigator.geolocation){toast('GPS indisponível');return;}
