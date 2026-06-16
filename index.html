@@ -1769,10 +1769,7 @@ function buscarTempoCoords(lat,lon,nomeCidade){
   };
   try{renderTempo(fakeData,'Teste '+lat.toFixed(1));}
   catch(e){
-    esconderTempoLoading();
-    document.getElementById('tempo-vazio').style.display='none';
-    document.getElementById('tempo-resultado').style.display='block';
-    document.getElementById('tempo-semana').innerHTML='<div style="color:red;font-size:14px;padding:16px;word-break:break-all">ERRO: '+e.message+'<br>'+e.stack+'</div>';
+    alert('ERRO: '+e.message);
   }
 }
 
