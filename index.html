@@ -1998,7 +1998,7 @@ function veiAbrirDetalhe(id){
 function veiRenderResumo(){
   var el = document.getElementById('vei-detalhe-resumo');
   var logs = veiGetLogs(veiIdAtivo);
-  if(!logs.length){ el.innerHTML=''; return; }
+  // mostra zeros mesmo sem registros para o usuario entender o layout
   var agora = new Date();
   var totalMes=0, totalAno=0, litrosMes=0, litrosAno=0;
   var kmArr = logs.filter(function(r){return r.km>0;}).map(function(r){return r.km;});
@@ -2012,9 +2012,9 @@ function veiRenderResumo(){
   var kmRodado = kmArr.length>1 ? Math.max.apply(null,kmArr)-Math.min.apply(null,kmArr) : 0;
   var custoPorKm = (kmRodado>0 && totalAno>0) ? 'R$ '+(totalAno/kmRodado).toFixed(2)+'/km' : '--';
   function chip(label,val,cor){
-    return '<div style="background:var(--surface2);border-radius:10px;padding:8px 12px;border-left:3px solid '+cor+'">'+
-      '<div style="font-size:10px;color:var(--text2)">'+label+'</div>'+
-      '<div style="font-size:15px;font-weight:700;color:#fff">'+val+'</div></div>';
+    return '<div style="background:var(--surface2);border-radius:10px;padding:10px 12px;border-left:3px solid '+cor+'">'+
+      '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">'+label+'</div>'+
+      '<div style="font-size:17px;font-weight:800;color:#fff">'+val+'</div></div>';
   }
   el.innerHTML =
     chip('Gasto este mês','R$ '+totalMes.toFixed(2),'#F8AA22')+
@@ -2022,6 +2022,15 @@ function veiRenderResumo(){
     chip('Gasto este ano','R$ '+totalAno.toFixed(2),'#A78BFA')+
     chip('Litros no ano',litrosAno.toFixed(1)+'L','#10B981')+
     chip('Custo por km',custoPorKm,'#3B82F6');
+}
+
+
+function abastCalcTotal(){
+  var l = parseFloat(document.getElementById('abast-litros').value)||0;
+  var p = parseFloat(document.getElementById('abast-preco').value)||0;
+  var t = l*p;
+  document.getElementById('abast-total-preview').textContent =
+    'R$ '+t.toFixed(2).replace('.',',');
 }
 
 function abastSalvar(){
@@ -2037,7 +2046,8 @@ function abastSalvar(){
   document.getElementById('abast-litros').value='';
   document.getElementById('abast-preco').value='';
   document.getElementById('abast-km').value='';
-  toast('Abastecimento salvo!');
+  document.getElementById('abast-total-preview').textContent='R$ 0,00';
+  toast('Abastecimento salvo! ✔');
   veiRenderResumo();
   veiRenderHist();
 }
@@ -2227,33 +2237,65 @@ function calcClearHist(){calcHistArr=[];calcRenderHist();}
     <h1 id="vei-detalhe-titulo">Veículo</h1>
   </div>
 
-  <!-- Resumo de gastos -->
-  <div id="vei-detalhe-resumo" style="display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap"></div>
+  <!-- Resumo chips -->
+  <div style="padding:0 16px 4px">
+    <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:6px">RESUMO</div>
+    <div id="vei-detalhe-resumo" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+  </div>
 
   <!-- Formulário de abastecimento -->
-  <div style="padding:0 16px 12px">
-    <div style="background:var(--surface);border-radius:var(--radius-sm);padding:14px;border:1px solid var(--border)">
-      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">REGISTRAR ABASTECIMENTO</div>
+  <div style="padding:12px 16px 4px">
+    <div style="background:var(--surface);border-radius:14px;padding:14px 16px;border:1px solid var(--border)">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:12px">⛽ REGISTRAR ABASTECIMENTO</div>
+
+      <!-- Data + Combustível -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div><label class="lbl">Data</label><input type="date" id="abast-data" class="inp"></div>
         <div>
-          <label class="lbl">Combustível</label>
+          <label class="lbl">📅 Data</label>
+          <input type="date" id="abast-data" class="inp">
+        </div>
+        <div>
+          <label class="lbl">🔥 Combustível</label>
           <select id="abast-comb" class="inp"></select>
         </div>
-        <div><label class="lbl">Litros / m³</label><input type="number" id="abast-litros" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-        <div><label class="lbl">R$ por litro/m³</label><input type="number" id="abast-preco" class="inp" placeholder="0.00" step="0.01" min="0"></div>
-        <div><label class="lbl">Km atual</label><input type="number" id="abast-km" class="inp" placeholder="Odômetro" min="0"></div>
-        <div style="display:flex;align-items:flex-end">
-          <button class="btn btn-success" style="width:100%" onclick="abastSalvar()">&#x2714; Salvar</button>
-        </div>
       </div>
+
+      <!-- Litros -->
+      <div style="margin-bottom:8px">
+        <label class="lbl">💧 Quantidade (litros / m³)</label>
+        <input type="number" id="abast-litros" class="inp" placeholder="Ex: 30.50"
+          step="0.01" min="0" oninput="abastCalcTotal()" style="font-size:18px">
+      </div>
+
+      <!-- Preço unitário -->
+      <div style="margin-bottom:8px">
+        <label class="lbl">💲 Preço por litro / m³  (R$)</label>
+        <input type="number" id="abast-preco" class="inp" placeholder="Ex: 5.89"
+          step="0.01" min="0" oninput="abastCalcTotal()" style="font-size:18px">
+      </div>
+
+      <!-- Total calculado em tempo real -->
+      <div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)">
+        <span style="font-size:13px;color:var(--text2)">💰 Total desta abastecida</span>
+        <span id="abast-total-preview" style="font-size:22px;font-weight:800;color:#F8AA22">R$ 0,00</span>
+      </div>
+
+      <!-- Km (opcional) -->
+      <div style="margin-bottom:12px">
+        <label class="lbl">🛣️ Km do odômetro (opcional)</label>
+        <input type="number" id="abast-km" class="inp" placeholder="Ex: 45820" min="0">
+      </div>
+
+      <button class="btn btn-success" style="width:100%;font-size:16px;padding:14px" onclick="abastSalvar()">
+        ✔ Salvar abastecimento
+      </button>
     </div>
   </div>
 
   <!-- Histórico -->
-  <div style="padding:0 16px 24px">
+  <div style="padding:12px 16px 24px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div style="font-size:12px;color:var(--text2);font-weight:700">HISTÓRICO</div>
+      <div style="font-size:12px;color:var(--text2);font-weight:700">📋 HISTÓRICO</div>
       <button onclick="veiExcluirVeiculo()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer">🗑 Excluir veículo</button>
     </div>
     <div id="vei-detalhe-hist"></div>
