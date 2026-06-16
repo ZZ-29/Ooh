@@ -1932,14 +1932,16 @@ function veiRenderLista(){
     var combs = v.combustiveis.map(function(c){
       return {gasolina:'⛽',etanol:'🌿',gnv:'💨',diesel:'🛢️'}[c]||c;
     }).join(' ');
-    return '<div onclick="veiAbrirDetalhe('+JSON.stringify(v.id)+')" style="background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer">'+
+    return '<div onclick="veiAbrirDetalhe('+JSON.stringify(v.id)+')" style="background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;border:2px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;active:background:var(--surface2)">'+
       '<div>'+
-        '<div style="font-size:16px;font-weight:700">'+v.nome+'</div>'+
-        '<div style="font-size:12px;color:var(--text2);margin-top:2px">'+combs+'</div>'+
+        '<div style="font-size:17px;font-weight:700">'+v.nome+'</div>'+
+        '<div style="font-size:12px;color:var(--text2);margin-top:3px">'+combs+'</div>'+
+        '<div style="font-size:11px;color:#A78BFA;margin-top:4px">⛽ Toque para registrar abastecimento</div>'+
       '</div>'+
       '<div style="text-align:right">'+
-        '<div style="font-size:13px;color:var(--text2)">este mês</div>'+
-        '<div style="font-size:17px;font-weight:700;color:#F8AA22">R$ '+totalMes.toFixed(2)+'</div>'+
+        '<div style="font-size:12px;color:var(--text2)">gasto no mês</div>'+
+        '<div style="font-size:19px;font-weight:800;color:#F8AA22">R$ '+totalMes.toFixed(2)+'</div>'+
+        '<div style="font-size:20px;color:var(--text2);margin-top:2px">›</div>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -1972,7 +1974,8 @@ function veiSalvarCadastro(){
   veiSetLista(lista);
   veiFecharCadastro();
   veiRenderLista();
-  toast('Veículo adicionado!');
+  toast('Veículo adicionado! Registre o primeiro abastecimento.');
+  veiAbrirDetalhe(id);
 }
 
 function veiAbrirDetalhe(id){
@@ -1998,7 +2001,10 @@ function veiAbrirDetalhe(id){
 function veiRenderResumo(){
   var el = document.getElementById('vei-detalhe-resumo');
   var logs = veiGetLogs(veiIdAtivo);
-  // mostra zeros mesmo sem registros para o usuario entender o layout
+  if(!logs.length){
+    el.innerHTML=chip('Gasto este mês','R$ 0,00','#F8AA22')+chip('Litros este mês','0L','#F8AA22')+chip('Gasto este ano','R$ 0,00','#A78BFA')+chip('Litros no ano','0L','#10B981');
+    return;
+  }
   var agora = new Date();
   var totalMes=0, totalAno=0, litrosMes=0, litrosAno=0;
   var kmArr = logs.filter(function(r){return r.km>0;}).map(function(r){return r.km;});
