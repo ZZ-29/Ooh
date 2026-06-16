@@ -244,11 +244,6 @@ select{appearance:none;-webkit-appearance:none}
       <div><div class="tool-name">Extras</div><div class="tool-desc">Conversor de unidades, moedas e notas</div></div>
     </div>
   </div>
-  <div class="tool-card" onclick="goTo('tradutor')" style="background:linear-gradient(145deg,#6D28D9,#4C1D95)">
-    <div class="tool-icon">🔤</div>
-    <div class="tool-name">Tradutor</div>
-    <div class="tool-desc">Inglês → Português</div>
-  </div>
   <div style="padding:12px 16px 20px">
     <div class="pix-rapido-card" id="pix-rapido-card">
       <div id="pix-rapido-body" style="display:none">
@@ -272,43 +267,6 @@ select{appearance:none;-webkit-appearance:none}
 
 
 
-<!-- TRADUTOR -->
-<div class="screen" id="screen-tradutor">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#6D28D9,#4C1D95)">&#x1F524;</div>
-    <h1>Tradutor EN→PT</h1>
-  </div>
-  <div style="padding:16px">
-
-    <!-- Só texto -->
-    <div>
-      <textarea id="trad-texto-input" placeholder="Cole ou digite o texto em inglês aqui..." style="width:100%;min-height:150px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;padding:12px;resize:vertical;box-sizing:border-box;font-family:inherit"></textarea>
-      <button type="button" onclick="tradTexto()" style="width:100%;margin-top:10px;background:#6D28D9;border:none;color:#fff;padding:16px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer">&#x1F310; Traduzir</button>
-      <button type="button" onclick="document.getElementById('trad-texto-input').value='';document.getElementById('trad-resultado').style.display='none'" style="width:100%;margin-top:8px;background:var(--surface2);border:none;color:var(--text2);padding:11px;border-radius:10px;font-size:13px;cursor:pointer">&#x1F5D1; Limpar</button>
-    </div>
-
-    <!-- Loading -->
-    <div id="trad-loading" style="display:none;text-align:center;padding:24px">
-      <div class="spinner" style="margin:0 auto 10px"></div>
-      <div style="color:var(--text2);font-size:14px">Traduzindo...</div>
-    </div>
-
-    <!-- Resultado -->
-    <div id="trad-resultado" style="display:none;margin-top:12px">
-      <div style="background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:10px">
-        <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:1px;margin-bottom:6px">&#x1F1FA;&#x1F1F8; ORIGINAL</div>
-        <div id="trad-original" style="font-size:13px;color:var(--text2);line-height:1.6"></div>
-      </div>
-      <div style="background:linear-gradient(135deg,#1e3a5f,#1e4d6b);border-radius:12px;padding:14px;margin-bottom:10px">
-        <div style="font-size:11px;color:#60A5FA;font-weight:700;letter-spacing:1px;margin-bottom:6px">&#x1F1E7;&#x1F1F7; TRADUÇÃO</div>
-        <div id="trad-traducao" style="font-size:15px;color:#fff;line-height:1.6;font-weight:500"></div>
-      </div>
-      <button type="button" onclick="tradCopiar()" style="width:100%;background:var(--surface2);border:none;color:var(--text);padding:13px;border-radius:10px;font-size:14px;cursor:pointer">&#x1F4CB; Copiar tradução</button>
-    </div>
-
-  </div>
-</div>
 
 <!-- CALCULADORA -->
 <div class="screen" id="screen-calc">
