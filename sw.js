@@ -1,4 +1,4 @@
-const CACHE = 'ooh-v7';
+const CACHE = 'ooh-v8';
 const ASSETS = ['manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -8,13 +8,9 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-      .then(() => self.clients.matchAll({type:'window',includeUncontrolled:true}))
-      .then(clients => clients.forEach(c => {
-        // Force fresh navigation — works even on old pages without message listener
-        c.navigate(c.url);
-      }))
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
   self.clients.claim();
 });

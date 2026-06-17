@@ -269,6 +269,49 @@ select{appearance:none;-webkit-appearance:none}
 
 
 
+<div class="screen" id="screen-veiculos">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#059669,#047857)">&#x26FD;</div>
+    <h1>Veículos</h1>
+  </div>
+
+  <!-- Lista de veículos -->
+  <div id="vei-lista" style="padding:0 16px 12px"></div>
+
+  <!-- Botão adicionar -->
+  <div style="padding:0 16px 16px">
+    <button class="btn btn-success" style="width:100%;gap:8px" onclick="veiAbrirCadastro()">
+      &#x2B; Adicionar veículo
+    </button>
+  </div>
+
+  <!-- Formulário de cadastro (oculto por padrão) -->
+  <div id="vei-form-cadastro" style="display:none;padding:0 16px 24px">
+    <div style="background:var(--surface);border-radius:var(--radius);padding:16px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px">NOVO VEÍCULO</div>
+      <div style="margin-bottom:10px">
+        <label class="lbl">Nome do veículo</label>
+        <input type="text" id="vei-novo-nome" class="inp" placeholder="Ex: Onix, Moto Honda, Ranger...">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="lbl">Combustíveis que usa (toque para selecionar)</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+          <button type="button" class="comb-btn" id="vei-comb-gasolina" onclick="veiToggleComb(this)">⛽ Gasolina</button>
+          <button type="button" class="comb-btn" id="vei-comb-etanol" onclick="veiToggleComb(this)">🌿 Etanol</button>
+          <button type="button" class="comb-btn" id="vei-comb-gnv" onclick="veiToggleComb(this)">💨 GNV</button>
+          <button type="button" class="comb-btn" id="vei-comb-diesel" onclick="veiToggleComb(this)">🛢️ Diesel</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" style="flex:1" onclick="veiFecharCadastro()">Cancelar</button>
+        <button class="btn btn-success" style="flex:2" onclick="veiSalvarCadastro()">&#x2714; Salvar veículo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="screen" id="screen-vei-detalhe">
   <div class="page-head">
     <button class="back-btn" onclick="goTo('veiculos')">&#x2190;</button>
