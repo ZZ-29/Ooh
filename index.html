@@ -2355,10 +2355,22 @@ function pdfEscolherArquivo(){
   input.click();
 }
 
-// Verifica se foi aberto via share target (?pdf=1)
+// Verifica PDF ao abrir (share target ou file handler)
 window.addEventListener('load',function(){
   if(location.search.indexOf('pdf=1')>-1) checkSharedPDF();
 });
+
+// File Handler API — aparece no "Abrir com" do Android
+if('launchQueue' in window){
+  window.launchQueue.setConsumer(async function(params){
+    if(!params.files||!params.files.length) return;
+    try{
+      var fh=params.files[0];
+      var file=await fh.getFile();
+      pdfAbrirBlob(file, file.name);
+    }catch(e){}
+  });
+}
 
 </script>
 
