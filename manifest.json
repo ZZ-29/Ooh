@@ -1,14 +1,20 @@
 {
   "name": "Ooh!",
   "short_name": "Ooh!",
-  "description": "Veja o que você não sabia que precisava",
-  "start_url": "/Ooh/index.html",
-  "scope": "/Ooh/",
+  "start_url": "/Ooh/",
   "display": "standalone",
-  "background_color": "#0F0F14",
-  "theme_color": "#6C3CE1",
+  "background_color": "#0B1120",
+  "theme_color": "#0B1120",
   "icons": [
     {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
     {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
-  ]
+  ],
+  "share_target": {
+    "action": "/Ooh/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [{"name": "pdf", "accept": ["application/pdf", ".pdf"]}]
+    }
+  }
 }

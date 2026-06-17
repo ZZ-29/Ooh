@@ -244,6 +244,11 @@ select{appearance:none;-webkit-appearance:none}
       <div><div class="tool-name">Extras</div><div class="tool-desc">Conversor de unidades, moedas e notas</div></div>
     </div>
   </div>
+  <div class="tool-card" onclick="pdfEscolherArquivo()" style="background:linear-gradient(145deg,#DC2626,#991B1B)">
+    <div class="tool-icon">&#x1F4C4;</div>
+    <div class="tool-name">PDF</div>
+    <div class="tool-desc">Visualizar documentos</div>
+  </div>
   <div style="padding:12px 16px 20px">
     <div class="pix-rapido-card" id="pix-rapido-card">
       <div id="pix-rapido-body" style="display:none">
@@ -384,6 +389,28 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 </div>
 
+
+<!-- PDF VIEWER -->
+<div class="screen" id="screen-pdf">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#DC2626,#991B1B)">&#x1F4C4;</div>
+    <h1 id="pdf-titulo">Documento</h1>
+  </div>
+  <div style="padding:0 16px 16px">
+    <div id="pdf-info" style="font-size:12px;color:var(--text2);margin-bottom:10px;text-align:center"></div>
+    <div id="pdf-loading" style="text-align:center;padding:40px">
+      <div class="spinner" style="margin:0 auto 12px"></div>
+      <div style="color:var(--text2);font-size:14px">Carregando PDF...</div>
+    </div>
+    <div id="pdf-canvas-wrap" style="display:none"></div>
+    <div id="pdf-nav" style="display:none;display:flex;justify-content:space-between;align-items:center;padding:12px 0;margin-top:8px">
+      <button type="button" onclick="pdfPagina(-1)" style="background:var(--surface2);border:none;color:var(--text);padding:10px 20px;border-radius:10px;font-size:14px;cursor:pointer">&#x2190; Anterior</button>
+      <span id="pdf-pag-info" style="font-size:13px;color:var(--text2)"></span>
+      <button type="button" onclick="pdfPagina(1)" style="background:var(--surface2);border:none;color:var(--text);padding:10px 20px;border-radius:10px;font-size:14px;cursor:pointer">Próxima &#x2192;</button>
+    </div>
+  </div>
+</div>
 
 <!-- CALCULADORA -->
 <div class="screen" id="screen-calc">
@@ -2253,7 +2280,87 @@ function veiExcluirVeiculo(){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
+// ===== PDF VIEWER =====
+var pdfDoc=null, pdfPagAtual=1, pdfTotalPags=0;
+
+function pdfAbrirBlob(blob, nome){
+  goTo('pdf');
+  document.getElementById('pdf-titulo').textContent = nome.replace('.pdf','').substring(0,25);
+  document.getElementById('pdf-loading').style.display='block';
+  document.getElementById('pdf-canvas-wrap').style.display='none';
+  document.getElementById('pdf-nav').style.display='none';
+  var url = URL.createObjectURL(blob);
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  pdfjsLib.getDocument(url).promise.then(function(doc){
+    pdfDoc=doc;
+    pdfTotalPags=doc.numPages;
+    pdfPagAtual=1;
+    document.getElementById('pdf-loading').style.display='none';
+    document.getElementById('pdf-canvas-wrap').style.display='block';
+    if(pdfTotalPags>1) document.getElementById('pdf-nav').style.display='flex';
+    pdfRenderPag(1);
+  }).catch(function(){
+    document.getElementById('pdf-loading').innerHTML='<div style="color:#f87171;padding:20px">Erro ao abrir o PDF</div>';
+  });
+}
+
+function pdfRenderPag(n){
+  document.getElementById('pdf-info').textContent='Página '+n+' de '+pdfTotalPags;
+  document.getElementById('pdf-pag-info').textContent=n+' / '+pdfTotalPags;
+  pdfDoc.getPage(n).then(function(page){
+    var wrap=document.getElementById('pdf-canvas-wrap');
+    wrap.innerHTML='';
+    var canvas=document.createElement('canvas');
+    canvas.style.width='100%';
+    canvas.style.borderRadius='8px';
+    wrap.appendChild(canvas);
+    var vp=page.getViewport({scale:1.5});
+    canvas.width=vp.width;
+    canvas.height=vp.height;
+    page.render({canvasContext:canvas.getContext('2d'),viewport:vp});
+  });
+}
+
+function pdfPagina(delta){
+  var nova=pdfPagAtual+delta;
+  if(nova<1||nova>pdfTotalPags) return;
+  pdfPagAtual=nova;
+  pdfRenderPag(nova);
+  document.getElementById('screen-pdf').scrollTop=0;
+}
+
+// Verifica PDF compartilhado ao abrir o app
+async function checkSharedPDF(){
+  if(!('caches' in window)) return;
+  try{
+    var cache=await caches.open('ooh-v9');
+    var resp=await cache.match('/Ooh/shared-pdf');
+    if(resp){
+      var nome=resp.headers.get('X-Filename')||'documento.pdf';
+      var blob=await resp.blob();
+      await cache.delete('/Ooh/shared-pdf');
+      pdfAbrirBlob(blob, nome);
+    }
+  }catch(e){}
+}
+
+// Abre PDF via card (escolher arquivo)
+function pdfEscolherArquivo(){
+  var input=document.createElement('input');
+  input.type='file';input.accept='application/pdf,.pdf';
+  input.onchange=function(){
+    if(input.files&&input.files[0]) pdfAbrirBlob(input.files[0],input.files[0].name);
+  };
+  input.click();
+}
+
+// Verifica se foi aberto via share target (?pdf=1)
+window.addEventListener('load',function(){
+  if(location.search.indexOf('pdf=1')>-1) checkSharedPDF();
+});
+
+</script>
 
 <script>
 if('serviceWorker' in navigator){
