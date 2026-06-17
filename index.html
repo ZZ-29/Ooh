@@ -268,6 +268,80 @@ select{appearance:none;-webkit-appearance:none}
 
 
 
+
+<div class="screen" id="screen-vei-detalhe">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('veiculos')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#059669,#047857)">&#x26FD;</div>
+    <h1 id="vei-detalhe-titulo">Veículo</h1>
+  </div>
+
+  <!-- Resumo chips -->
+  <div style="padding:0 16px 4px">
+    <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:6px">RESUMO</div>
+    <div id="vei-detalhe-resumo" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+  </div>
+
+  <!-- Formulário de abastecimento -->
+  <div style="padding:12px 16px 4px">
+    <div style="background:var(--surface);border-radius:14px;padding:14px 16px;border:1px solid var(--border)">
+      <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:12px">⛽ REGISTRAR ABASTECIMENTO</div>
+
+      <!-- Data + Combustível -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label class="lbl">📅 Data</label>
+          <input type="date" id="abast-data" class="inp">
+        </div>
+        <div>
+          <label class="lbl">🔥 Combustível</label>
+          <select id="abast-comb" class="inp"></select>
+        </div>
+      </div>
+
+      <!-- Litros -->
+      <div style="margin-bottom:8px">
+        <label class="lbl">💧 Quantidade (litros / m³)</label>
+        <input type="number" id="abast-litros" class="inp" placeholder="Ex: 30.50"
+          step="0.01" min="0" oninput="abastCalcTotal()" style="font-size:18px">
+      </div>
+
+      <!-- Preço unitário -->
+      <div style="margin-bottom:8px">
+        <label class="lbl">💲 Preço por litro / m³  (R$)</label>
+        <input type="number" id="abast-preco" class="inp" placeholder="Ex: 5.89"
+          step="0.01" min="0" oninput="abastCalcTotal()" style="font-size:18px">
+      </div>
+
+      <!-- Total calculado em tempo real -->
+      <div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)">
+        <span style="font-size:13px;color:var(--text2)">💰 Total desta abastecida</span>
+        <span id="abast-total-preview" style="font-size:22px;font-weight:800;color:#F8AA22">R$ 0,00</span>
+      </div>
+
+      <!-- Km (opcional) -->
+      <div style="margin-bottom:12px">
+        <label class="lbl">🛣️ Km do odômetro (opcional)</label>
+        <input type="number" id="abast-km" class="inp" placeholder="Ex: 45820" min="0">
+      </div>
+
+      <button class="btn btn-success" style="width:100%;font-size:16px;padding:14px" onclick="abastSalvar()">
+        ✔ Salvar abastecimento
+      </button>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div style="padding:12px 16px 24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--text2);font-weight:700">📋 HISTÓRICO</div>
+      <button onclick="veiExcluirVeiculo()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer">🗑 Excluir veículo</button>
+    </div>
+    <div id="vei-detalhe-hist"></div>
+  </div>
+</div>
+
+
 <!-- CALCULADORA -->
 <div class="screen" id="screen-calc">
   <div class="page-head">
