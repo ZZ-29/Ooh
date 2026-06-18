@@ -1253,7 +1253,7 @@ function scannerPreview(input){
       scannerImg=img;
       document.getElementById('scanner-step1').style.display='none';
       document.getElementById('scanner-step2').style.display='block';
-      scannerSetupCanvas();
+      setTimeout(scannerSetupCanvas,80);
     };
     img.src=e.target.result;
   };
@@ -1263,13 +1263,17 @@ function scannerPreview(input){
 function scannerSetupCanvas(){
   var canvas=document.getElementById('scanner-canvas');
   var maxW=canvas.parentElement.clientWidth-32;
+  if(maxW<=0) maxW=window.innerWidth-32;
+  if(maxW<=0) maxW=320;
   var scale=Math.min(1,maxW/scannerImg.width);
   canvas.width=Math.round(scannerImg.width*scale);
   canvas.height=Math.round(scannerImg.height*scale);
   scannerCanvas=canvas;scannerCtx=canvas.getContext('2d');
-  var m=30;
+  var m=Math.round(Math.min(canvas.width,canvas.height)*0.1);
   scannerCorners=[{x:m,y:m},{x:canvas.width-m,y:m},{x:canvas.width-m,y:canvas.height-m},{x:m,y:canvas.height-m}];
   scannerDraw();
+  canvas.removeEventListener('touchstart',scannerTS);
+  canvas.removeEventListener('touchmove',scannerTM);
   canvas.addEventListener('touchstart',scannerTS,{passive:false});
   canvas.addEventListener('touchmove',scannerTM,{passive:false});
   canvas.addEventListener('touchend',function(){scannerDragging=-1;});
@@ -1298,11 +1302,13 @@ function scannerDraw(){
   for(var i=1;i<4;i++)scannerCtx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
   scannerCtx.closePath();
   scannerCtx.strokeStyle='#6C3CE1';scannerCtx.lineWidth=2.5;scannerCtx.stroke();
-  var clrs=['#FF6B6B','#FFD93D','#6BCB77','#4D96FF'];
+  var clrs=['#FF4444','#FFD93D','#00CC66','#4D96FF'];
   scannerCorners.forEach(function(p,i){
-    scannerCtx.beginPath();scannerCtx.arc(p.x,p.y,14,0,Math.PI*2);
+    scannerCtx.beginPath();scannerCtx.arc(p.x,p.y,22,0,Math.PI*2);
+    scannerCtx.fillStyle='rgba(0,0,0,0.4)';scannerCtx.fill();
+    scannerCtx.beginPath();scannerCtx.arc(p.x,p.y,18,0,Math.PI*2);
     scannerCtx.fillStyle=clrs[i];scannerCtx.fill();
-    scannerCtx.strokeStyle='#fff';scannerCtx.lineWidth=2.5;scannerCtx.stroke();
+    scannerCtx.strokeStyle='#fff';scannerCtx.lineWidth=3;scannerCtx.stroke();
   });
 }
 
@@ -1315,7 +1321,7 @@ function scannerPt(e){
 function scannerTS(e){
   e.preventDefault();
   var pt=scannerPt(e);scannerDragging=-1;
-  scannerCorners.forEach(function(c,i){if(Math.hypot(pt.x-c.x,pt.y-c.y)<28)scannerDragging=i;});
+  scannerCorners.forEach(function(c,i){if(Math.hypot(pt.x-c.x,pt.y-c.y)<40)scannerDragging=i;});
 }
 function scannerTM(e){
   e.preventDefault();if(scannerDragging<0)return;
