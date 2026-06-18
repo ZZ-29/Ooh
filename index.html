@@ -1391,24 +1391,27 @@ function scannerNovo(){
 function scannerSetupCanvas(){
   var cv=document.getElementById('scanner-canvas');
   if(!cv||!scannerImg)return;
+  // Canvas sempre ocupa a tela inteira
   var vW=window.innerWidth, vH=window.innerHeight;
+  cv.width=vW; cv.height=vH;
+  cv.style.cssText='display:block;position:absolute;top:0;left:0;width:'+vW+'px;height:'+vH+'px;z-index:1;pointer-events:none';
+  scannerCv=cv; scannerCtx=cv.getContext('2d');
+  // Calcular onde a imagem fica dentro do canvas (centralizada, mantendo proporção)
   var natW=scannerImg.naturalWidth||scannerImg.width||1;
   var natH=scannerImg.naturalHeight||scannerImg.height||1;
-  var scale=Math.min(vW/natW,vH/natH); // sem cap: imagem sempre preenche a tela
-  var cW=Math.round(natW*scale), cH=Math.round(natH*scale);
-  var offX=Math.round((vW-cW)/2), offY=0;
-  cv.width=cW; cv.height=cH;
-  cv.style.cssText='display:block;position:absolute;top:'+offY+'px;left:'+offX+'px;width:'+cW+'px;height:'+cH+'px;z-index:1;pointer-events:none';
-  scannerCv=cv; scannerCtx=cv.getContext('2d');
-  // Rect inicial: 10% de margem nas bordas, fundo acima da barra de botões
-  var mX=Math.round(cW*0.10), mY=Math.round(cH*0.07);
-  var barPx=Math.round(130*(cH/vH)); if(barPx<90)barPx=90;
-  var botY=cH-barPx-10; if(botY<cH*0.55)botY=Math.round(cH*0.88);
-  // scannerRect: {x1,y1,x2,y2} em coordenadas do canvas
-  scannerRect={x1:mX, y1:mY, x2:cW-mX, y2:botY};
+  var barH=110; // reservar espaço para barra de botões
+  var scale=Math.min(vW/natW,(vH-barH)/natH);
+  var iW=Math.round(natW*scale), iH=Math.round(natH*scale);
+  var iX=Math.round((vW-iW)/2), iY=0;
+  // Guardar para conversão de coords
+  scannerCv._iX=iX; scannerCv._iY=iY;
+  scannerCv._iW=iW; scannerCv._iH=iH;
+  scannerCv._scale=scale;
+  // Rect inicial: 10% de margem dentro da área da imagem
+  var mX=Math.round(iW*0.10), mY=Math.round(iH*0.07);
+  scannerRect={x1:iX+mX, y1:iY+mY, x2:iX+iW-mX, y2:iY+iH-mY};
   scannerDraw();
   // ---- Handles HTML (4 cantos) ----
-  // TL(0)→muda x1,y1  TR(1)→muda x2,y1  BR(2)→muda x2,y2  BL(3)→muda x1,y2
   var hClrs=['#FF4444','#FFD93D','#00CC66','#4D96FF'];
   var handles=[];
   for(var i=0;i<4;i++){
@@ -1421,10 +1424,10 @@ function scannerSetupCanvas(){
   }
   function getHPos(i){
     var r=scannerRect;
-    if(i===0)return{x:offX+r.x1,y:offY+r.y1};
-    if(i===1)return{x:offX+r.x2,y:offY+r.y1};
-    if(i===2)return{x:offX+r.x2,y:offY+r.y2};
-    return       {x:offX+r.x1,y:offY+r.y2};
+    if(i===0)return{x:r.x1,y:r.y1};
+    if(i===1)return{x:r.x2,y:r.y1};
+    if(i===2)return{x:r.x2,y:r.y2};
+    return       {x:r.x1,y:r.y2};
   }
   function posHandles(){
     for(var i=0;i<4;i++){
@@ -1434,38 +1437,34 @@ function scannerSetupCanvas(){
     }
   }
   posHandles();
-  function updateRect(i,clientX,clientY){
-    var cx=Math.max(0,Math.min(cW,clientX-offX));
-    var cy=Math.max(0,Math.min(cH,clientY-offY));
+  function clamp(v,mn,mx){return Math.max(mn,Math.min(mx,v));}
+  function updateRect(i,cx,cy){
     var r=scannerRect;
-    // Cada canto move seus dois eixos, mantendo retângulo
-    if(i===0){r.x1=Math.min(cx,r.x2-20);r.y1=Math.min(cy,r.y2-20);}
-    if(i===1){r.x2=Math.max(cx,r.x1+20);r.y1=Math.min(cy,r.y2-20);}
-    if(i===2){r.x2=Math.max(cx,r.x1+20);r.y2=Math.max(cy,r.y1+20);}
-    if(i===3){r.x1=Math.min(cx,r.x2-20);r.y2=Math.max(cy,r.y1+20);}
+    if(i===0){r.x1=clamp(cx,iX,r.x2-20);r.y1=clamp(cy,iY,r.y2-20);}
+    if(i===1){r.x2=clamp(cx,r.x1+20,iX+iW);r.y1=clamp(cy,iY,r.y2-20);}
+    if(i===2){r.x2=clamp(cx,r.x1+20,iX+iW);r.y2=clamp(cy,r.y1+20,iY+iH);}
+    if(i===3){r.x1=clamp(cx,iX,r.x2-20);r.y2=clamp(cy,r.y1+20,iY+iH);}
     posHandles();
     scannerDraw();
   }
-  // Eventos em cada handle
   for(var _i=0;_i<4;_i++){
     (function(idx){
       var h=handles[idx];
       h.addEventListener('touchstart',function(e){
-        e.preventDefault(); e.stopPropagation();
+        e.preventDefault();e.stopPropagation();
         scannerDragging=idx;
       },{passive:false});
       h.addEventListener('mousedown',function(e){
-        e.preventDefault(); scannerDragging=idx;
+        e.preventDefault();scannerDragging=idx;
       });
     })(_i);
   }
-  // Move/end no document
   if(window._scTM)document.removeEventListener('touchmove',window._scTM);
   if(window._scTE)document.removeEventListener('touchend',window._scTE);
   if(window._scMM)document.removeEventListener('mousemove',window._scMM);
   if(window._scMU)document.removeEventListener('mouseup',window._scMU);
   window._scTM=function(e){
-    if(scannerDragging<0)return; e.preventDefault();
+    if(scannerDragging<0)return;e.preventDefault();
     var t=e.touches[0];
     updateRect(scannerDragging,t.clientX,t.clientY);
   };
@@ -1481,27 +1480,34 @@ function scannerSetupCanvas(){
 
 
 function scannerDraw(){
-  if(!scannerCtx||!scannerRect||!scannerImg)return;
+  if(!scannerCtx||!scannerRect||!scannerImg||!scannerCv._iW)return;
   var ctx=scannerCtx, cv=scannerCv;
   var r=scannerRect;
+  var iX=cv._iX, iY=cv._iY, iW=cv._iW, iH=cv._iH;
   ctx.clearRect(0,0,cv.width,cv.height);
-  ctx.drawImage(scannerImg,0,0,cv.width,cv.height);
-  // Escurecer fora da seleção
-  ctx.fillStyle='rgba(0,0,0,0.5)';
+  // Imagem centralizada no canvas
+  ctx.drawImage(scannerImg,iX,iY,iW,iH);
+  // Escurecer fora do recorte
+  ctx.fillStyle='rgba(0,0,0,0.52)';
   ctx.fillRect(0,0,cv.width,cv.height);
-  // Área clara dentro do retângulo
-  ctx.drawImage(scannerImg,r.x1,r.y1,r.x2-r.x1,r.y2-r.y1,r.x1,r.y1,r.x2-r.x1,r.y2-r.y1);
-  // Borda do recorte
+  // Recortar clipping área
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(r.x1,r.y1,r.x2-r.x1,r.y2-r.y1);
+  ctx.clip();
+  ctx.drawImage(scannerImg,iX,iY,iW,iH);
+  ctx.restore();
+  // Borda roxa
   ctx.strokeStyle='rgba(108,60,225,0.95)'; ctx.lineWidth=2.5;
   ctx.strokeRect(r.x1,r.y1,r.x2-r.x1,r.y2-r.y1);
-  // Linhas de grade (terços)
-  ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=1;
+  // Linhas de grade
+  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1;
   var w=r.x2-r.x1, h=r.y2-r.y1;
   ctx.beginPath();
-  ctx.moveTo(r.x1+w/3,r.y1); ctx.lineTo(r.x1+w/3,r.y2);
-  ctx.moveTo(r.x1+w*2/3,r.y1); ctx.lineTo(r.x1+w*2/3,r.y2);
-  ctx.moveTo(r.x1,r.y1+h/3); ctx.lineTo(r.x2,r.y1+h/3);
-  ctx.moveTo(r.x1,r.y1+h*2/3); ctx.lineTo(r.x2,r.y1+h*2/3);
+  ctx.moveTo(r.x1+w/3,r.y1);ctx.lineTo(r.x1+w/3,r.y2);
+  ctx.moveTo(r.x1+w*2/3,r.y1);ctx.lineTo(r.x1+w*2/3,r.y2);
+  ctx.moveTo(r.x1,r.y1+h/3);ctx.lineTo(r.x2,r.y1+h/3);
+  ctx.moveTo(r.x1,r.y1+h*2/3);ctx.lineTo(r.x2,r.y1+h*2/3);
   ctx.stroke();
 }
 
@@ -1516,13 +1522,15 @@ function processarScan(tipo,btn){
   setTimeout(function(){
     try{
       var r=scannerRect;
-      var cW=scannerCv.width, cH=scannerCv.height;
+      // Converter coords canvas → imagem original usando iX,iY,scale
+      var iX=scannerCv._iX||0, iY=scannerCv._iY||0;
+      var sc=scannerCv._scale||1;
       var natW=scannerImg.naturalWidth||scannerImg.width;
       var natH=scannerImg.naturalHeight||scannerImg.height;
-      var scX=natW/cW, scY=natH/cH;
-      // Coordenadas no espaço da imagem original
-      var sx=Math.round(r.x1*scX), sy=Math.round(r.y1*scY);
-      var sw=Math.round((r.x2-r.x1)*scX), sh=Math.round((r.y2-r.y1)*scY);
+      var sx=Math.max(0,Math.round((r.x1-iX)/sc));
+      var sy=Math.max(0,Math.round((r.y1-iY)/sc));
+      var sw=Math.min(Math.round((r.x2-r.x1)/sc),natW-sx);
+      var sh=Math.min(Math.round((r.y2-r.y1)/sc),natH-sy);
       if(sw<10||sh<10)throw new Error('Área muito pequena');
       // Garantir tamanho mínimo de 900px na maior dimensão
       var minPx=900;
@@ -2655,7 +2663,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v19');
+    var cache=await caches.open('ooh-v20');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
