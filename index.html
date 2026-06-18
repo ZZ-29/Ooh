@@ -1708,10 +1708,24 @@ function salvarScannerPDF(){
     var doc=new window.jspdf.jsPDF({orientation:orient,unit:'px',format:[W,H]});
     doc.addImage(imgData,'JPEG',0,0,W,H);
     var nome='scan_'+Date.now()+'.pdf';
-    // output('blob') é síncrono no jsPDF v2
+    // Tentar Web Share com arquivo PDF
     var blob=doc.output('blob');
-    _scanShare(blob,nome);
-    toast('📄 PDF gerado!',3000);
+    var file=new File([blob],nome,{type:'application/pdf'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'Documento PDF'})
+        .then(function(){toast('📄 PDF compartilhado!',3000);})
+        .catch(function(e){
+          if(e.name!=='AbortError'){
+            // Fallback: download direto
+            doc.save(nome);
+            toast('📄 PDF salvo!',3000);
+          }
+        });
+    } else {
+      // Download direto para pasta Downloads
+      doc.save(nome);
+      toast('📄 PDF salvo em Downloads!',3000);
+    }
   }catch(e){toast('Erro PDF: '+e.message,4000);}
 }
 
@@ -2607,7 +2621,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v28');
+    var cache=await caches.open('ooh-v29');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
