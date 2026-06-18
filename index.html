@@ -1673,7 +1673,8 @@ function scannerSalvarGaleria(){
       a.click();
       document.body.removeChild(a);
       setTimeout(function(){URL.revokeObjectURL(url);},3000);
-      toast('📥 Salvo! Abra a Galeria → Downloads',3500);
+      toast('📥 Salvo em Downloads!',2000);
+      setTimeout(function(){scannerNovo();},2200);
     }catch(e){
       toast('Erro ao salvar: '+e.message,4000);
     }
@@ -2628,7 +2629,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v32');
+    var cache=await caches.open('ooh-v33');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
