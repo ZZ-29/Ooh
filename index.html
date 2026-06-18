@@ -837,7 +837,8 @@ select{appearance:none;-webkit-appearance:none}
     <img id="scanner-result-img" style="width:100%;border-radius:10px;margin-bottom:14px;display:none">
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost" style="flex:1" onclick="scannerNovo()">&#x21A9; Novo scan</button>
-      <button class="btn btn-primary" style="flex:1" onclick="salvarScannerPDF()">&#x1F4BE; Salvar PDF</button>
+      <button class="btn btn-primary" style="flex:1" onclick="scannerCompartilhar()">&#x1F4E4; Compartilhar</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="salvarScannerPDF()">&#x1F4BE; PDF</button>
     </div>
   </div>
 </div>
@@ -1429,6 +1430,16 @@ function salvarScannerPDF(){
     pdf.save('scan_'+Date.now()+'.pdf');
     toast('PDF salvo!');
   }catch(e){toast('Erro ao salvar: '+e.message);}
+}
+
+function scannerCompartilhar(){
+  if(!scannerResultCanvas){toast('Nenhum scan disponível');return;}
+  if(!navigator.share||!navigator.canShare){toast('Compartilhamento não disponível neste browser');return;}
+  scannerResultCanvas.toBlob(function(blob){
+    var file=new File([blob],'scan_'+Date.now()+'.jpg',{type:'image/jpeg'});
+    if(!navigator.canShare({files:[file]})){toast('Este device não suporta compartilhar imagens');return;}
+    navigator.share({files:[file],title:'Scan Ooh!'}).catch(function(e){if(e.name!=='AbortError')toast('Erro: '+e.message);});
+  },'image/jpeg',.92);
 }
 
 function scannerNovo(){
