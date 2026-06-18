@@ -1269,8 +1269,10 @@ function scannerSetupCanvas(){
   var maxW=canvas.parentElement.clientWidth-32;
   if(maxW<=0) maxW=window.innerWidth-32;
   if(maxW<=0) maxW=320;
+  var maxH=window.innerHeight-260;
+  if(maxH<200) maxH=200;
   toast('✂️ Recorte pronto! Arraste os pontos',4000);
-  var scale=Math.min(1,maxW/scannerImg.width);
+  var scale=Math.min(1,maxW/scannerImg.width,maxH/scannerImg.height);
   canvas.width=Math.round(scannerImg.width*scale);
   canvas.height=Math.round(scannerImg.height*scale);
   scannerCanvas=canvas;scannerCtx=canvas.getContext('2d');
