@@ -811,18 +811,18 @@ select{appearance:none;-webkit-appearance:none}
     </div>
   </div>
 
-  <!-- Step 2: Ajustar cantos -->
-  <div id="scanner-step2" style="display:none;padding:0 16px">
-    <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:8px">&#x1F449; Arraste os pontos coloridos para os <strong style="color:#fff">cantos do documento</strong></p>
-    <canvas id="scanner-canvas" style="display:block;margin:0 auto;border-radius:10px;touch-action:none"></canvas>
-    <div style="margin-top:14px">
-      <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saída:</p>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button class="scan-btn-tipo" onclick="processarScan('color',this)">&#x1F3A8; Colorido</button>
+  <!-- Step 2: Tela cheia tipo scanner -->
+  <div id="scanner-step2" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:#000;flex-direction:column">
+    <canvas id="scanner-canvas" style="display:block;touch-action:none;flex:1"></canvas>
+    <!-- Barra de ações flutuante no fundo -->
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px 24px;background:linear-gradient(transparent,rgba(0,0,0,0.85));display:flex;flex-direction:column;gap:10px">
+      <p style="color:rgba(255,255,255,0.7);font-size:12px;text-align:center;margin:0">Arraste os pontos para os cantos do documento</p>
+      <div style="display:flex;gap:8px">
+        <button class="scan-btn-tipo" onclick="processarScan('color',this)">&#x1F3A8; Cor</button>
         <button class="scan-btn-tipo" onclick="processarScan('pb',this)">&#x26AB; P&amp;B</button>
         <button class="scan-btn-tipo sel" onclick="processarScan('doc',this)">&#x1F4C4; Documento</button>
+        <button class="btn btn-ghost" style="flex:0 0 auto;padding:10px 14px" onclick="scannerNovo()">&#x2190;</button>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="scannerNovo()" style="width:100%">&#x2190; Nova foto</button>
     </div>
   </div>
 
@@ -1264,9 +1264,9 @@ function scannerPreview(input){
 
 function scannerSetupCanvas(){
   var cv=document.getElementById('scanner-canvas');
-  var availW=window.innerWidth-32;
-  var availH=window.innerHeight-240;
-  if(availH<150)availH=150;
+  // Tela cheia: usar dimensões totais da viewport menos barra de ações (110px)
+  var availW=window.innerWidth;
+  var availH=window.innerHeight-110;
   var natW=scannerImg.naturalWidth||scannerImg.width;
   var natH=scannerImg.naturalHeight||scannerImg.height;
   var scale=Math.min(availW/natW,availH/natH,1);
@@ -1274,6 +1274,7 @@ function scannerSetupCanvas(){
   var cH=Math.round(natH*scale);
   cv.width=cW; cv.height=cH;
   cv.style.width=cW+'px'; cv.style.height=cH+'px';
+  cv.style.maxWidth='100vw';
   scannerCv=cv; scannerCtx=cv.getContext('2d');
   var m=Math.round(Math.min(cW,cH)*0.08);
   scannerCorners=[{x:m,y:m},{x:cW-m,y:m},{x:cW-m,y:cH-m},{x:m,y:cH-m}];
