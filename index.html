@@ -1260,7 +1260,7 @@ preencherUnidades();
 
 // ===== SCANNER =====
 // ===== SCANNER =====
-var scannerImg=null,scannerResultCanvas=null,scannerRect=null;
+var scannerImg=null,scannerResultCanvas=null,scannerResultBlob=null,scannerRect=null;
 var scannerCtx=null,scannerCv=null,scannerDragging=-1,scannerStream=null;
 
 function scannerAbrirCamera(){
@@ -1297,7 +1297,7 @@ function scannerVoltarCamera(){
 
 function scannerNovo(){
   scannerFecharCamera();
-  scannerImg=null; scannerResultCanvas=null; scannerRect=null;
+  scannerImg=null; scannerResultCanvas=null; scannerResultBlob=null; scannerRect=null;
   scannerCv=null; scannerCtx=null; scannerDragging=-1;
   // Recriar file inputs para destravar câmera no Android
   document.querySelectorAll('#scanner-step1 input[type=file]').forEach(function(fi){
@@ -1501,6 +1501,9 @@ function processarScan(tipo,btn){
         ctx.putImageData(id,0,0);
       }
       scannerResultCanvas=out;
+      // Pré-gerar blob para salvar sem async (preserva user gesture no Android)
+      scannerResultBlob=null;
+      out.toBlob(function(b){scannerResultBlob=b;},'image/jpeg',0.95);
       var ri=document.getElementById('scanner-result-img');
       ri.src=out.toDataURL('image/jpeg',0.95);
       ri.style.display='block';
@@ -1657,18 +1660,26 @@ function scannerCompartilhar(){
 
 function scannerSalvarGaleria(){
   if(!scannerResultCanvas){toast('Nenhum scan',3000);return;}
-  scannerResultCanvas.toBlob(function(blob){
-    var nome='scan_'+Date.now()+'.jpg';
+  var nome='scan_'+Date.now()+'.jpg';
+  function _doShare(blob){
     var file=new File([blob],nome,{type:'image/jpeg'});
-    // Android: Web Share com arquivo abre "Salvar em Fotos" no share sheet
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       navigator.share({files:[file],title:'Documento digitalizado'})
-        .then(function(){toast('✅ Imagem compartilhada/salva!',3000);})
+        .then(function(){toast('✅ Salvo na galeria!',3000);})
         .catch(function(e){if(e.name!=='AbortError')_scanDownload(blob,nome);});
     } else {
       _scanDownload(blob,nome);
     }
-  },'image/jpeg',0.95);
+  }
+  // Usar blob pré-gerado (síncrono ao user gesture — necessário no Android PWA)
+  if(scannerResultBlob){
+    _doShare(scannerResultBlob);
+  } else {
+    scannerResultCanvas.toBlob(function(blob){
+      scannerResultBlob=blob;
+      _doShare(blob);
+    },'image/jpeg',0.95);
+  }
 }
 
 function _scanDownload(blob,nome){
@@ -2596,7 +2607,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v21');
+    var cache=await caches.open('ooh-v22');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
