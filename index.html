@@ -813,7 +813,7 @@ select{appearance:none;-webkit-appearance:none}
   <!-- Step 2: Ajustar cantos -->
   <div id="scanner-step2" style="display:none;padding:0 16px">
     <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:8px">&#x1F449; Arraste os pontos coloridos para os <strong style="color:#fff">cantos do documento</strong></p>
-    <canvas id="scanner-canvas" style="width:100%;max-height:calc(100vh - 270px);touch-action:none;border-radius:10px;display:block"></canvas>
+    <canvas id="scanner-canvas" style="touch-action:none;border-radius:10px;display:block"></canvas>
     <div style="margin-top:14px">
       <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saida:</p>
       <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -1275,6 +1275,10 @@ function scannerSetupCanvas(){
   var scale=Math.min(1,maxW/scannerImg.width,maxH/scannerImg.height);
   canvas.width=Math.round(scannerImg.width*scale);
   canvas.height=Math.round(scannerImg.height*scale);
+  canvas.style.width=canvas.width+'px';
+  canvas.style.height=canvas.height+'px';
+  canvas.style.maxWidth='100%';
+  canvas.style.maxHeight='';
   scannerCanvas=canvas;scannerCtx=canvas.getContext('2d');
   var m=Math.round(Math.min(canvas.width,canvas.height)*0.1);
   scannerCorners=[{x:m,y:m},{x:canvas.width-m,y:m},{x:canvas.width-m,y:canvas.height-m},{x:m,y:canvas.height-m}];
