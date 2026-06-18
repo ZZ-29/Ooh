@@ -988,7 +988,7 @@ function goTo(s){
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
-  if(s==='cal'){try{calInit();}catch(e){toast('Erro agenda: '+e.message,4000);}}
+  if(s==='cal'){try{calInit();}catch(e){alert('Erro agenda: '+e.message);}}
   if(s==='scanner')setTimeout(scannerNovo,0);
 }
 
