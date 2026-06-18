@@ -788,36 +788,20 @@ select{appearance:none;-webkit-appearance:none}
 
 <!-- SCANNER -->
 <div class="screen" id="screen-scanner">
-  <!-- Step 1: Câmera ao vivo - tela cheia -->
-  <div id="scanner-step1" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:#000">
-    <video id="scanner-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block"></video>
-    <!-- Guia de enquadramento -->
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-58%);width:84%;height:62%;pointer-events:none">
-      <div style="position:absolute;top:-2px;left:-2px;width:28px;height:28px;border-top:4px solid #6C3CE1;border-left:4px solid #6C3CE1;border-radius:3px 0 0 0"></div>
-      <div style="position:absolute;top:-2px;right:-2px;width:28px;height:28px;border-top:4px solid #6C3CE1;border-right:4px solid #6C3CE1;border-radius:0 3px 0 0"></div>
-      <div style="position:absolute;bottom:-2px;left:-2px;width:28px;height:28px;border-bottom:4px solid #6C3CE1;border-left:4px solid #6C3CE1;border-radius:0 0 0 3px"></div>
-      <div style="position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;border-bottom:4px solid #6C3CE1;border-right:4px solid #6C3CE1;border-radius:0 0 3px 0"></div>
-    </div>
-    <!-- Barra topo -->
-    <div style="position:absolute;top:0;left:0;right:0;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(rgba(0,0,0,0.55),transparent)">
-      <button type="button" onclick="scannerFecharCamera();goTo('home')" style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.3);color:#fff;width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer">&#x2715;</button>
-      <span style="color:#fff;font-weight:700;font-size:16px">&#x1F4C3; Scanner</span>
-      <label style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.3);color:#fff;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px">
-        &#x1F5BC;<input type="file" id="scanner-file-input" accept="image/*" style="display:none" onchange="scannerPreviewFile(this)">
-      </label>
-    </div>
-    <!-- Botão captura -->
-    <div style="position:absolute;bottom:44px;left:0;right:0;display:flex;justify-content:center;align-items:center">
-      <button type="button" onclick="scannerCapturar()" style="width:76px;height:76px;border-radius:50%;background:#fff;border:5px solid rgba(255,255,255,0.4);cursor:pointer;font-size:30px;display:flex;align-items:center;justify-content:center">&#x1F4F7;</button>
-    </div>
-    <!-- Fallback câmera indisponível -->
-    <div id="scanner-no-cam" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:#0B1120;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px">
-      <div style="font-size:56px">&#x1F4F5;</div>
-      <p style="color:#fff;font-weight:700;font-size:18px;text-align:center">Câmera indisponível</p>
-      <p style="color:var(--text2);font-size:14px;text-align:center">Selecione uma imagem da galeria</p>
-      <label class="btn btn-primary" style="cursor:pointer">&#x1F5BC; Abrir Galeria<input type="file" accept="image/*" style="display:none" onchange="scannerPreviewFile(this)"></label>
-      <button type="button" class="btn btn-ghost" onclick="scannerFecharCamera();goTo('home')">&#x2190; Voltar</button>
-    </div>
+  <!-- Step 1: Capturar foto via câmera nativa ou galeria -->
+  <div id="scanner-step1" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:#0B1120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px">
+    <button type="button" onclick="goTo('home')" style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,0.08);border:none;color:#fff;width:42px;height:42px;border-radius:50%;font-size:20px;cursor:pointer">&#x2190;</button>
+    <div style="font-size:64px">&#x1F4C3;</div>
+    <p style="color:#fff;font-weight:700;font-size:20px;margin:0">Scanner</p>
+    <p style="color:var(--text2);font-size:14px;text-align:center;margin:0">Fotografe o documento para recortar e salvar</p>
+    <label style="width:100%;max-width:320px;padding:18px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;font-size:18px;font-weight:700;text-align:center;cursor:pointer;display:block">
+      📷 Tirar Foto
+      <input type="file" accept="image/*" capture="environment" style="display:none" onchange="scannerPreviewFile(this)">
+    </label>
+    <label style="width:100%;max-width:320px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:16px;font-weight:600;text-align:center;cursor:pointer;display:block">
+      🖼️ Escolher da Galeria
+      <input type="file" accept="image/*" style="display:none" onchange="scannerPreviewFile(this)">
+    </label>
   </div>
 
   <!-- Step 2: Crop tela cheia -->
@@ -1277,28 +1261,10 @@ preencherUnidades();
 // ===== SCANNER =====
 // ===== SCANNER =====
 var scannerImg=null,scannerResultCanvas=null,scannerRect=null;
-var scannerCtx=null,scannerCv=null,scannerDragging=-1;
-var scannerStream=null;
+var scannerCtx=null,scannerCv=null,scannerDragging=-1,scannerStream=null;
 
 function scannerAbrirCamera(){
-  var video=document.getElementById('scanner-video');
-  if(!video)return;
-  var nocam=document.getElementById('scanner-no-cam');
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    if(nocam)nocam.style.display='flex';
-    return;
-  }
-  navigator.mediaDevices.getUserMedia({
-    video:{facingMode:{ideal:'environment'}}
-  }).then(function(stream){
-    scannerStream=stream;
-    video.srcObject=stream;
-    video.play().catch(function(){});
-    if(nocam)nocam.style.display='none';
-  }).catch(function(e){
-    if(nocam)nocam.style.display='flex';
-    console.log('Camera err:',e.message);
-  });
+  // Câmera nativa via input file — não precisa getUserMedia
 }
 
 function scannerFecharCamera(){
@@ -1306,38 +1272,6 @@ function scannerFecharCamera(){
     scannerStream.getTracks().forEach(function(t){try{t.stop();}catch(ex){}});
     scannerStream=null;
   }
-  var video=document.getElementById('scanner-video');
-  if(video)try{video.srcObject=null;}catch(ex){}
-}
-
-function scannerCapturar(){
-  var video=document.getElementById('scanner-video');
-  if(!video||!video.videoWidth){toast('Câmera não pronta',3000);return;}
-  var vw=video.videoWidth, vh=video.videoHeight;
-  var tmp=document.createElement('canvas');
-  // Android envia vídeo em landscape mesmo com celular em portrait → rotacionar
-  var screenPortrait=window.innerWidth<window.innerHeight;
-  var videoLandscape=vw>vh*1.2;
-  if(screenPortrait&&videoLandscape){
-    // Rotacionar 90° no sentido horário
-    tmp.width=vh; tmp.height=vw;
-    var ctx=tmp.getContext('2d');
-    ctx.translate(vh,0);
-    ctx.rotate(Math.PI/2);
-    ctx.drawImage(video,0,0,vw,vh);
-  } else {
-    tmp.width=vw; tmp.height=vh;
-    tmp.getContext('2d').drawImage(video,0,0);
-  }
-  scannerFecharCamera();
-  var img=new Image();
-  img.onload=function(){
-    scannerImg=img;
-    document.getElementById('scanner-step1').style.display='none';
-    document.getElementById('scanner-step2').style.display='block';
-    setTimeout(scannerSetupCanvas,60);
-  };
-  img.src=tmp.toDataURL('image/jpeg',0.96);
 }
 
 function scannerPreviewFile(input){
@@ -1365,6 +1299,12 @@ function scannerNovo(){
   scannerFecharCamera();
   scannerImg=null; scannerResultCanvas=null; scannerRect=null;
   scannerCv=null; scannerCtx=null; scannerDragging=-1;
+  // Recriar file inputs para destravar câmera no Android
+  document.querySelectorAll('#scanner-step1 input[type=file]').forEach(function(fi){
+    var nf=fi.cloneNode(false); nf.onchange=null;
+    nf.addEventListener('change',function(){scannerPreviewFile(this);});
+    fi.parentNode.replaceChild(nf,fi);
+  });
   var s1=document.getElementById('scanner-step1');
   var s2=document.getElementById('scanner-step2');
   var s3=document.getElementById('scanner-step3');
@@ -1378,14 +1318,7 @@ function scannerNovo(){
   try{document.getElementById('scanner-no-cam').style.display='none';}catch(e){}
   // Esconder handles
   for(var _i=0;_i<4;_i++){try{document.getElementById('sc-h'+_i).style.display='none';}catch(e){}}
-  // Recriar file input da galeria para destravar Android
-  try{
-    var fi=document.getElementById('scanner-file-input');
-    var nf=fi.cloneNode(false); nf.onchange=null;
-    nf.addEventListener('change',function(){scannerPreviewFile(this);});
-    fi.parentNode.replaceChild(nf,fi);
-  }catch(e){}
-  scannerAbrirCamera();
+
 }
 
 function scannerSetupCanvas(){
@@ -2663,7 +2596,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v20');
+    var cache=await caches.open('ooh-v21');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
