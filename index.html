@@ -470,6 +470,54 @@ select{appearance:none;-webkit-appearance:none}
 </div>
 
 <!-- TEMPO -->
+<div class="screen" id="screen-cal">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(135deg,#0f2027,#1a3a2a)">&#x1F4C5;</div>
+    <h1>Agenda</h1>
+  </div>
+  <div style="padding:0 12px 80px">
+    <!-- Navegação mês -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:10px 4px 0">
+      <button onclick="calMes(-1)" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer">&#x2039;</button>
+      <button onclick="calAbrirNavMesAno()" style="background:none;border:none;color:#fff;font-size:18px;font-weight:700;cursor:pointer;letter-spacing:0.5px" id="cal-titulo"></button>
+      <button onclick="calMes(1)" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer">&#x203a;</button>
+    </div>
+    <!-- Dias da semana -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px" id="cal-semana"></div>
+    <!-- Grade de dias -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px" id="cal-grade"></div>
+    <!-- Eventos do mês -->
+    <div id="cal-eventos" style="margin-top:16px"></div>
+  </div>
+  <!-- Modal nota -->
+  <div id="cal-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:24px">
+    <div style="background:#131C2E;border:1px solid rgba(108,60,225,0.4);border-radius:18px;padding:20px;width:100%;max-width:340px">
+      <div style="color:#fff;font-weight:700;font-size:16px;margin-bottom:12px" id="cal-modal-titulo"></div>
+      <textarea id="cal-modal-input" style="width:100%;min-height:80px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:14px;padding:10px;resize:none;font-family:inherit" placeholder="Anotação para este dia..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button onclick="calSalvarNota()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6C3CE1,#2563EB);border:none;color:#fff;font-weight:700;border-radius:10px;font-size:14px;cursor:pointer">Salvar</button>
+        <button onclick="calFecharModal()" style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:none;color:#fff;border-radius:10px;font-size:14px;cursor:pointer">Cancelar</button>
+      </div>
+      <button onclick="calApagarNota()" id="cal-modal-apagar" style="display:none;width:100%;margin-top:8px;padding:10px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:10px;font-size:13px;cursor:pointer">Apagar anotação</button>
+    </div>
+  </div>
+  <!-- Nav mês/ano -->
+  <div id="cal-nav-mesano" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:24px">
+    <div style="background:#131C2E;border:1px solid rgba(108,60,225,0.4);border-radius:18px;padding:20px;width:100%;max-width:320px">
+      <div style="color:#fff;font-weight:700;font-size:16px;margin-bottom:16px;text-align:center">Ir para...</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <select id="cal-sel-mes" style="flex:1;background:#0B1120;border:1px solid rgba(255,255,255,0.15);color:#fff;padding:10px;border-radius:10px;font-size:14px"></select>
+        <select id="cal-sel-ano" style="width:90px;background:#0B1120;border:1px solid rgba(255,255,255,0.15);color:#fff;padding:10px;border-radius:10px;font-size:14px"></select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="calIrParaMesAno()" style="flex:1;padding:12px;background:linear-gradient(135deg,#6C3CE1,#2563EB);border:none;color:#fff;font-weight:700;border-radius:10px;cursor:pointer">Ir</button>
+        <button onclick="document.getElementById('cal-nav-mesano').style.display='none'" style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:none;color:#fff;border-radius:10px;cursor:pointer">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="screen" id="screen-tempo">
   <div class="page-head">
     <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
@@ -927,6 +975,7 @@ function goTo(s){
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
+  if(s==='cal'){calInit();}
   if(s==='scanner')setTimeout(scannerNovo,0);
 }
 
@@ -2636,7 +2685,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v35');
+    var cache=await caches.open('ooh-v36');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
@@ -2827,6 +2876,126 @@ function calcRenderHist(){
 function calcClearHist(){calcHistArr=[];calcRenderHist();}
 
 
+
+
+// ===== AGENDA / CALENDÁRIO =====
+var calAno, calMesAtual, calDiaSel=null;
+var calMeses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var calSemDias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function calInit(){
+  var hoje=new Date();
+  calAno=hoje.getFullYear(); calMesAtual=hoje.getMonth();
+  calRender();
+}
+
+function calMes(dir){
+  calMesAtual+=dir;
+  if(calMesAtual>11){calMesAtual=0;calAno++;}
+  if(calMesAtual<0){calMesAtual=11;calAno--;}
+  calRender();
+}
+
+function calRender(){
+  var titulo=document.getElementById('cal-titulo');
+  var grade=document.getElementById('cal-grade');
+  var semana=document.getElementById('cal-semana');
+  if(!titulo||!grade)return;
+  titulo.textContent=calMeses[calMesAtual]+' '+calAno;
+  // Cabeçalho dias semana
+  semana.innerHTML=calSemDias.map(function(d){
+    return '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;padding:4px 0">'+d+'</div>';
+  }).join('');
+  // Dias do mês
+  var hoje=new Date(); var hd=hoje.getDate(),hm=hoje.getMonth(),ha=hoje.getFullYear();
+  var primeiroDia=new Date(calAno,calMesAtual,1).getDay();
+  var totalDias=new Date(calAno,calMesAtual+1,0).getDate();
+  var html='';
+  for(var i=0;i<primeiroDia;i++) html+='<div></div>';
+  for(var d=1;d<=totalDias;d++){
+    var chave='cal_'+calAno+'_'+calMesAtual+'_'+d;
+    var nota=localStorage.getItem(chave);
+    var ehHoje=(d===hd&&calMesAtual===hm&&calAno===ha);
+    var bg=ehHoje?'background:linear-gradient(135deg,#6C3CE1,#2563EB);':'background:rgba(255,255,255,0.05);';
+    var dot=nota?'<div style="width:5px;height:5px;background:#10B981;border-radius:50%;margin:1px auto 0"></div>':'';
+    html+='<div onclick="calAbrirDia('+d+')" style="'+bg+'border-radius:10px;padding:6px 2px;text-align:center;cursor:pointer;min-height:42px">'
+      +'<span style="font-size:14px;font-weight:'+(ehHoje?'700':'500')+';color:#fff">'+d+'</span>'+dot+'</div>';
+  }
+  grade.innerHTML=html;
+  calRenderEventos();
+}
+
+function calRenderEventos(){
+  var el=document.getElementById('cal-eventos');
+  if(!el)return;
+  var totalDias=new Date(calAno,calMesAtual+1,0).getDate();
+  var itens=[];
+  for(var d=1;d<=totalDias;d++){
+    var nota=localStorage.getItem('cal_'+calAno+'_'+calMesAtual+'_'+d);
+    if(nota) itens.push({d:d,nota:nota});
+  }
+  if(!itens.length){el.innerHTML='<p style="color:rgba(255,255,255,0.3);font-size:13px;text-align:center;padding:8px 0">Nenhuma anotação neste mês</p>';return;}
+  el.innerHTML='<p style="color:rgba(255,255,255,0.5);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Anotações</p>'
+    +itens.map(function(i){
+      return '<div onclick="calAbrirDia('+i.d+')" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer">'
+        +'<span style="color:#10B981;font-weight:700;font-size:13px">'+i.d+' de '+calMeses[calMesAtual]+'</span>'
+        +'<p style="color:rgba(255,255,255,0.8);font-size:13px;margin-top:3px">'+i.nota+'</p></div>';
+    }).join('');
+}
+
+function calAbrirDia(d){
+  calDiaSel=d;
+  var chave='cal_'+calAno+'_'+calMesAtual+'_'+d;
+  var nota=localStorage.getItem(chave)||'';
+  document.getElementById('cal-modal-titulo').textContent=d+' de '+calMeses[calMesAtual]+' de '+calAno;
+  document.getElementById('cal-modal-input').value=nota;
+  document.getElementById('cal-modal-apagar').style.display=nota?'block':'none';
+  var m=document.getElementById('cal-modal');
+  m.style.display='flex';
+}
+
+function calSalvarNota(){
+  if(calDiaSel===null)return;
+  var val=document.getElementById('cal-modal-input').value.trim();
+  var chave='cal_'+calAno+'_'+calMesAtual+'_'+calDiaSel;
+  if(val) localStorage.setItem(chave,val);
+  else localStorage.removeItem(chave);
+  calFecharModal(); calRender();
+  toast('Anotação salva!',2000);
+}
+
+function calApagarNota(){
+  if(calDiaSel===null)return;
+  localStorage.removeItem('cal_'+calAno+'_'+calMesAtual+'_'+calDiaSel);
+  calFecharModal(); calRender();
+  toast('Anotação apagada',2000);
+}
+
+function calFecharModal(){
+  document.getElementById('cal-modal').style.display='none';
+  calDiaSel=null;
+}
+
+function calAbrirNavMesAno(){
+  var sm=document.getElementById('cal-sel-mes');
+  var sa=document.getElementById('cal-sel-ano');
+  sm.innerHTML=calMeses.map(function(m,i){
+    return '<option value="'+i+'"'+(i===calMesAtual?' selected':'')+'>'+m+'</option>';
+  }).join('');
+  sa.innerHTML='';
+  var anoAtual=new Date().getFullYear();
+  for(var a=anoAtual-5;a<=anoAtual+5;a++){
+    sa.innerHTML+='<option value="'+a+'"'+(a===calAno?' selected':'')+'>'+a+'</option>';
+  }
+  document.getElementById('cal-nav-mesano').style.display='flex';
+}
+
+function calIrParaMesAno(){
+  calMesAtual=parseInt(document.getElementById('cal-sel-mes').value);
+  calAno=parseInt(document.getElementById('cal-sel-ano').value);
+  document.getElementById('cal-nav-mesano').style.display='none';
+  calRender();
+}
 
 // ===== TRADUTOR =====
 
