@@ -795,7 +795,7 @@ select{appearance:none;-webkit-appearance:none}
     <p style="color:#fff;font-weight:700;font-size:20px;margin:0">Scanner</p>
     <p style="color:var(--text2);font-size:14px;text-align:center;margin:0">Fotografe o documento para recortar e salvar</p>
     <label style="width:100%;max-width:320px;padding:18px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;font-size:18px;font-weight:700;text-align:center;cursor:pointer;display:block">
-      📷 Tirar Foto
+      📷 Scanear
       <input type="file" accept="image/*" capture="environment" style="display:none" onchange="scannerPreviewFile(this)">
     </label>
     <label style="width:100%;max-width:320px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:16px;font-weight:600;text-align:center;cursor:pointer;display:block">
@@ -1329,20 +1329,19 @@ function scannerSetupCanvas(){
   var natW=scannerImg.naturalWidth||scannerImg.width||1;
   var natH=scannerImg.naturalHeight||scannerImg.height||1;
   var barH=110;
-  // Cover: imagem preenche toda a tela (pode ultrapassar as bordas)
-  var scale=Math.max(vW/natW,(vH-barH)/natH);
+  // Contain: imagem inteira visível, centralizada horizontal e verticalmente
+  var availH=vH-barH;
+  var scale=Math.min(vW/natW, availH/natH);
   var iW=Math.round(natW*scale), iH=Math.round(natH*scale);
-  var iX=Math.round((vW-iW)/2);   // negativo se imagem mais larga que tela
-  var iY=Math.round(((vH-barH)-iH)/2); // negativo se imagem mais alta que tela
+  var iX=Math.round((vW-iW)/2);       // centralizado horizontalmente
+  var iY=Math.round((availH-iH)/2);   // centralizado verticalmente
   // Guardar para conversão de coords
   scannerCv._iX=iX; scannerCv._iY=iY;
   scannerCv._iW=iW; scannerCv._iH=iH;
   scannerCv._scale=scale;
-  // Rect inicial: margem dentro da área visível (não no overflow)
-  var visX1=Math.max(0,iX), visY1=Math.max(0,iY);
-  var visX2=Math.min(vW,iX+iW), visY2=Math.min(vH-barH,iY+iH);
-  var mX=Math.round((visX2-visX1)*0.08), mY=Math.round((visY2-visY1)*0.06);
-  scannerRect={x1:visX1+mX, y1:visY1+mY, x2:visX2-mX, y2:visY2-mY};
+  // Rect inicial: 8% de margem dentro da imagem
+  var mX=Math.round(iW*0.08), mY=Math.round(iH*0.06);
+  scannerRect={x1:iX+mX, y1:iY+mY, x2:iX+iW-mX, y2:iY+iH-mY};
   scannerDraw();
   // ---- Handles HTML (4 cantos) ----
   var hClrs=['#FF4444','#FFD93D','#00CC66','#4D96FF'];
@@ -2607,7 +2606,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v25');
+    var cache=await caches.open('ooh-v26');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
@@ -2650,7 +2649,7 @@ if('launchQueue' in window){
 <!-- ===== BANNERS DE INSTALAÇÃO ===== -->
 <div id="android-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 12px);background:linear-gradient(135deg,#1a1040,#0D1525);border-top:1px solid rgba(108,60,225,0.4);box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
   <div style="display:flex;align-items:center;gap:12px">
-    <span style="font-size:32px;flex-shrink:0">🌟</span>
+    <span style="font-size:22px;font-weight:900;color:#fff;flex-shrink:0;font-style:italic;letter-spacing:-1px;background:linear-gradient(135deg,#6C3CE1,#2563EB);-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:4px 6px;border-radius:8px;background-clip:text">Ooh!</span>
     <div style="flex:1;min-width:0">
       <div style="color:#fff;font-weight:700;font-size:15px">Instalar Ooh!</div>
       <div style="color:rgba(255,255,255,0.6);font-size:12px">Adicionar à tela inicial — rápido e gratuito</div>
@@ -2662,7 +2661,7 @@ if('launchQueue' in window){
 
 <div id="ios-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 12px);background:linear-gradient(135deg,#1a1040,#0D1525);border-top:1px solid rgba(108,60,225,0.4);box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
   <div style="display:flex;align-items:flex-start;gap:12px">
-    <span style="font-size:28px;flex-shrink:0">🌟</span>
+    <span style="font-size:20px;font-weight:900;color:#fff;flex-shrink:0;font-style:italic;letter-spacing:-1px">Ooh!</span>
     <div style="flex:1">
       <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:4px">Instalar Ooh! no iPhone</div>
       <div style="color:rgba(255,255,255,0.65);font-size:12px;line-height:1.5">Toque em <strong style="color:#fff">Compartilhar ↑</strong> → <strong style="color:#fff">"Adicionar à Tela de Início"</strong></div>
