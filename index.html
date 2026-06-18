@@ -195,67 +195,71 @@ select{appearance:none;-webkit-appearance:none}
     </div>
   </div>
   <div class="tools-grid">
-    <!-- Linha 1: leitura -->
-    <div class="tool-card qr" onclick="goTo('qr')">
-      <div class="tool-icon">&#x2B1B;</div>
-      <div class="tool-name">QR / Barras</div>
-      <div class="tool-desc">Gerar e ler códigos</div>
-    </div>
-    <div class="tool-card ocr" onclick="goTo('cam')">
-      <div class="tool-icon">&#x1F50D;</div>
-      <div class="tool-name">OCR</div>
-      <div class="tool-desc">Extrair texto de fotos</div>
-    </div>
-    <!-- Linha 2: documentos -->
-    <div class="tool-card scanner" onclick="abrirScanner()">
-      <div class="tool-icon">&#x1F4C3;</div>
-      <div class="tool-name">Scanner</div>
-      <div class="tool-desc">Digitalizar e PDF</div>
-    </div>
-
-    <!-- Linha 3: financeiro -->
-    <div class="tool-card pix" onclick="togglePixRapido()">
-      <div class="tool-icon">&#x26A1;</div>
-      <div class="tool-name">Pix Rápido</div>
-      <div class="tool-desc">Gere QR Pix na hora</div>
-    </div>
-    <div class="tool-card" onclick="goTo('calc')" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">
-      <div class="tool-icon">&#x1F9EE;</div>
-      <div class="tool-name">Calculadora</div>
-      <div class="tool-desc">Operações e %</div>
-    </div>
-    <!-- Linha 4: organização -->
-    <div class="tool-card" onclick="goTo('lembretes')" style="background:linear-gradient(145deg,#B45309,#92400E)">
-      <div class="tool-icon">&#x23F0;</div>
-      <div class="tool-name">Lembretes</div>
-      <div class="tool-desc">Alarmes e avisos</div>
-    </div>
+    <!-- A -->
     <div class="tool-card" onclick="goTo('cal')" style="background:linear-gradient(135deg,#0f2027,#1a3a2a)">
       <div class="tool-icon">&#x1F4C5;</div>
       <div class="tool-name">Agenda</div>
       <div class="tool-desc">Compromissos e datas</div>
     </div>
-    <!-- Linha 5: utilidades -->
-    <div class="tool-card" onclick="goTo('timer')" style="background:linear-gradient(145deg,#DC2626,#991B1B)">
-      <div class="tool-icon">&#x1F373;</div>
-      <div class="tool-name">Timer</div>
-      <div class="tool-desc">Cronômetro e cozinha</div>
+    <!-- C -->
+    <div class="tool-card" onclick="goTo('calc')" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">
+      <div class="tool-icon">&#x1F9EE;</div>
+      <div class="tool-name">Calculadora</div>
+      <div class="tool-desc">Operações e %</div>
     </div>
+    <!-- E -->
+    <div class="tool-card extra" onclick="goTo('extras')">
+      <div class="tool-icon">&#x1F9F0;</div>
+      <div class="tool-name">Extras</div>
+      <div class="tool-desc">Conversores e notas</div>
+    </div>
+    <!-- L -->
+    <div class="tool-card" onclick="goTo('lembretes')" style="background:linear-gradient(145deg,#B45309,#92400E)">
+      <div class="tool-icon">&#x23F0;</div>
+      <div class="tool-name">Lembretes</div>
+      <div class="tool-desc">Alarmes e avisos</div>
+    </div>
+    <!-- O -->
+    <div class="tool-card ocr" onclick="goTo('cam')">
+      <div class="tool-icon">&#x1F50D;</div>
+      <div class="tool-name">OCR</div>
+      <div class="tool-desc">Extrair texto de fotos</div>
+    </div>
+    <!-- P -->
+    <div class="tool-card pix" onclick="togglePixRapido()">
+      <div class="tool-icon">&#x26A1;</div>
+      <div class="tool-name">Pix Rápido</div>
+      <div class="tool-desc">Gere QR Pix na hora</div>
+    </div>
+    <!-- Q -->
+    <div class="tool-card qr" onclick="goTo('qr')">
+      <div class="tool-icon">&#x2B1B;</div>
+      <div class="tool-name">QR / Barras</div>
+      <div class="tool-desc">Gerar e ler códigos</div>
+    </div>
+    <!-- S -->
+    <div class="tool-card scanner" onclick="abrirScanner()">
+      <div class="tool-icon">&#x1F4C3;</div>
+      <div class="tool-name">Scanner</div>
+      <div class="tool-desc">Digitalizar e PDF</div>
+    </div>
+    <!-- T (Tempo) -->
     <div class="tool-card" onclick="goTo('tempo')" style="background:linear-gradient(145deg,#0369A1,#075985)">
       <div class="tool-icon">&#x26C5;</div>
       <div class="tool-name">Tempo</div>
       <div class="tool-desc">Previsão sem anúncio</div>
     </div>
-    <!-- Linha 6: veículos + extras -->
+    <!-- T (Timer) -->
+    <div class="tool-card" onclick="goTo('timer')" style="background:linear-gradient(145deg,#DC2626,#991B1B)">
+      <div class="tool-icon">&#x1F373;</div>
+      <div class="tool-name">Timer</div>
+      <div class="tool-desc">Cronômetro e cozinha</div>
+    </div>
+    <!-- V -->
     <div class="tool-card" onclick="goTo('veiculos')" style="background:linear-gradient(145deg,#059669,#047857)">
       <div class="tool-icon">&#x26FD;</div>
       <div class="tool-name">Veículos</div>
       <div class="tool-desc">Gastos de combustível</div>
-    </div>
-    <div class="tool-card extra" onclick="goTo('extras')">
-      <div class="tool-icon">&#x1F9F0;</div>
-      <div class="tool-name">Extras</div>
-      <div class="tool-desc">Conversores e notas</div>
     </div>
   </div>
 
@@ -972,17 +976,19 @@ function goTo(s){
   if(s!=='home')history.pushState({screen:s},'','');
   document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(x){x.classList.remove('active');});
-  document.getElementById('screen-'+s).classList.add('active');
+  var tela=document.getElementById('screen-'+s);
+  if(!tela){console.warn('tela não encontrada:',s);return;}
+  tela.classList.add('active');
   var nb=document.getElementById('nav-'+s);
   if(nb)nb.classList.add('active');
-  if(s!=='qr')pararCam();
-  if(s!=='scanner')scannerFecharCamera();
+  try{if(s!=='qr')pararCam();}catch(e){}
+  try{if(s!=='scanner')scannerFecharCamera();}catch(e){}
   if(s==='extras')carregarNotas();
   if(s==='lembretes')initLembretes();
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
-  if(s==='cal'){calInit();}
+  if(s==='cal'){try{calInit();}catch(e){toast('Erro agenda: '+e.message,4000);}}
   if(s==='scanner')setTimeout(scannerNovo,0);
 }
 
@@ -2692,7 +2698,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v40');
+    var cache=await caches.open('ooh-v41');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
