@@ -205,7 +205,7 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-name">OCR</div>
       <div class="tool-desc">Extrair texto de fotos</div>
     </div>
-    <div class="tool-card scanner" onclick="goTo('scanner')">
+    <div class="tool-card scanner" onclick="abrirScanner()">
       <div class="tool-icon">&#x1F4C3;</div>
       <div class="tool-name">Scanner</div>
       <div class="tool-desc">Digitaliza documentos</div>
@@ -1295,6 +1295,15 @@ function scannerVoltarCamera(){
   scannerAbrirCamera();
 }
 
+function abrirScanner(){
+  // Abre o scanner e dispara a câmera direto — mesmo user gesture do toque no card
+  goTo('scanner');
+  setTimeout(function(){
+    var inp=document.querySelector('#scanner-step1 input[capture="environment"]');
+    if(inp)inp.click();
+  },120);
+}
+
 function scannerNovo(){
   scannerFecharCamera();
   scannerImg=null; scannerResultCanvas=null; scannerResultBlob=null; scannerRect=null;
@@ -1674,7 +1683,7 @@ function scannerSalvarGaleria(){
       document.body.removeChild(a);
       setTimeout(function(){URL.revokeObjectURL(url);},3000);
       toast('📥 Salvo em Downloads!',2000);
-      setTimeout(function(){scannerNovo();},2200);
+      scannerNovo();
     }catch(e){
       toast('Erro ao salvar: '+e.message,4000);
     }
@@ -2629,7 +2638,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v33');
+    var cache=await caches.open('ooh-v34');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
