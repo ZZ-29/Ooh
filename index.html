@@ -855,20 +855,20 @@ select{appearance:none;-webkit-appearance:none}
       <!-- Imagem resultado -->
       <img id="scanner-result-img" style="width:100%;border-radius:10px;margin-bottom:16px;display:none;box-shadow:0 4px 20px rgba(0,0,0,0.5)">
       <!-- Botão principal: Salvar na Galeria -->
-      <button type="button" onclick="scannerSalvarGaleria()" style="width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#1D4ED8);border:none;color:#fff;font-size:17px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px">
-        <span style="font-size:24px">&#x1F4F8;</span> Salvar na Galeria
+      <button type="button" onclick="scannerSalvarGaleria()" style="width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#1D4ED8);border:none;color:#fff;font-size:18px;font-weight:700;cursor:pointer;margin-bottom:10px">
+        📸 Salvar na Galeria
       </button>
       <!-- Botões secundários -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <button type="button" onclick="salvarScannerPDF()" style="padding:14px 8px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-          <span style="font-size:20px">&#x1F4C4;</span> Salvar PDF
+        <button type="button" onclick="salvarScannerPDF()" style="padding:14px 8px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:15px;font-weight:600;cursor:pointer">
+          📄 Salvar PDF
         </button>
-        <button type="button" onclick="scannerCompartilhar()" style="padding:14px 8px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-          <span style="font-size:20px">&#x1F4E4;</span> Compartilhar
+        <button type="button" onclick="scannerCompartilhar()" style="padding:14px 8px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:15px;font-weight:600;cursor:pointer">
+          📤 Compartilhar
         </button>
       </div>
-      <button type="button" onclick="scannerNovo()" style="width:100%;padding:12px;border-radius:12px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer">
-        &#x21A9; Novo scan
+      <button type="button" onclick="scannerNovo()" style="width:100%;padding:12px;border-radius:12px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);font-size:15px;cursor:pointer">
+        ↩ Novo scan
       </button>
     </div>
   </div>
@@ -1313,9 +1313,22 @@ function scannerFecharCamera(){
 function scannerCapturar(){
   var video=document.getElementById('scanner-video');
   if(!video||!video.videoWidth){toast('Câmera não pronta',3000);return;}
+  var vw=video.videoWidth, vh=video.videoHeight;
   var tmp=document.createElement('canvas');
-  tmp.width=video.videoWidth; tmp.height=video.videoHeight;
-  tmp.getContext('2d').drawImage(video,0,0);
+  // Android envia vídeo em landscape mesmo com celular em portrait → rotacionar
+  var screenPortrait=window.innerWidth<window.innerHeight;
+  var videoLandscape=vw>vh*1.2;
+  if(screenPortrait&&videoLandscape){
+    // Rotacionar 90° no sentido horário
+    tmp.width=vh; tmp.height=vw;
+    var ctx=tmp.getContext('2d');
+    ctx.translate(vh,0);
+    ctx.rotate(Math.PI/2);
+    ctx.drawImage(video,0,0,vw,vh);
+  } else {
+    tmp.width=vw; tmp.height=vh;
+    tmp.getContext('2d').drawImage(video,0,0);
+  }
   scannerFecharCamera();
   var img=new Image();
   img.onload=function(){
@@ -2638,7 +2651,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v16');
+    var cache=await caches.open('ooh-v17');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
