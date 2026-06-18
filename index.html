@@ -2606,7 +2606,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v26');
+    var cache=await caches.open('ooh-v27');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
@@ -2649,7 +2649,7 @@ if('launchQueue' in window){
 <!-- ===== BANNERS DE INSTALAÇÃO ===== -->
 <div id="android-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 12px);background:linear-gradient(135deg,#1a1040,#0D1525);border-top:1px solid rgba(108,60,225,0.4);box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
   <div style="display:flex;align-items:center;gap:12px">
-    <span style="font-size:22px;font-weight:900;color:#fff;flex-shrink:0;font-style:italic;letter-spacing:-1px;background:linear-gradient(135deg,#6C3CE1,#2563EB);-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:4px 6px;border-radius:8px;background-clip:text">Ooh!</span>
+    <span style="display:inline-flex;align-items:baseline;gap:0;flex-shrink:0"><span style="font-size:24px;font-weight:900;color:#F8AA22;font-family:Poppins,sans-serif;letter-spacing:-2px;position:relative;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:3px solid #F8AA22;border-radius:50%;margin-right:1px"><span style="width:7px;height:7px;background:#D4880A;border-radius:50%;position:absolute"></span></span><span style="font-size:18px;font-weight:900;color:#A78BFA;font-family:Poppins,sans-serif;letter-spacing:-1px">o</span><span style="font-size:20px;font-weight:900;color:#fff;font-family:Poppins,sans-serif">h</span><span style="font-size:22px;font-weight:900;color:#10B981;font-family:Poppins,sans-serif">!</span></span>
     <div style="flex:1;min-width:0">
       <div style="color:#fff;font-weight:700;font-size:15px">Instalar Ooh!</div>
       <div style="color:rgba(255,255,255,0.6);font-size:12px">Adicionar à tela inicial — rápido e gratuito</div>
@@ -2661,7 +2661,7 @@ if('launchQueue' in window){
 
 <div id="ios-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 12px);background:linear-gradient(135deg,#1a1040,#0D1525);border-top:1px solid rgba(108,60,225,0.4);box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
   <div style="display:flex;align-items:flex-start;gap:12px">
-    <span style="font-size:20px;font-weight:900;color:#fff;flex-shrink:0;font-style:italic;letter-spacing:-1px">Ooh!</span>
+    <span style="display:inline-flex;align-items:baseline;gap:0;flex-shrink:0"><span style="font-size:22px;font-weight:900;color:#F8AA22;font-family:Poppins,sans-serif;letter-spacing:-2px;position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:3px solid #F8AA22;border-radius:50%;margin-right:1px"><span style="width:6px;height:6px;background:#D4880A;border-radius:50%;position:absolute"></span></span><span style="font-size:16px;font-weight:900;color:#A78BFA;font-family:Poppins,sans-serif;letter-spacing:-1px">o</span><span style="font-size:18px;font-weight:900;color:#fff;font-family:Poppins,sans-serif">h</span><span style="font-size:20px;font-weight:900;color:#10B981;font-family:Poppins,sans-serif">!</span></span>
     <div style="flex:1">
       <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:4px">Instalar Ooh! no iPhone</div>
       <div style="color:rgba(255,255,255,0.65);font-size:12px;line-height:1.5">Toque em <strong style="color:#fff">Compartilhar ↑</strong> → <strong style="color:#fff">"Adicionar à Tela de Início"</strong></div>
