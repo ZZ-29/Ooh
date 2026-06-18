@@ -1700,18 +1700,19 @@ function _scanDownload(blob,nome){
 
 function salvarScannerPDF(){
   if(!scannerResultCanvas){toast('Nenhum scan',3000);return;}
+  if(!window.jspdf){toast('PDF não carregado, tente novamente',3000);return;}
   try{
     var imgData=scannerResultCanvas.toDataURL('image/jpeg',0.92);
     var W=scannerResultCanvas.width, H=scannerResultCanvas.height;
     var orient=W>H?'l':'p';
-    var doc=new jsPDF({orientation:orient,unit:'px',format:[W,H]});
+    var doc=new window.jspdf.jsPDF({orientation:orient,unit:'px',format:[W,H]});
     doc.addImage(imgData,'JPEG',0,0,W,H);
-    // Tentar share do PDF antes de download
-    doc.output('blob',function(){}).then && doc.output('blob').then
-      ? doc.output('blob').then(function(b){_scanShare(b,'scan_'+Date.now()+'.pdf');})
-      : doc.save('scan_'+Date.now()+'.pdf');
-    toast('📄 PDF pronto!',3000);
-  }catch(e){toast('Erro ao gerar PDF: '+e.message,4000);}
+    var nome='scan_'+Date.now()+'.pdf';
+    // output('blob') é síncrono no jsPDF v2
+    var blob=doc.output('blob');
+    _scanShare(blob,nome);
+    toast('📄 PDF gerado!',3000);
+  }catch(e){toast('Erro PDF: '+e.message,4000);}
 }
 
 
@@ -2606,7 +2607,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v27');
+    var cache=await caches.open('ooh-v28');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
