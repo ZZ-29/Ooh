@@ -251,9 +251,10 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-name">Agenda</div>
       <div class="tool-desc">Compromissos e datas</div>
     </div>
-    <div class="tool-card extra" onclick="goTo('extras')" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:16px">
-      <div class="tool-icon" style="flex-shrink:0">&#x1F9F0;</div>
-      <div><div class="tool-name">Extras</div><div class="tool-desc">Conversor de unidades, moedas e notas</div></div>
+    <div class="tool-card extra" onclick="goTo('extras')">
+      <div class="tool-icon">&#x1F9F0;</div>
+      <div class="tool-name">Extras</div>
+      <div class="tool-desc">Conversores e notas</div>
     </div>
   </div>
 
@@ -2690,7 +2691,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v38');
+    var cache=await caches.open('ooh-v39');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
