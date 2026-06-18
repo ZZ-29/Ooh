@@ -813,7 +813,7 @@ select{appearance:none;-webkit-appearance:none}
   <!-- Step 2: Ajustar cantos -->
   <div id="scanner-step2" style="display:none;padding:0 16px">
     <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:8px">&#x1F449; Arraste os pontos coloridos para os <strong style="color:#fff">cantos do documento</strong></p>
-    <canvas id="scanner-canvas" style="width:100%;touch-action:none;border-radius:10px;display:block"></canvas>
+    <canvas id="scanner-canvas" style="width:100%;max-height:calc(100vh - 270px);touch-action:none;border-radius:10px;display:block"></canvas>
     <div style="margin-top:14px">
       <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saida:</p>
       <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -1462,8 +1462,21 @@ function scannerNovo(){
   document.getElementById('scanner-step3').style.display='none';
   document.getElementById('scanner-processing').style.display='none';
   document.getElementById('scanner-result-img').style.display='none';
-  try{document.getElementById('scanner-cam-input').value='';}catch(e){}
-  try{document.getElementById('scanner-file-input').value='';}catch(e){}
+  // Recriar inputs para destravar câmera no Android
+  try{
+    var ci=document.getElementById('scanner-cam-input');
+    var ni=ci.cloneNode(true);
+    ni.onchange=null;
+    ni.addEventListener('change',function(){scannerPreview(this);});
+    ci.parentNode.replaceChild(ni,ci);
+  }catch(e){}
+  try{
+    var fi=document.getElementById('scanner-file-input');
+    var nf=fi.cloneNode(true);
+    nf.onchange=null;
+    nf.addEventListener('change',function(){scannerPreview(this);});
+    fi.parentNode.replaceChild(nf,fi);
+  }catch(e){}
 }
 
 
