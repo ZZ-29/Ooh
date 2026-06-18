@@ -2603,7 +2603,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v23');
+    var cache=await caches.open('ooh-v24');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
@@ -2643,6 +2643,31 @@ if('launchQueue' in window){
 
 </script>
 
+<!-- ===== BANNERS DE INSTALAÇÃO ===== -->
+<div id="android-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 12px);background:linear-gradient(135deg,#1a1040,#0D1525);border-top:1px solid rgba(108,60,225,0.4);box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
+  <div style="display:flex;align-items:center;gap:12px">
+    <span style="font-size:32px;flex-shrink:0">🌟</span>
+    <div style="flex:1;min-width:0">
+      <div style="color:#fff;font-weight:700;font-size:15px">Instalar Ooh!</div>
+      <div style="color:rgba(255,255,255,0.6);font-size:12px">Adicionar à tela inicial — rápido e gratuito</div>
+    </div>
+    <button onclick="androidInstalarAgora()" style="background:linear-gradient(135deg,#6C3CE1,#2563EB);border:none;color:#fff;font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px;cursor:pointer;white-space:nowrap">Instalar</button>
+    <button onclick="androidDismissBanner()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0">&times;</button>
+  </div>
+</div>
+
+<div id="ios-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 12px);background:linear-gradient(135deg,#1a1040,#0D1525);border-top:1px solid rgba(108,60,225,0.4);box-shadow:0 -4px 20px rgba(0,0,0,0.5)">
+  <div style="display:flex;align-items:flex-start;gap:12px">
+    <span style="font-size:28px;flex-shrink:0">🌟</span>
+    <div style="flex:1">
+      <div style="color:#fff;font-weight:700;font-size:14px;margin-bottom:4px">Instalar Ooh! no iPhone</div>
+      <div style="color:rgba(255,255,255,0.65);font-size:12px;line-height:1.5">Toque em <strong style="color:#fff">Compartilhar ↑</strong> → <strong style="color:#fff">"Adicionar à Tela de Início"</strong></div>
+    </div>
+    <button onclick="document.getElementById('ios-banner').style.display='none';localStorage.setItem('ios-dismissed','1')" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0">&times;</button>
+  </div>
+</div>
+
+
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
@@ -2664,6 +2689,45 @@ if('serviceWorker' in navigator){
   if(isIOS && !isStandalone && !dismissed){
     setTimeout(function(){document.getElementById('ios-banner').style.display='block';},2000);
   }
+})();
+
+// Android: captura beforeinstallprompt para banner de instalação nativo
+(function(){
+  var deferredPrompt=null;
+  var isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  var dismissed=localStorage.getItem('android-install-dismissed');
+  if(isStandalone||dismissed)return;
+
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    deferredPrompt=e;
+    setTimeout(function(){
+      document.getElementById('android-install-banner').style.display='block';
+    },2500);
+  });
+
+  window.androidInstalarAgora=function(){
+    if(!deferredPrompt)return;
+    document.getElementById('android-install-banner').style.display='none';
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(r){
+      if(r.outcome==='accepted'){
+        localStorage.setItem('android-install-dismissed','1');
+      }
+      deferredPrompt=null;
+    });
+  };
+
+  window.androidDismissBanner=function(){
+    document.getElementById('android-install-banner').style.display='none';
+    localStorage.setItem('android-install-dismissed','1');
+  };
+
+  // Se já instalado via standalone, não mostrar mais
+  window.addEventListener('appinstalled',function(){
+    document.getElementById('android-install-banner').style.display='none';
+    localStorage.setItem('android-install-dismissed','1');
+  });
 })();
 
 
