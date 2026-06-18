@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#6C3CE1;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.sc-handle{position:absolute;width:48px;height:48px;border-radius:50%;border:3.5px solid #fff;cursor:grab;transform:translate(-50%,-50%);z-index:20;touch-action:none;box-shadow:0 2px 10px rgba(0,0,0,0.6)}
+.sc-handle{position:absolute;width:32px;height:32px;border-radius:50%;border:2.5px solid #fff;cursor:grab;transform:translate(-50%,-50%);z-index:20;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,0.7)}
 .scan-btn-tipo{flex:1;padding:10px 4px;border-radius:10px;border:2px solid transparent;background:var(--surface2);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
 .scan-btn-tipo:hover,.scan-btn-tipo.sel{border-color:#6C3CE1;background:#1a1040;color:#fff}
 .scan-handle{position:absolute;width:42px;height:42px;border-radius:50%;border:3px solid #fff;cursor:grab;transform:translate(-50%,-50%);z-index:10;touch-action:none;box-shadow:0 2px 10px rgba(0,0,0,.6)}
@@ -1264,7 +1264,7 @@ preencherUnidades();
 
 // ===== SCANNER =====
 // ===== SCANNER =====
-var scannerImg=null,scannerResultCanvas=null,scannerCorners=null;
+var scannerImg=null,scannerResultCanvas=null,scannerRect=null;
 var scannerCtx=null,scannerCv=null,scannerDragging=-1;
 var scannerStream=null;
 
@@ -1338,7 +1338,7 @@ function scannerVoltarCamera(){
 
 function scannerNovo(){
   scannerFecharCamera();
-  scannerImg=null; scannerResultCanvas=null; scannerCorners=null;
+  scannerImg=null; scannerResultCanvas=null; scannerRect=null;
   scannerCv=null; scannerCtx=null; scannerDragging=-1;
   var s1=document.getElementById('scanner-step1');
   var s2=document.getElementById('scanner-step2');
@@ -1370,151 +1370,180 @@ function scannerSetupCanvas(){
   var natW=scannerImg.naturalWidth||scannerImg.width||1;
   var natH=scannerImg.naturalHeight||scannerImg.height||1;
   var scale=Math.min(vW/natW,vH/natH,1);
-  var cW=Math.round(natW*scale);
-  var cH=Math.round(natH*scale);
-  var offX=Math.round((vW-cW)/2);
-  var offY=0;
-  // Configurar canvas (só desenha, sem touch events)
+  var cW=Math.round(natW*scale), cH=Math.round(natH*scale);
+  var offX=Math.round((vW-cW)/2), offY=0;
   cv.width=cW; cv.height=cH;
   cv.style.cssText='display:block;position:absolute;top:'+offY+'px;left:'+offX+'px;width:'+cW+'px;height:'+cH+'px;z-index:1';
   scannerCv=cv; scannerCtx=cv.getContext('2d');
-  // Posições iniciais: margem de 10% dos lados, bolas inferiores acima da barra (130px do fundo)
+  // Rect inicial: 10% de margem nas bordas, fundo acima da barra de botões
   var mX=Math.round(cW*0.10), mY=Math.round(cH*0.07);
-  var botY=cH-Math.round(130*(cH/vH))-8;
-  if(botY<cH*0.5)botY=Math.round(cH*0.85); // fallback
-  scannerCorners=[
-    {x:mX,    y:mY},
-    {x:cW-mX, y:mY},
-    {x:cW-mX, y:botY},
-    {x:mX,    y:botY}
-  ];
+  var barPx=Math.round(130*(cH/vH)); if(barPx<90)barPx=90;
+  var botY=cH-barPx-10; if(botY<cH*0.55)botY=Math.round(cH*0.88);
+  // scannerRect: {x1,y1,x2,y2} em coordenadas do canvas
+  scannerRect={x1:mX, y1:mY, x2:cW-mX, y2:botY};
   scannerDraw();
-  // Posicionar e ativar os 4 handles HTML (um div por canto)
+  // ---- Handles HTML (4 cantos) ----
+  // TL(0)→muda x1,y1  TR(1)→muda x2,y1  BR(2)→muda x2,y2  BL(3)→muda x1,y2
   var hClrs=['#FF4444','#FFD93D','#00CC66','#4D96FF'];
   var handles=[];
   for(var i=0;i<4;i++){
-    var h=document.getElementById('sc-h'+i);
-    h.style.background=hClrs[i];
-    h.style.display='block';
+    var old=document.getElementById('sc-h'+i);
+    var h=document.createElement('div');
+    h.id='sc-h'+i; h.className='sc-handle';
+    h.style.background=hClrs[i]; h.style.display='block';
+    old.parentNode.replaceChild(h,old);
     handles.push(h);
   }
-  // Função: mover handle para posição do canto (coordenadas de tela)
-  function posHandle(i){
-    var h=handles[i];
-    var c=scannerCorners[i];
-    h.style.left=(offX+c.x)+'px';
-    h.style.top=(offY+c.y)+'px';
+  function getHPos(i){
+    var r=scannerRect;
+    if(i===0)return{x:offX+r.x1,y:offY+r.y1};
+    if(i===1)return{x:offX+r.x2,y:offY+r.y1};
+    if(i===2)return{x:offX+r.x2,y:offY+r.y2};
+    return       {x:offX+r.x1,y:offY+r.y2};
   }
-  for(var i=0;i<4;i++)posHandle(i);
-  // Converter coords de tela → coords do canvas
-  function toCv(clientX,clientY){
-    return{
-      x:Math.max(0,Math.min(cW,clientX-offX)),
-      y:Math.max(0,Math.min(cH,clientY-offY))
-    };
-  }
-  // Adicionar touch/mouse em cada handle
-  function addHandleEvents(idx){
-    var h=handles[idx];
-    // Remover listeners antigos clonando
-    var nh=h.cloneNode(true);
-    nh.style.background=hClrs[idx];
-    h.parentNode.replaceChild(nh,h);
-    handles[idx]=nh;
-    posHandle(idx);
-    function onStart(e){
-      e.preventDefault();
-      e.stopPropagation();
-      scannerDragging=idx;
+  function posHandles(){
+    for(var i=0;i<4;i++){
+      var p=getHPos(i);
+      handles[i].style.left=p.x+'px';
+      handles[i].style.top=p.y+'px';
     }
-    nh.addEventListener('touchstart',onStart,{passive:false});
-    nh.addEventListener('mousedown',onStart);
   }
-  for(var i=0;i<4;i++)addHandleEvents(i);
-  // Move e end no documento (funciona mesmo saindo do handle)
-  // Remover listeners antigos usando namespace via flag
-  if(window._scanMoveHandler)document.removeEventListener('touchmove',window._scanMoveHandler);
-  if(window._scanEndHandler){document.removeEventListener('touchend',window._scanEndHandler);document.removeEventListener('mouseup',window._scanEndHandler);}
-  if(window._scanMouseMove)document.removeEventListener('mousemove',window._scanMouseMove);
-  window._scanMoveHandler=function(e){
-    if(scannerDragging<0)return;
-    e.preventDefault();
+  posHandles();
+  function updateRect(i,clientX,clientY){
+    var cx=Math.max(0,Math.min(cW,clientX-offX));
+    var cy=Math.max(0,Math.min(cH,clientY-offY));
+    var r=scannerRect;
+    // Cada canto move seus dois eixos, mantendo retângulo
+    if(i===0){r.x1=Math.min(cx,r.x2-20);r.y1=Math.min(cy,r.y2-20);}
+    if(i===1){r.x2=Math.max(cx,r.x1+20);r.y1=Math.min(cy,r.y2-20);}
+    if(i===2){r.x2=Math.max(cx,r.x1+20);r.y2=Math.max(cy,r.y1+20);}
+    if(i===3){r.x1=Math.min(cx,r.x2-20);r.y2=Math.max(cy,r.y1+20);}
+    posHandles();
+    scannerDraw();
+  }
+  // Eventos em cada handle
+  for(var _i=0;_i<4;_i++){
+    (function(idx){
+      var h=handles[idx];
+      h.addEventListener('touchstart',function(e){
+        e.preventDefault(); e.stopPropagation();
+        scannerDragging=idx;
+      },{passive:false});
+      h.addEventListener('mousedown',function(e){
+        e.preventDefault(); scannerDragging=idx;
+      });
+    })(_i);
+  }
+  // Move/end no document
+  if(window._scTM)document.removeEventListener('touchmove',window._scTM);
+  if(window._scTE)document.removeEventListener('touchend',window._scTE);
+  if(window._scMM)document.removeEventListener('mousemove',window._scMM);
+  if(window._scMU)document.removeEventListener('mouseup',window._scMU);
+  window._scTM=function(e){
+    if(scannerDragging<0)return; e.preventDefault();
     var t=e.touches[0];
-    var pt=toCv(t.clientX,t.clientY);
-    scannerCorners[scannerDragging]=pt;
-    // Reposicionar o handle visual
-    handles[scannerDragging].style.left=(offX+pt.x)+'px';
-    handles[scannerDragging].style.top=(offY+pt.y)+'px';
-    scannerDraw();
+    updateRect(scannerDragging,t.clientX,t.clientY);
   };
-  window._scanEndHandler=function(){scannerDragging=-1;};
-  window._scanMouseMove=function(e){
-    if(scannerDragging<0)return;
-    var pt=toCv(e.clientX,e.clientY);
-    scannerCorners[scannerDragging]=pt;
-    handles[scannerDragging].style.left=(offX+pt.x)+'px';
-    handles[scannerDragging].style.top=(offY+pt.y)+'px';
-    scannerDraw();
-  };
-  document.addEventListener('touchmove',window._scanMoveHandler,{passive:false});
-  document.addEventListener('touchend',window._scanEndHandler);
-  document.addEventListener('mouseup',window._scanEndHandler);
-  document.addEventListener('mousemove',window._scanMouseMove);
-  toast('✂️ Arraste as 4 bolas para os cantos do documento',3000);
+  window._scTE=function(){scannerDragging=-1;};
+  window._scMM=function(e){if(scannerDragging<0)return;updateRect(scannerDragging,e.clientX,e.clientY);};
+  window._scMU=function(){scannerDragging=-1;};
+  document.addEventListener('touchmove',window._scTM,{passive:false});
+  document.addEventListener('touchend',window._scTE);
+  document.addEventListener('mousemove',window._scMM);
+  document.addEventListener('mouseup',window._scMU);
+  toast('✂️ Arraste os cantos para enquadrar o documento',3000);
 }
 
+
 function scannerDraw(){
-  if(!scannerCtx||!scannerCorners||!scannerImg)return;
-  var ctx=scannerCtx,cv=scannerCv;
+  if(!scannerCtx||!scannerRect||!scannerImg)return;
+  var ctx=scannerCtx, cv=scannerCv;
+  var r=scannerRect;
   ctx.clearRect(0,0,cv.width,cv.height);
-  // Imagem original
   ctx.drawImage(scannerImg,0,0,cv.width,cv.height);
   // Escurecer fora da seleção
-  ctx.fillStyle='rgba(0,0,0,0.48)';
+  ctx.fillStyle='rgba(0,0,0,0.5)';
   ctx.fillRect(0,0,cv.width,cv.height);
-  // Área clara dentro
-  ctx.save();
+  // Área clara dentro do retângulo
+  ctx.drawImage(scannerImg,r.x1,r.y1,r.x2-r.x1,r.y2-r.y1,r.x1,r.y1,r.x2-r.x1,r.y2-r.y1);
+  // Borda do recorte
+  ctx.strokeStyle='rgba(108,60,225,0.95)'; ctx.lineWidth=2.5;
+  ctx.strokeRect(r.x1,r.y1,r.x2-r.x1,r.y2-r.y1);
+  // Linhas de grade (terços)
+  ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=1;
+  var w=r.x2-r.x1, h=r.y2-r.y1;
   ctx.beginPath();
-  ctx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
-  for(var i=1;i<4;i++)ctx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
-  ctx.closePath(); ctx.clip();
-  ctx.drawImage(scannerImg,0,0,cv.width,cv.height);
-  ctx.restore();
-  // Borda roxa conectando os 4 cantos
-  ctx.beginPath();
-  ctx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
-  for(var i=1;i<4;i++)ctx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
-  ctx.closePath();
-  ctx.strokeStyle='rgba(108,60,225,0.95)'; ctx.lineWidth=3; ctx.stroke();
-  // As bolas são divs HTML (sc-h0..3) — não desenhamos aqui
+  ctx.moveTo(r.x1+w/3,r.y1); ctx.lineTo(r.x1+w/3,r.y2);
+  ctx.moveTo(r.x1+w*2/3,r.y1); ctx.lineTo(r.x1+w*2/3,r.y2);
+  ctx.moveTo(r.x1,r.y1+h/3); ctx.lineTo(r.x2,r.y1+h/3);
+  ctx.moveTo(r.x1,r.y1+h*2/3); ctx.lineTo(r.x2,r.y1+h*2/3);
+  ctx.stroke();
 }
+
 
 function processarScan(tipo,btn){
   document.querySelectorAll('.scan-btn-tipo').forEach(function(b){b.classList.remove('sel');});
   if(btn)btn.classList.add('sel');
-  if(!scannerCorners||!scannerCv||!scannerImg){toast('Capture uma foto primeiro',3000);return;}
+  if(!scannerRect||!scannerCv||!scannerImg){toast('Capture uma foto primeiro',3000);return;}
   document.getElementById('scanner-step2').style.display='none';
   var sp=document.getElementById('scanner-processing');
   sp.style.display='flex';
   setTimeout(function(){
     try{
+      var r=scannerRect;
+      var cW=scannerCv.width, cH=scannerCv.height;
       var natW=scannerImg.naturalWidth||scannerImg.width;
       var natH=scannerImg.naturalHeight||scannerImg.height;
-      var scX=natW/scannerCv.width, scY=natH/scannerCv.height;
-      var natPts=scannerCorners.map(function(c){return{x:c.x*scX,y:c.y*scY};});
-      scannerResultCanvas=aplicarScanFiltroNat(natPts,tipo);
+      var scX=natW/cW, scY=natH/cH;
+      // Coordenadas no espaço da imagem original
+      var sx=Math.round(r.x1*scX), sy=Math.round(r.y1*scY);
+      var sw=Math.round((r.x2-r.x1)*scX), sh=Math.round((r.y2-r.y1)*scY);
+      if(sw<10||sh<10)throw new Error('Área muito pequena');
+      var out=document.createElement('canvas');
+      out.width=sw; out.height=sh;
+      var ctx=out.getContext('2d');
+      // Recorte simples
+      ctx.drawImage(scannerImg,sx,sy,sw,sh,0,0,sw,sh);
+      // Aplicar filtro
+      if(tipo==='pb'||tipo==='doc'){
+        var id=ctx.getImageData(0,0,sw,sh), d=id.data;
+        if(tipo==='doc'){
+          // Auto-níveis p5/p95 + threshold para texto nítido
+          var grays=new Uint8Array(d.length/4);
+          for(var i=0,j=0;i<d.length;i+=4,j++)
+            grays[j]=Math.round(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114);
+          var hist=new Array(256).fill(0);
+          for(var i=0;i<grays.length;i++)hist[grays[i]]++;
+          var tot=grays.length,cum=0,p5=0,p95=255;
+          for(var v=0;v<256;v++){cum+=hist[v];if(cum/tot>=0.05&&p5===0)p5=v;if(cum/tot>=0.95){p95=v;break;}}
+          var rng=Math.max(1,p95-p5);
+          for(var i=0,j=0;i<d.length;i+=4,j++){
+            var n=Math.max(0,Math.min(255,Math.round((grays[j]-p5)*255/rng)));
+            var out2=n>140?255:Math.round(n*0.3);
+            d[i]=d[i+1]=d[i+2]=out2;
+          }
+        } else {
+          for(var i=0;i<d.length;i+=4){
+            var g=Math.round(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114);
+            d[i]=d[i+1]=d[i+2]=g;
+          }
+        }
+        ctx.putImageData(id,0,0);
+      }
+      scannerResultCanvas=out;
       var ri=document.getElementById('scanner-result-img');
-      ri.src=scannerResultCanvas.toDataURL('image/jpeg',0.95);
+      ri.src=out.toDataURL('image/jpeg',0.95);
       ri.style.display='block';
       sp.style.display='none';
       document.getElementById('scanner-step3').style.display='block';
     }catch(e){
-      toast('Erro ao processar: '+e.message,5000);
+      toast('Erro: '+e.message,5000);
       sp.style.display='none';
       document.getElementById('scanner-step2').style.display='block';
     }
-  },80);
+  },60);
 }
+
 
 function aplicarScanFiltroNat(sp,tipo){
   // Transformada de perspectiva
@@ -1631,32 +1660,46 @@ function gaussElim(A,b){
   return x;
 }
 
+function _scanShare(blob,name){
+  var file=new File([blob],name,{type:blob.type});
+  if(navigator.share){
+    var shareData={files:[file],title:'Documento digitalizado'};
+    var canF=(navigator.canShare&&navigator.canShare(shareData));
+    if(canF){
+      navigator.share(shareData).catch(function(e){if(e.name!=='AbortError')toast('Erro ao compartilhar',3000);});
+    } else {
+      navigator.share({title:'Documento digitalizado',text:'Scan pelo Ooh!'}).catch(function(){});
+    }
+  } else {
+    // Fallback: abrir em nova aba para salvar
+    var url=URL.createObjectURL(blob);
+    window.open(url,'_blank');
+    toast('Pressione e segure a imagem para salvar',4000);
+  }
+}
+
 function scannerCompartilhar(){
   if(!scannerResultCanvas){toast('Nenhum scan disponível',3000);return;}
   scannerResultCanvas.toBlob(function(blob){
-    var file=new File([blob],'scan_'+Date.now()+'.jpg',{type:'image/jpeg'});
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:'Scan de documento'}).catch(function(e){
-        if(e.name!=='AbortError')toast('Erro ao compartilhar',3000);
-      });
-    } else if(navigator.share){
-      navigator.share({title:'Scan de documento',text:'Documento digitalizado pelo Ooh!'}).catch(function(){});
-    } else {
-      toast('Compartilhamento não disponível neste browser',4000);
-    }
+    _scanShare(blob,'scan_'+Date.now()+'.jpg');
   },'image/jpeg',0.95);
 }
 
 function scannerSalvarGaleria(){
   if(!scannerResultCanvas){toast('Nenhum scan',3000);return;}
   scannerResultCanvas.toBlob(function(blob){
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url; a.download='scan_'+Date.now()+'.jpg';
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){URL.revokeObjectURL(url);},2000);
-    toast('🖼️ Imagem salva!',3000);
+    // Tentar download nativo; fallback: nova aba
+    try{
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url; a.download='scan_'+Date.now()+'.jpg';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url);},3000);
+      toast('🖼️ Imagem salva na galeria!',3000);
+    }catch(e){
+      _scanShare(blob,'scan_'+Date.now()+'.jpg');
+    }
   },'image/jpeg',0.95);
 }
 
@@ -1668,8 +1711,11 @@ function salvarScannerPDF(){
     var orient=W>H?'l':'p';
     var doc=new jsPDF({orientation:orient,unit:'px',format:[W,H]});
     doc.addImage(imgData,'JPEG',0,0,W,H);
-    doc.save('scan_'+Date.now()+'.pdf');
-    toast('📄 PDF salvo!',3000);
+    // Tentar share do PDF antes de download
+    doc.output('blob',function(){}).then && doc.output('blob').then
+      ? doc.output('blob').then(function(b){_scanShare(b,'scan_'+Date.now()+'.pdf');})
+      : doc.save('scan_'+Date.now()+'.pdf');
+    toast('📄 PDF pronto!',3000);
   }catch(e){toast('Erro ao gerar PDF: '+e.message,4000);}
 }
 
@@ -2565,7 +2611,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v14');
+    var cache=await caches.open('ooh-v15');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
