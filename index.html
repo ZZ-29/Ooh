@@ -245,11 +245,7 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-icon" style="font-size:36px;flex-shrink:0">&#x26FD;</div>
       <div><div class="tool-name">Veículos</div><div class="tool-desc">Gastos de combustível por mês e ano</div></div>
     </div>
-    <div class="tool-card" onclick="pdfEscolherArquivo()" style="background:linear-gradient(145deg,#DC2626,#991B1B)">
-      <div class="tool-icon">&#x1F4C4;</div>
-      <div class="tool-name">PDF</div>
-      <div class="tool-desc">Visualizar documentos</div>
-    </div>
+
     <div class="tool-card" onclick="goTo('cal')" style="background:linear-gradient(135deg,#0f2027,#1a3a2a)">
       <div class="tool-icon">&#x1F4C5;</div>
       <div class="tool-name">Agenda</div>
@@ -860,6 +856,9 @@ select{appearance:none;-webkit-appearance:none}
       🖼️ Escolher da Galeria
       <input type="file" accept="image/*" style="display:none" onchange="scannerPreviewFile(this)">
     </label>
+    <button type="button" onclick="goTo('home');setTimeout(function(){pdfEscolherArquivo();},100)" style="width:100%;max-width:320px;padding:14px;border-radius:14px;background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.35);color:#f87171;font-size:15px;font-weight:600;text-align:center;cursor:pointer">
+      📄 Abrir PDF
+    </button>
   </div>
 
   <!-- Step 2: Crop tela cheia -->
@@ -2691,7 +2690,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v37');
+    var cache=await caches.open('ooh-v38');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
