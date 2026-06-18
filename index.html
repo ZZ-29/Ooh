@@ -1245,19 +1245,23 @@ preencherUnidades();
 var scannerImg=null,scannerCanvas=null,scannerCtx=null,scannerCorners=null,scannerDragging=-1,scannerResultCanvas=null;
 
 function scannerPreview(input){
-  if(!input.files||!input.files[0])return;
-  var reader=new FileReader();
-  reader.onload=function(e){
-    var img=new Image();
-    img.onload=function(){
-      scannerImg=img;
-      document.getElementById('scanner-step1').style.display='none';
-      document.getElementById('scanner-step2').style.display='block';
-      setTimeout(scannerSetupCanvas,80);
-    };
-    img.src=e.target.result;
+  if(!input.files||!input.files[0]){toast('Nenhum arquivo selecionado');return;}
+  var file=input.files[0];
+  toast('📷 Foto recebida: '+Math.round(file.size/1024)+'KB',3000);
+  var url=URL.createObjectURL(file);
+  var img=new Image();
+  img.onload=function(){
+    toast('🖼️ Imagem: '+img.width+'x'+img.height,3000);
+    scannerImg=img;
+    document.getElementById('scanner-step1').style.display='none';
+    document.getElementById('scanner-step2').style.display='block';
+    setTimeout(function(){
+      toast('⚙️ Preparando recorte...',2000);
+      scannerSetupCanvas();
+    },150);
   };
-  reader.readAsDataURL(input.files[0]);
+  img.onerror=function(){toast('Erro ao carregar imagem',5000);URL.revokeObjectURL(url);};
+  img.src=url;
 }
 
 function scannerSetupCanvas(){
@@ -1265,6 +1269,7 @@ function scannerSetupCanvas(){
   var maxW=canvas.parentElement.clientWidth-32;
   if(maxW<=0) maxW=window.innerWidth-32;
   if(maxW<=0) maxW=320;
+  toast('✂️ Recorte pronto! Arraste os pontos',4000);
   var scale=Math.min(1,maxW/scannerImg.width);
   canvas.width=Math.round(scannerImg.width*scale);
   canvas.height=Math.round(scannerImg.height*scale);
