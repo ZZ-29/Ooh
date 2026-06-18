@@ -84,6 +84,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 @keyframes spin{to{transform:rotate(360deg)}}
 .scan-btn-tipo{flex:1;padding:10px 4px;border-radius:10px;border:2px solid transparent;background:var(--surface2);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
 .scan-btn-tipo:hover,.scan-btn-tipo.sel{border-color:#6C3CE1;background:#1a1040;color:#fff}
+.scan-handle{position:absolute;width:42px;height:42px;border-radius:50%;border:3px solid #fff;cursor:grab;transform:translate(-50%,-50%);z-index:10;touch-action:none;box-shadow:0 2px 10px rgba(0,0,0,.6)}
 
 .tool-card.pix{background:linear-gradient(145deg,#B49BFC,#8B6BE8)}
 .tool-card.extra{background:linear-gradient(145deg,#14C9DC,#0898AA)}
@@ -813,15 +814,24 @@ select{appearance:none;-webkit-appearance:none}
   <!-- Step 2: Ajustar cantos -->
   <div id="scanner-step2" style="display:none;padding:0 16px">
     <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:8px">&#x1F449; Arraste os pontos coloridos para os <strong style="color:#fff">cantos do documento</strong></p>
-    <canvas id="scanner-canvas" style="touch-action:none;border-radius:10px;display:block"></canvas>
+    <div id="scan-crop-box" style="position:relative;display:block;width:100%;touch-action:none;user-select:none">
+      <img id="scanner-preview-img" style="width:100%;max-height:58vh;object-fit:contain;display:block;border-radius:10px;pointer-events:none" draggable="false">
+      <svg id="scan-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none">
+        <polygon id="scan-poly" fill="rgba(108,60,225,0.2)" stroke="#6C3CE1" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>
+      <div class="scan-handle" id="sh0" style="background:#FF4444"></div>
+      <div class="scan-handle" id="sh1" style="background:#FFD93D"></div>
+      <div class="scan-handle" id="sh2" style="background:#00CC66"></div>
+      <div class="scan-handle" id="sh3" style="background:#4D96FF"></div>
+    </div>
     <div style="margin-top:14px">
-      <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saida:</p>
+      <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saída:</p>
       <div style="display:flex;gap:8px;margin-bottom:14px">
         <button class="scan-btn-tipo" onclick="processarScan('color',this)">&#x1F3A8; Colorido</button>
-        <button class="scan-btn-tipo" onclick="processarScan('pb',this)">&#x26AB; Preto e Branco</button>
+        <button class="scan-btn-tipo" onclick="processarScan('pb',this)">&#x26AB; P&amp;B</button>
         <button class="scan-btn-tipo sel" onclick="processarScan('doc',this)">&#x1F4C4; Documento</button>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="scannerNovo()" style="width:100%">&#x2190; Tirar nova foto</button>
+      <button class="btn btn-ghost btn-sm" onclick="scannerNovo()" style="width:100%">&#x2190; Nova foto</button>
     </div>
   </div>
 
@@ -1242,104 +1252,86 @@ function carregarScript(src){
 preencherUnidades();
 
 // ===== SCANNER =====
-var scannerImg=null,scannerCanvas=null,scannerCtx=null,scannerCorners=null,scannerDragging=-1,scannerResultCanvas=null;
+var scannerImg=null,scannerResultCanvas=null,scannerCorners=null;
+var scannerHandles=[{px:8,py:8},{px:92,py:8},{px:92,py:92},{px:8,py:92}];
+var scannerDraggingHandle=-1;
 
 function scannerPreview(input){
-  if(!input.files||!input.files[0]){toast('Nenhum arquivo selecionado');return;}
+  if(!input.files||!input.files[0])return;
   var file=input.files[0];
-  toast('📷 Foto recebida: '+Math.round(file.size/1024)+'KB',3000);
   var url=URL.createObjectURL(file);
   var img=new Image();
   img.onload=function(){
-    toast('🖼️ Imagem: '+img.width+'x'+img.height,3000);
     scannerImg=img;
+    document.getElementById('scanner-preview-img').src=url;
     document.getElementById('scanner-step1').style.display='none';
     document.getElementById('scanner-step2').style.display='block';
-    setTimeout(function(){
-      toast('⚙️ Preparando recorte...',2000);
-      scannerSetupCanvas();
-    },150);
+    setTimeout(scannerInitHandles,150);
   };
-  img.onerror=function(){toast('Erro ao carregar imagem',5000);URL.revokeObjectURL(url);};
+  img.onerror=function(){toast('Erro ao carregar imagem',5000);};
   img.src=url;
 }
 
-function scannerSetupCanvas(){
-  var canvas=document.getElementById('scanner-canvas');
-  var maxW=canvas.parentElement.clientWidth-32;
-  if(maxW<=0) maxW=window.innerWidth-32;
-  if(maxW<=0) maxW=320;
-  var maxH=window.innerHeight-260;
-  if(maxH<200) maxH=200;
-  toast('✂️ Recorte pronto! Arraste os pontos',4000);
-  var scale=Math.min(1,maxW/scannerImg.width,maxH/scannerImg.height);
-  canvas.width=Math.round(scannerImg.width*scale);
-  canvas.height=Math.round(scannerImg.height*scale);
-  canvas.style.width=canvas.width+'px';
-  canvas.style.height=canvas.height+'px';
-  canvas.style.maxWidth='100%';
-  canvas.style.maxHeight='';
-  scannerCanvas=canvas;scannerCtx=canvas.getContext('2d');
-  var m=Math.round(Math.min(canvas.width,canvas.height)*0.1);
-  scannerCorners=[{x:m,y:m},{x:canvas.width-m,y:m},{x:canvas.width-m,y:canvas.height-m},{x:m,y:canvas.height-m}];
-  scannerDraw();
-  canvas.removeEventListener('touchstart',scannerTS);
-  canvas.removeEventListener('touchmove',scannerTM);
-  canvas.addEventListener('touchstart',scannerTS,{passive:false});
-  canvas.addEventListener('touchmove',scannerTM,{passive:false});
-  canvas.addEventListener('touchend',function(){scannerDragging=-1;});
-  canvas.addEventListener('mousedown',scannerTS);
-  canvas.addEventListener('mousemove',function(e){if(scannerDragging>=0)scannerTM(e);});
-  canvas.addEventListener('mouseup',function(){scannerDragging=-1;});
-}
-
-function scannerDraw(){
-  if(!scannerCtx||!scannerImg)return;
-  var c=scannerCanvas;
-  scannerCtx.clearRect(0,0,c.width,c.height);
-  scannerCtx.drawImage(scannerImg,0,0,c.width,c.height);
-  scannerCtx.fillStyle='rgba(0,0,0,.45)';
-  scannerCtx.fillRect(0,0,c.width,c.height);
-  scannerCtx.save();
-  scannerCtx.beginPath();
-  scannerCtx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
-  for(var i=1;i<4;i++)scannerCtx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
-  scannerCtx.closePath();
-  scannerCtx.clip();
-  scannerCtx.drawImage(scannerImg,0,0,c.width,c.height);
-  scannerCtx.restore();
-  scannerCtx.beginPath();
-  scannerCtx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
-  for(var i=1;i<4;i++)scannerCtx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
-  scannerCtx.closePath();
-  scannerCtx.strokeStyle='#6C3CE1';scannerCtx.lineWidth=2.5;scannerCtx.stroke();
-  var clrs=['#FF4444','#FFD93D','#00CC66','#4D96FF'];
-  scannerCorners.forEach(function(p,i){
-    scannerCtx.beginPath();scannerCtx.arc(p.x,p.y,22,0,Math.PI*2);
-    scannerCtx.fillStyle='rgba(0,0,0,0.4)';scannerCtx.fill();
-    scannerCtx.beginPath();scannerCtx.arc(p.x,p.y,18,0,Math.PI*2);
-    scannerCtx.fillStyle=clrs[i];scannerCtx.fill();
-    scannerCtx.strokeStyle='#fff';scannerCtx.lineWidth=3;scannerCtx.stroke();
+function scannerInitHandles(){
+  scannerHandles=[{px:8,py:8},{px:92,py:8},{px:92,py:92},{px:8,py:92}];
+  scannerUpdateHandles();
+  var box=document.getElementById('scan-crop-box');
+  var newBox=box.cloneNode(false);
+  while(box.firstChild) newBox.appendChild(box.firstChild);
+  box.parentNode.replaceChild(newBox,box);
+  box=document.getElementById('scan-crop-box');
+  box.addEventListener('touchstart',function(e){
+    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
+    var t=e.touches[0];
+    var tx=(t.clientX-rect.left)/rect.width*100;
+    var ty=(t.clientY-rect.top)/rect.height*100;
+    scannerDraggingHandle=-1;
+    var best=25;
+    scannerHandles.forEach(function(h,i){
+      var d=Math.hypot(tx-h.px,ty-h.py);
+      if(d<best){best=d;scannerDraggingHandle=i;}
+    });
+    if(scannerDraggingHandle>=0) e.preventDefault();
+  },{passive:false});
+  box.addEventListener('touchmove',function(e){
+    if(scannerDraggingHandle<0) return;
+    e.preventDefault();
+    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
+    var t=e.touches[0];
+    scannerHandles[scannerDraggingHandle]={
+      px:Math.max(0,Math.min(100,(t.clientX-rect.left)/rect.width*100)),
+      py:Math.max(0,Math.min(100,(t.clientY-rect.top)/rect.height*100))
+    };
+    scannerUpdateHandles();
+  },{passive:false});
+  box.addEventListener('touchend',function(){scannerDraggingHandle=-1;});
+  box.addEventListener('mousedown',function(e){
+    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
+    var mx=(e.clientX-rect.left)/rect.width*100;
+    var my=(e.clientY-rect.top)/rect.height*100;
+    scannerDraggingHandle=-1;var best=15;
+    scannerHandles.forEach(function(h,i){var d=Math.hypot(mx-h.px,my-h.py);if(d<best){best=d;scannerDraggingHandle=i;}});
   });
+  box.addEventListener('mousemove',function(e){
+    if(scannerDraggingHandle<0) return;
+    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
+    scannerHandles[scannerDraggingHandle]={
+      px:Math.max(0,Math.min(100,(e.clientX-rect.left)/rect.width*100)),
+      py:Math.max(0,Math.min(100,(e.clientY-rect.top)/rect.height*100))
+    };
+    scannerUpdateHandles();
+  });
+  document.addEventListener('mouseup',function(){scannerDraggingHandle=-1;});
+  toast('✂️ Arraste os 4 pontos para os cantos do documento',4000);
 }
 
-function scannerPt(e){
-  var rect=scannerCanvas.getBoundingClientRect();
-  var cx=e.touches?e.touches[0].clientX:e.clientX;
-  var cy=e.touches?e.touches[0].clientY:e.clientY;
-  return{x:(cx-rect.left)*(scannerCanvas.width/rect.width),y:(cy-rect.top)*(scannerCanvas.height/rect.height)};
-}
-function scannerTS(e){
-  e.preventDefault();
-  var pt=scannerPt(e);scannerDragging=-1;
-  scannerCorners.forEach(function(c,i){if(Math.hypot(pt.x-c.x,pt.y-c.y)<40)scannerDragging=i;});
-}
-function scannerTM(e){
-  e.preventDefault();if(scannerDragging<0)return;
-  var pt=scannerPt(e);
-  pt.x=Math.max(0,Math.min(scannerCanvas.width,pt.x));
-  pt.y=Math.max(0,Math.min(scannerCanvas.height,pt.y));
-  scannerCorners[scannerDragging]=pt;scannerDraw();
+function scannerUpdateHandles(){
+  scannerHandles.forEach(function(h,i){
+    var el=document.getElementById('sh'+i);
+    if(el){el.style.left=h.px+'%';el.style.top=h.py+'%';}
+  });
+  var poly=document.getElementById('scan-poly');
+  if(poly) poly.setAttribute('points',scannerHandles.map(function(h){return h.px+'% '+h.py+'%';}).join(' '));
 }
 
 function gaussElim(A,b){
@@ -1422,18 +1414,63 @@ function processarScan(tipo,btn){
   document.getElementById('scanner-processing').style.display='block';
   setTimeout(function(){
     try{
-      scannerResultCanvas=aplicarScanFiltro(tipo);
+      var dispImg=document.getElementById('scanner-preview-img');
+      var dW=dispImg.naturalWidth||scannerImg.width;
+      var dH=dispImg.naturalHeight||scannerImg.height;
+      scannerCorners=scannerHandles.map(function(h){
+        return{x:h.px/100*dW, y:h.py/100*dH};
+      });
+      scannerResultCanvas=aplicarScanFiltroNat();
       var img=document.getElementById('scanner-result-img');
       img.src=scannerResultCanvas.toDataURL('image/jpeg',.92);
       img.style.display='block';
       document.getElementById('scanner-processing').style.display='none';
       document.getElementById('scanner-step3').style.display='block';
     }catch(e){
-      toast('Erro: '+e.message);
+      toast('Erro: '+e.message,5000);
       document.getElementById('scanner-processing').style.display='none';
       document.getElementById('scanner-step2').style.display='block';
     }
   },80);
+}
+
+function aplicarScanFiltroNat(){
+  var tipo=document.querySelector('.scan-btn-tipo.sel');
+  tipo=tipo?tipo.textContent.trim():'doc';
+  if(tipo.indexOf('Colorido')>-1) tipo='color';
+  else if(tipo.indexOf('P')>-1&&tipo.indexOf('B')>-1) tipo='pb';
+  else tipo='doc';
+  var sp=scannerCorners;
+  var w=Math.round(Math.max(ptDist(sp[0],sp[1]),ptDist(sp[3],sp[2])));
+  var h=Math.round(Math.max(ptDist(sp[0],sp[3]),ptDist(sp[1],sp[2])));
+  var dp=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
+  var M=getPerspM(dp,sp);
+  var oc=document.createElement('canvas');oc.width=w;oc.height=h;
+  var octx=oc.getContext('2d');
+  var sc2=document.createElement('canvas');
+  sc2.width=scannerImg.naturalWidth||scannerImg.width;
+  sc2.height=scannerImg.naturalHeight||scannerImg.height;
+  var sc2x=sc2.getContext('2d');sc2x.drawImage(scannerImg,0,0);
+  var sd=sc2x.getImageData(0,0,sc2.width,sc2.height);
+  var od=octx.createImageData(w,h);
+  for(var y=0;y<h;y++){
+    for(var x=0;x<w;x++){
+      var dn=M[6]*x+M[7]*y+M[8];
+      var sx=Math.round((M[0]*x+M[1]*y+M[2])/dn);
+      var sy=Math.round((M[3]*x+M[4]*y+M[5])/dn);
+      if(sx>=0&&sx<sc2.width&&sy>=0&&sy<sc2.height){
+        var si=(sy*sc2.width+sx)*4;
+        var di=(y*w+x)*4;
+        var r=sd.data[si],g=sd.data[si+1],b=sd.data[si+2];
+        if(tipo==='pb'){var gr=Math.round(.299*r+.587*g+.114*b);od.data[di]=od.data[di+1]=od.data[di+2]=gr;}
+        else if(tipo==='doc'){var gr=Math.round(.299*r+.587*g+.114*b);var v=Math.min(255,Math.max(0,Math.round((gr-80)*2.2)));od.data[di]=od.data[di+1]=od.data[di+2]=v;}
+        else{od.data[di]=r;od.data[di+1]=g;od.data[di+2]=b;}
+        od.data[di+3]=255;
+      }
+    }
+  }
+  octx.putImageData(od,0,0);
+  return oc;
 }
 
 function salvarScannerPDF(){
@@ -1460,24 +1497,24 @@ function scannerCompartilhar(){
 }
 
 function scannerNovo(){
-  scannerImg=null;scannerResultCanvas=null;
+  scannerImg=null;scannerResultCanvas=null;scannerCorners=null;
+  scannerHandles=[{px:8,py:8},{px:92,py:8},{px:92,py:92},{px:8,py:92}];
   document.getElementById('scanner-step1').style.display='block';
   document.getElementById('scanner-step2').style.display='none';
   document.getElementById('scanner-step3').style.display='none';
   document.getElementById('scanner-processing').style.display='none';
   document.getElementById('scanner-result-img').style.display='none';
+  try{document.getElementById('scanner-preview-img').src='';}catch(e){}
   // Recriar inputs para destravar câmera no Android
   try{
     var ci=document.getElementById('scanner-cam-input');
-    var ni=ci.cloneNode(true);
-    ni.onchange=null;
+    var ni=ci.cloneNode(true);ni.onchange=null;
     ni.addEventListener('change',function(){scannerPreview(this);});
     ci.parentNode.replaceChild(ni,ci);
   }catch(e){}
   try{
     var fi=document.getElementById('scanner-file-input');
-    var nf=fi.cloneNode(true);
-    nf.onchange=null;
+    var nf=fi.cloneNode(true);nf.onchange=null;
     nf.addEventListener('change',function(){scannerPreview(this);});
     fi.parentNode.replaceChild(nf,fi);
   }catch(e){}
