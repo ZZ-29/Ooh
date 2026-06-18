@@ -1332,7 +1332,7 @@ function scannerUpdateHandles(){
     if(el){el.style.left=h.px+'%';el.style.top=h.py+'%';}
   });
   var poly=document.getElementById('scan-poly');
-  if(poly) poly.setAttribute('points',scannerHandles.map(function(h){return h.px+'% '+h.py+'%';}).join(' '));
+  if(poly) poly.setAttribute('points',scannerHandles.map(function(h){return h.px+' '+h.py;}).join(' '));
 }
 
 function gaussElim(A,b){
