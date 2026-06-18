@@ -814,15 +814,9 @@ select{appearance:none;-webkit-appearance:none}
   <!-- Step 2: Ajustar cantos -->
   <div id="scanner-step2" style="display:none;padding:0 16px">
     <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:8px">&#x1F449; Arraste os pontos coloridos para os <strong style="color:#fff">cantos do documento</strong></p>
-    <div id="scan-crop-box" style="position:relative;display:block;width:100%;max-height:58vh;touch-action:none;user-select:none;overflow:hidden;border-radius:10px">
-      <img id="scanner-preview-img" style="width:100%;height:auto;max-height:58vh;display:block;pointer-events:none" draggable="false">
-      <svg id="scan-svg" viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none">
-        <polygon id="scan-poly" fill="rgba(108,60,225,0.2)" stroke="#6C3CE1" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-      </svg>
-      <div class="scan-handle" id="sh0" style="background:#FF4444"></div>
-      <div class="scan-handle" id="sh1" style="background:#FFD93D"></div>
-      <div class="scan-handle" id="sh2" style="background:#00CC66"></div>
-      <div class="scan-handle" id="sh3" style="background:#4D96FF"></div>
+    <div id="scan-crop-box" style="position:relative;display:inline-block;width:100%;touch-action:none;user-select:none">
+      <img id="scanner-preview-img" style="width:100%;display:block;border-radius:10px;pointer-events:none" draggable="false">
+      <canvas id="scanner-overlay" style="position:absolute;top:0;left:0;border-radius:10px;touch-action:none"></canvas>
     </div>
     <div style="margin-top:14px">
       <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saída:</p>
@@ -1254,8 +1248,7 @@ preencherUnidades();
 
 // ===== SCANNER =====
 var scannerImg=null,scannerResultCanvas=null,scannerCorners=null;
-var scannerHandles=[{px:8,py:8},{px:92,py:8},{px:92,py:92},{px:8,py:92}];
-var scannerDraggingHandle=-1;
+var scannerOvCanvas=null,scannerOvCtx=null,scannerDragging=-1;
 
 function scannerPreview(input){
   if(!input.files||!input.files[0])return;
@@ -1267,72 +1260,78 @@ function scannerPreview(input){
     document.getElementById('scanner-preview-img').src=url;
     document.getElementById('scanner-step1').style.display='none';
     document.getElementById('scanner-step2').style.display='block';
-    setTimeout(scannerInitHandles,150);
+    setTimeout(scannerInitOverlay,200);
   };
   img.onerror=function(){toast('Erro ao carregar imagem',5000);};
   img.src=url;
 }
 
-function scannerInitHandles(){
-  scannerHandles=[{px:8,py:8},{px:92,py:8},{px:92,py:92},{px:8,py:92}];
-  scannerUpdateHandles();
-  var box=document.getElementById('scan-crop-box');
-  var newBox=box.cloneNode(false);
-  while(box.firstChild) newBox.appendChild(box.firstChild);
-  box.parentNode.replaceChild(newBox,box);
-  box=document.getElementById('scan-crop-box');
-  box.addEventListener('touchstart',function(e){
-    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
-    var t=e.touches[0];
-    var tx=(t.clientX-rect.left)/rect.width*100;
-    var ty=(t.clientY-rect.top)/rect.height*100;
-    scannerDraggingHandle=-1;
-    var best=25;
-    scannerHandles.forEach(function(h,i){
-      var d=Math.hypot(tx-h.px,ty-h.py);
-      if(d<best){best=d;scannerDraggingHandle=i;}
-    });
-    if(scannerDraggingHandle>=0) e.preventDefault();
+function scannerInitOverlay(){
+  var dispImg=document.getElementById('scanner-preview-img');
+  var w=dispImg.clientWidth;
+  var h=dispImg.clientHeight;
+  if(w<=0||h<=0){setTimeout(scannerInitOverlay,100);return;}
+  var ov=document.getElementById('scanner-overlay');
+  ov.width=w; ov.height=h;
+  ov.style.width=w+'px'; ov.style.height=h+'px';
+  scannerOvCanvas=ov; scannerOvCtx=ov.getContext('2d');
+  var m=Math.round(Math.min(w,h)*0.08);
+  scannerCorners=[{x:m,y:m},{x:w-m,y:m},{x:w-m,y:h-m},{x:m,y:h-m}];
+  scannerDrawOverlay();
+  var newOv=ov.cloneNode(false);
+  newOv.width=w; newOv.height=h;
+  newOv.style.width=w+'px'; newOv.style.height=h+'px';
+  ov.parentNode.replaceChild(newOv,ov);
+  scannerOvCanvas=newOv; scannerOvCtx=newOv.getContext('2d');
+  scannerDrawOverlay();
+  function getOvPt(e){
+    var rect=scannerOvCanvas.getBoundingClientRect();
+    var cx=e.touches?e.touches[0].clientX:e.clientX;
+    var cy=e.touches?e.touches[0].clientY:e.clientY;
+    return{x:(cx-rect.left)*(scannerOvCanvas.width/rect.width),y:(cy-rect.top)*(scannerOvCanvas.height/rect.height)};
+  }
+  scannerOvCanvas.addEventListener('touchstart',function(e){
+    var pt=getOvPt(e);scannerDragging=-1;var best=55;
+    scannerCorners.forEach(function(c,i){var d=Math.hypot(pt.x-c.x,pt.y-c.y);if(d<best){best=d;scannerDragging=i;}});
+    if(scannerDragging>=0)e.preventDefault();
   },{passive:false});
-  box.addEventListener('touchmove',function(e){
-    if(scannerDraggingHandle<0) return;
-    e.preventDefault();
-    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
-    var t=e.touches[0];
-    scannerHandles[scannerDraggingHandle]={
-      px:Math.max(0,Math.min(100,(t.clientX-rect.left)/rect.width*100)),
-      py:Math.max(0,Math.min(100,(t.clientY-rect.top)/rect.height*100))
-    };
-    scannerUpdateHandles();
+  scannerOvCanvas.addEventListener('touchmove',function(e){
+    if(scannerDragging<0)return;e.preventDefault();
+    var pt=getOvPt(e);
+    scannerCorners[scannerDragging]={x:Math.max(0,Math.min(scannerOvCanvas.width,pt.x)),y:Math.max(0,Math.min(scannerOvCanvas.height,pt.y))};
+    scannerDrawOverlay();
   },{passive:false});
-  box.addEventListener('touchend',function(){scannerDraggingHandle=-1;});
-  box.addEventListener('mousedown',function(e){
-    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
-    var mx=(e.clientX-rect.left)/rect.width*100;
-    var my=(e.clientY-rect.top)/rect.height*100;
-    scannerDraggingHandle=-1;var best=15;
-    scannerHandles.forEach(function(h,i){var d=Math.hypot(mx-h.px,my-h.py);if(d<best){best=d;scannerDraggingHandle=i;}});
+  scannerOvCanvas.addEventListener('touchend',function(){scannerDragging=-1;});
+  scannerOvCanvas.addEventListener('mousedown',function(e){
+    var pt=getOvPt(e);scannerDragging=-1;var best=35;
+    scannerCorners.forEach(function(c,i){var d=Math.hypot(pt.x-c.x,pt.y-c.y);if(d<best){best=d;scannerDragging=i;}});
   });
-  box.addEventListener('mousemove',function(e){
-    if(scannerDraggingHandle<0) return;
-    var rect=document.getElementById('scanner-preview-img').getBoundingClientRect();
-    scannerHandles[scannerDraggingHandle]={
-      px:Math.max(0,Math.min(100,(e.clientX-rect.left)/rect.width*100)),
-      py:Math.max(0,Math.min(100,(e.clientY-rect.top)/rect.height*100))
-    };
-    scannerUpdateHandles();
+  scannerOvCanvas.addEventListener('mousemove',function(e){
+    if(scannerDragging<0)return;
+    var pt=getOvPt(e);
+    scannerCorners[scannerDragging]={x:Math.max(0,Math.min(scannerOvCanvas.width,pt.x)),y:Math.max(0,Math.min(scannerOvCanvas.height,pt.y))};
+    scannerDrawOverlay();
   });
-  document.addEventListener('mouseup',function(){scannerDraggingHandle=-1;});
+  document.addEventListener('mouseup',function(){scannerDragging=-1;});
   toast('✂️ Arraste os 4 pontos para os cantos do documento',4000);
 }
 
-function scannerUpdateHandles(){
-  scannerHandles.forEach(function(h,i){
-    var el=document.getElementById('sh'+i);
-    if(el){el.style.left=h.px+'%';el.style.top=h.py+'%';}
+function scannerDrawOverlay(){
+  if(!scannerOvCtx||!scannerCorners)return;
+  var ctx=scannerOvCtx,ov=scannerOvCanvas;
+  ctx.clearRect(0,0,ov.width,ov.height);
+  ctx.beginPath();
+  ctx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
+  for(var i=1;i<4;i++)ctx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
+  ctx.closePath();
+  ctx.fillStyle='rgba(108,60,225,0.18)';ctx.fill();
+  ctx.strokeStyle='#6C3CE1';ctx.lineWidth=2.5;ctx.stroke();
+  var clrs=['#FF4444','#FFD93D','#00CC66','#4D96FF'];
+  scannerCorners.forEach(function(p,i){
+    ctx.beginPath();ctx.arc(p.x,p.y,20,0,Math.PI*2);
+    ctx.fillStyle=clrs[i];ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.stroke();
   });
-  var poly=document.getElementById('scan-poly');
-  if(poly) poly.setAttribute('points',scannerHandles.map(function(h){return h.px+' '+h.py;}).join(' '));
 }
 
 function gaussElim(A,b){
@@ -1411,19 +1410,19 @@ function aplicarScanFiltro(tipo){
 function processarScan(tipo,btn){
   document.querySelectorAll('.scan-btn-tipo').forEach(function(b){b.classList.remove('sel');});
   if(btn)btn.classList.add('sel');
+  if(!scannerCorners||!scannerOvCanvas){toast('Tire uma foto primeiro',3000);return;}
   document.getElementById('scanner-step2').style.display='none';
   document.getElementById('scanner-processing').style.display='block';
   setTimeout(function(){
     try{
-      var dispImg=document.getElementById('scanner-preview-img');
-      var dW=dispImg.naturalWidth||scannerImg.width;
-      var dH=dispImg.naturalHeight||scannerImg.height;
-      scannerCorners=scannerHandles.map(function(h){
-        return{x:h.px/100*dW, y:h.py/100*dH};
-      });
-      scannerResultCanvas=aplicarScanFiltroNat();
+      var natW=scannerImg.naturalWidth||scannerImg.width;
+      var natH=scannerImg.naturalHeight||scannerImg.height;
+      var scX=natW/scannerOvCanvas.width;
+      var scY=natH/scannerOvCanvas.height;
+      var natCorners=scannerCorners.map(function(c){return{x:c.x*scX,y:c.y*scY};});
+      scannerResultCanvas=aplicarScanFiltroNat(natCorners,tipo);
       var img=document.getElementById('scanner-result-img');
-      img.src=scannerResultCanvas.toDataURL('image/jpeg',.92);
+      img.src=scannerResultCanvas.toDataURL('image/jpeg',.95);
       img.style.display='block';
       document.getElementById('scanner-processing').style.display='none';
       document.getElementById('scanner-step3').style.display='block';
@@ -1435,15 +1434,10 @@ function processarScan(tipo,btn){
   },80);
 }
 
-function aplicarScanFiltroNat(){
-  var tipo=document.querySelector('.scan-btn-tipo.sel');
-  tipo=tipo?tipo.textContent.trim():'doc';
-  if(tipo.indexOf('Colorido')>-1) tipo='color';
-  else if(tipo.indexOf('P')>-1&&tipo.indexOf('B')>-1) tipo='pb';
-  else tipo='doc';
-  var sp=scannerCorners;
+function aplicarScanFiltroNat(sp,tipo){
   var w=Math.round(Math.max(ptDist(sp[0],sp[1]),ptDist(sp[3],sp[2])));
   var h=Math.round(Math.max(ptDist(sp[0],sp[3]),ptDist(sp[1],sp[2])));
+  if(w<10||h<10){throw new Error('Área muito pequena, ajuste os pontos');}
   var dp=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
   var M=getPerspM(dp,sp);
   var oc=document.createElement('canvas');oc.width=w;oc.height=h;
@@ -1454,6 +1448,17 @@ function aplicarScanFiltroNat(){
   var sc2x=sc2.getContext('2d');sc2x.drawImage(scannerImg,0,0);
   var sd=sc2x.getImageData(0,0,sc2.width,sc2.height);
   var od=octx.createImageData(w,h);
+  // Auto-níveis para modo doc: calcula p5 e p95 da luminância
+  var p5=0,p95=255;
+  if(tipo==='doc'||tipo==='pb'){
+    var hist=new Array(256).fill(0);
+    for(var i=0;i<sd.data.length;i+=4){
+      hist[Math.round(.299*sd.data[i]+.587*sd.data[i+1]+.114*sd.data[i+2])]++;
+    }
+    var total=sd.data.length/4,cum=0;
+    for(var v=0;v<256;v++){cum+=hist[v];if(cum/total<0.05)p5=v;if(cum/total<0.92)p95=v;}
+  }
+  var range=p95-p5||1;
   for(var y=0;y<h;y++){
     for(var x=0;x<w;x++){
       var dn=M[6]*x+M[7]*y+M[8];
@@ -1463,9 +1468,17 @@ function aplicarScanFiltroNat(){
         var si=(sy*sc2.width+sx)*4;
         var di=(y*w+x)*4;
         var r=sd.data[si],g=sd.data[si+1],b=sd.data[si+2];
-        if(tipo==='pb'){var gr=Math.round(.299*r+.587*g+.114*b);od.data[di]=od.data[di+1]=od.data[di+2]=gr;}
-        else if(tipo==='doc'){var gr=Math.round(.299*r+.587*g+.114*b);var v=Math.min(255,Math.max(0,Math.round((gr-80)*2.2)));od.data[di]=od.data[di+1]=od.data[di+2]=v;}
-        else{od.data[di]=r;od.data[di+1]=g;od.data[di+2]=b;}
+        if(tipo==='doc'){
+          var gr=Math.round(.299*r+.587*g+.114*b);
+          var norm=Math.min(255,Math.max(0,Math.round((gr-p5)/range*255)));
+          var v=norm>140?255:Math.round(norm*0.4);
+          od.data[di]=od.data[di+1]=od.data[di+2]=v;
+        }else if(tipo==='pb'){
+          var gr=Math.round(.299*r+.587*g+.114*b);
+          od.data[di]=od.data[di+1]=od.data[di+2]=Math.min(255,Math.max(0,Math.round((gr-p5)/range*255)));
+        }else{
+          od.data[di]=r;od.data[di+1]=g;od.data[di+2]=b;
+        }
         od.data[di+3]=255;
       }
     }
@@ -1499,7 +1512,7 @@ function scannerCompartilhar(){
 
 function scannerNovo(){
   scannerImg=null;scannerResultCanvas=null;scannerCorners=null;
-  scannerHandles=[{px:8,py:8},{px:92,py:8},{px:92,py:92},{px:8,py:92}];
+  scannerOvCanvas=null;scannerOvCtx=null;scannerDragging=-1;
   document.getElementById('scanner-step1').style.display='block';
   document.getElementById('scanner-step2').style.display='none';
   document.getElementById('scanner-step3').style.display='none';
