@@ -189,6 +189,10 @@ select{appearance:none;-webkit-appearance:none}
       </div>
     </div>
     <div class="home-sub">Praticidade em suas mãos</div>
+    <div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:4px 12px">
+      <span style="font-size:12px">🔒</span>
+      <span style="font-size:11px;color:#10B981;font-weight:600;letter-spacing:0.3px">Seus dados ficam só no seu celular</span>
+    </div>
   </div>
   <div class="tools-grid">
     <div class="tool-card qr" onclick="goTo('qr')">
@@ -2624,7 +2628,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v31');
+    var cache=await caches.open('ooh-v32');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
