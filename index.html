@@ -1289,7 +1289,7 @@ function scannerAbrirCamera(){
     return;
   }
   navigator.mediaDevices.getUserMedia({
-    video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}
+    video:{facingMode:{ideal:'environment'}}
   }).then(function(stream){
     scannerStream=stream;
     video.srcObject=stream;
@@ -2655,7 +2655,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v18');
+    var cache=await caches.open('ooh-v19');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
