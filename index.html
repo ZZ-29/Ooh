@@ -1296,12 +1296,10 @@ function scannerVoltarCamera(){
 }
 
 function abrirScanner(){
-  // Abre o scanner e dispara a câmera direto — mesmo user gesture do toque no card
+  // Clique síncrono — preserva o user gesture do Android
   goTo('scanner');
-  setTimeout(function(){
-    var inp=document.querySelector('#scanner-step1 input[capture="environment"]');
-    if(inp)inp.click();
-  },120);
+  var inp=document.querySelector('#scanner-step1 input[capture="environment"]');
+  if(inp)inp.click();
 }
 
 function scannerNovo(){
@@ -2638,7 +2636,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v34');
+    var cache=await caches.open('ooh-v35');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
