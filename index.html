@@ -2624,7 +2624,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v30');
+    var cache=await caches.open('ooh-v31');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';

@@ -1,4 +1,4 @@
-const CACHE = 'ooh-v10';
+const CACHE = 'ooh-v31';
 const ASSETS = ['manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -40,9 +40,14 @@ self.addEventListener('fetch', e => {
     return;
   }
 
+  // Navegação: sempre busca versão fresca do servidor (sem cache HTTP)
   if (e.request.mode === 'navigate') {
-    e.respondWith(fetch(e.request).catch(() => caches.match('index.html')));
+    e.respondWith(
+      fetch(e.request, {cache: 'no-cache'})
+        .catch(() => caches.match('index.html'))
+    );
     return;
   }
+
   e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
