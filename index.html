@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://unpkg.com https://api.qrserver.com https://geocoding-api.open-meteo.com https://api.open-meteo.com https://api.mymemory.translated.net; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://api.qrserver.com; connect-src 'self' https://geocoding-api.open-meteo.com https://api.open-meteo.com https://api.mymemory.translated.net; worker-src 'self' blob:;">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -975,6 +976,17 @@ select{appearance:none;-webkit-appearance:none}
 <script>
 var camAtiva=false,html5QrScanner=null;
 
+// Sanitização: escapa HTML em dados do usuário antes de injetar no DOM
+function escHtml(s){
+  if(!s)return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
 
 function goTo(s){
   if(s!=='home')history.pushState({screen:s},'','');
@@ -992,7 +1004,7 @@ function goTo(s){
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
-  if(s==='cal'){try{calInit();}catch(e){alert('Erro agenda: '+e.message);}}
+  if(s==='cal'){try{calInit();}catch(e){toast('Erro agenda: '+e.message,5000);}}
   if(s==='scanner')setTimeout(scannerNovo,0);
 }
 
@@ -1306,7 +1318,7 @@ function carregarNotas(){
   var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
   var lista=document.getElementById('notas-lista');if(!lista)return;
   if(!notas.length){lista.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:13px">Nenhuma nota ainda</div>';return;}
-  lista.innerHTML=notas.map(function(n,i){return '<div class="nota-card"><button class="nota-card-del" onclick="deletarNota('+i+')">x</button><div class="nota-card-text">'+n.txt+'</div><div class="nota-card-date">'+n.data+'</div></div>';}).join('');
+  lista.innerHTML=notas.map(function(n,i){return '<div class="nota-card"><button class="nota-card-del" onclick="deletarNota('+i+')">x</button><div class="nota-card-text">'+escHtml(n.txt)+'</div><div class="nota-card-date">'+escHtml(n.data)+'</div></div>';}).join('');
 }
 function deletarNota(i){
   var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
@@ -2702,7 +2714,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v41');
+    var cache=await caches.open('ooh-v42');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
@@ -2956,7 +2968,7 @@ function calRenderEventos(){
     +itens.map(function(i){
       return '<div onclick="calAbrirDia('+i.d+')" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer">'
         +'<span style="color:#10B981;font-weight:700;font-size:13px">'+i.d+' de '+calMeses[calMesAtual]+'</span>'
-        +'<p style="color:rgba(255,255,255,0.8);font-size:13px;margin-top:3px">'+i.nota+'</p></div>';
+        +'<p style="color:rgba(255,255,255,0.8);font-size:13px;margin-top:3px">'+escHtml(i.nota)+'</p></div>';
     }).join('');
 }
 
