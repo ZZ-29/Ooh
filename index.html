@@ -1394,11 +1394,11 @@ function scannerSetupCanvas(){
   var vW=window.innerWidth, vH=window.innerHeight;
   var natW=scannerImg.naturalWidth||scannerImg.width||1;
   var natH=scannerImg.naturalHeight||scannerImg.height||1;
-  var scale=Math.min(vW/natW,vH/natH,1);
+  var scale=Math.min(vW/natW,vH/natH); // sem cap: imagem sempre preenche a tela
   var cW=Math.round(natW*scale), cH=Math.round(natH*scale);
   var offX=Math.round((vW-cW)/2), offY=0;
   cv.width=cW; cv.height=cH;
-  cv.style.cssText='display:block;position:absolute;top:'+offY+'px;left:'+offX+'px;width:'+cW+'px;height:'+cH+'px;z-index:1';
+  cv.style.cssText='display:block;position:absolute;top:'+offY+'px;left:'+offX+'px;width:'+cW+'px;height:'+cH+'px;z-index:1;pointer-events:none';
   scannerCv=cv; scannerCtx=cv.getContext('2d');
   // Rect inicial: 10% de margem nas bordas, fundo acima da barra de botões
   var mX=Math.round(cW*0.10), mY=Math.round(cH*0.07);
@@ -1524,11 +1524,15 @@ function processarScan(tipo,btn){
       var sx=Math.round(r.x1*scX), sy=Math.round(r.y1*scY);
       var sw=Math.round((r.x2-r.x1)*scX), sh=Math.round((r.y2-r.y1)*scY);
       if(sw<10||sh<10)throw new Error('Área muito pequena');
+      // Garantir tamanho mínimo de 900px na maior dimensão
+      var minPx=900;
+      var outScale=Math.max(1, minPx/Math.max(sw,sh));
+      var outW=Math.round(sw*outScale), outH=Math.round(sh*outScale);
       var out=document.createElement('canvas');
-      out.width=sw; out.height=sh;
+      out.width=outW; out.height=outH;
       var ctx=out.getContext('2d');
-      // Recorte simples
-      ctx.drawImage(scannerImg,sx,sy,sw,sh,0,0,sw,sh);
+      // Recorte + escalar para tamanho mínimo
+      ctx.drawImage(scannerImg,sx,sy,sw,sh,0,0,outW,outH);
       // Aplicar filtro
       if(tipo==='pb'||tipo==='doc'){
         var id=ctx.getImageData(0,0,sw,sh), d=id.data;
@@ -2651,7 +2655,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v17');
+    var cache=await caches.open('ooh-v18');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
