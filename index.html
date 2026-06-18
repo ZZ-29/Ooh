@@ -814,10 +814,7 @@ select{appearance:none;-webkit-appearance:none}
   <!-- Step 2: Ajustar cantos -->
   <div id="scanner-step2" style="display:none;padding:0 16px">
     <p style="color:var(--text2);font-size:13px;text-align:center;margin-bottom:8px">&#x1F449; Arraste os pontos coloridos para os <strong style="color:#fff">cantos do documento</strong></p>
-    <div id="scan-crop-box" style="position:relative;display:flex;justify-content:center;width:100%;touch-action:none;user-select:none">
-      <img id="scanner-preview-img" style="max-width:100%;max-height:56vh;width:auto;height:auto;display:block;border-radius:10px;pointer-events:none" draggable="false">
-      <canvas id="scanner-overlay" style="position:absolute;border-radius:10px;touch-action:none"></canvas>
-    </div>
+    <canvas id="scanner-canvas" style="display:block;margin:0 auto;border-radius:10px;touch-action:none"></canvas>
     <div style="margin-top:14px">
       <p style="color:var(--text2);font-size:12px;text-align:center;margin-bottom:10px">Tipo de saída:</p>
       <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -1248,7 +1245,7 @@ preencherUnidades();
 
 // ===== SCANNER =====
 var scannerImg=null,scannerResultCanvas=null,scannerCorners=null;
-var scannerOvCanvas=null,scannerOvCtx=null,scannerDragging=-1;
+var scannerCtx=null,scannerCv=null,scannerDragging=-1;
 
 function scannerPreview(input){
   if(!input.files||!input.files[0])return;
@@ -1257,80 +1254,91 @@ function scannerPreview(input){
   var img=new Image();
   img.onload=function(){
     scannerImg=img;
-    document.getElementById('scanner-preview-img').src=url;
     document.getElementById('scanner-step1').style.display='none';
     document.getElementById('scanner-step2').style.display='block';
-    setTimeout(scannerInitOverlay,200);
+    setTimeout(scannerSetupCanvas,50);
   };
   img.onerror=function(){toast('Erro ao carregar imagem',5000);};
   img.src=url;
 }
 
-function scannerInitOverlay(){
-  var dispImg=document.getElementById('scanner-preview-img');
-  var w=dispImg.clientWidth;
-  var h=dispImg.clientHeight;
-  if(w<=0||h<=0){setTimeout(scannerInitOverlay,100);return;}
-  var ov=document.getElementById('scanner-overlay');
-  ov.width=w; ov.height=h;
-  ov.style.width=w+'px'; ov.style.height=h+'px';
-  // Posicionar canvas exatamente sobre a img
-  var imgRect=dispImg.getBoundingClientRect();
-  var boxRect=document.getElementById('scan-crop-box').getBoundingClientRect();
-  ov.style.top=(imgRect.top-boxRect.top)+'px';
-  ov.style.left=(imgRect.left-boxRect.left)+'px';
-  scannerOvCanvas=ov; scannerOvCtx=ov.getContext('2d');
-  var m=Math.round(Math.min(w,h)*0.08);
-  scannerCorners=[{x:m,y:m},{x:w-m,y:m},{x:w-m,y:h-m},{x:m,y:h-m}];
-  scannerDrawOverlay();
-  var newOv=ov.cloneNode(false);
-  newOv.width=w; newOv.height=h;
-  newOv.style.width=w+'px'; newOv.style.height=h+'px';
-  ov.parentNode.replaceChild(newOv,ov);
-  scannerOvCanvas=newOv; scannerOvCtx=newOv.getContext('2d');
-  scannerDrawOverlay();
-  function getOvPt(e){
-    var rect=scannerOvCanvas.getBoundingClientRect();
+function scannerSetupCanvas(){
+  var cv=document.getElementById('scanner-canvas');
+  var availW=window.innerWidth-32;
+  var availH=window.innerHeight-240;
+  if(availH<150)availH=150;
+  var natW=scannerImg.naturalWidth||scannerImg.width;
+  var natH=scannerImg.naturalHeight||scannerImg.height;
+  var scale=Math.min(availW/natW,availH/natH,1);
+  var cW=Math.round(natW*scale);
+  var cH=Math.round(natH*scale);
+  cv.width=cW; cv.height=cH;
+  cv.style.width=cW+'px'; cv.style.height=cH+'px';
+  scannerCv=cv; scannerCtx=cv.getContext('2d');
+  var m=Math.round(Math.min(cW,cH)*0.08);
+  scannerCorners=[{x:m,y:m},{x:cW-m,y:m},{x:cW-m,y:cH-m},{x:m,y:cH-m}];
+  scannerDraw();
+  var newCv=cv.cloneNode(false);
+  newCv.width=cW; newCv.height=cH;
+  newCv.style.width=cW+'px'; newCv.style.height=cH+'px';
+  cv.parentNode.replaceChild(newCv,cv);
+  scannerCv=newCv; scannerCtx=newCv.getContext('2d');
+  scannerDraw();
+  function getPt(e){
+    var rect=scannerCv.getBoundingClientRect();
     var cx=e.touches?e.touches[0].clientX:e.clientX;
     var cy=e.touches?e.touches[0].clientY:e.clientY;
-    return{x:(cx-rect.left)*(scannerOvCanvas.width/rect.width),y:(cy-rect.top)*(scannerOvCanvas.height/rect.height)};
+    return{x:(cx-rect.left)*(scannerCv.width/rect.width),y:(cy-rect.top)*(scannerCv.height/rect.height)};
   }
-  scannerOvCanvas.addEventListener('touchstart',function(e){
-    var pt=getOvPt(e);scannerDragging=-1;var best=55;
+  scannerCv.addEventListener('touchstart',function(e){
+    var pt=getPt(e);scannerDragging=-1;var best=55;
     scannerCorners.forEach(function(c,i){var d=Math.hypot(pt.x-c.x,pt.y-c.y);if(d<best){best=d;scannerDragging=i;}});
     if(scannerDragging>=0)e.preventDefault();
   },{passive:false});
-  scannerOvCanvas.addEventListener('touchmove',function(e){
+  scannerCv.addEventListener('touchmove',function(e){
     if(scannerDragging<0)return;e.preventDefault();
-    var pt=getOvPt(e);
-    scannerCorners[scannerDragging]={x:Math.max(0,Math.min(scannerOvCanvas.width,pt.x)),y:Math.max(0,Math.min(scannerOvCanvas.height,pt.y))};
-    scannerDrawOverlay();
+    var pt=getPt(e);
+    scannerCorners[scannerDragging]={x:Math.max(0,Math.min(scannerCv.width,pt.x)),y:Math.max(0,Math.min(scannerCv.height,pt.y))};
+    scannerDraw();
   },{passive:false});
-  scannerOvCanvas.addEventListener('touchend',function(){scannerDragging=-1;});
-  scannerOvCanvas.addEventListener('mousedown',function(e){
-    var pt=getOvPt(e);scannerDragging=-1;var best=35;
+  scannerCv.addEventListener('touchend',function(){scannerDragging=-1;});
+  scannerCv.addEventListener('mousedown',function(e){
+    var pt=getPt(e);scannerDragging=-1;var best=35;
     scannerCorners.forEach(function(c,i){var d=Math.hypot(pt.x-c.x,pt.y-c.y);if(d<best){best=d;scannerDragging=i;}});
   });
-  scannerOvCanvas.addEventListener('mousemove',function(e){
+  scannerCv.addEventListener('mousemove',function(e){
     if(scannerDragging<0)return;
-    var pt=getOvPt(e);
-    scannerCorners[scannerDragging]={x:Math.max(0,Math.min(scannerOvCanvas.width,pt.x)),y:Math.max(0,Math.min(scannerOvCanvas.height,pt.y))};
-    scannerDrawOverlay();
+    var pt=getPt(e);
+    scannerCorners[scannerDragging]={x:Math.max(0,Math.min(scannerCv.width,pt.x)),y:Math.max(0,Math.min(scannerCv.height,pt.y))};
+    scannerDraw();
   });
   document.addEventListener('mouseup',function(){scannerDragging=-1;});
   toast('✂️ Arraste os 4 pontos para os cantos do documento',4000);
 }
 
-function scannerDrawOverlay(){
-  if(!scannerOvCtx||!scannerCorners)return;
-  var ctx=scannerOvCtx,ov=scannerOvCanvas;
-  ctx.clearRect(0,0,ov.width,ov.height);
+function scannerDraw(){
+  if(!scannerCtx||!scannerCorners)return;
+  var ctx=scannerCtx,cv=scannerCv;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.drawImage(scannerImg,0,0,cv.width,cv.height);
+  // Escurecer fora da seleção
+  ctx.fillStyle='rgba(0,0,0,0.45)';
+  ctx.fillRect(0,0,cv.width,cv.height);
+  // Área clara dentro
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
+  for(var i=1;i<4;i++)ctx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
+  ctx.closePath();ctx.clip();
+  ctx.drawImage(scannerImg,0,0,cv.width,cv.height);
+  ctx.restore();
+  // Borda do recorte
   ctx.beginPath();
   ctx.moveTo(scannerCorners[0].x,scannerCorners[0].y);
   for(var i=1;i<4;i++)ctx.lineTo(scannerCorners[i].x,scannerCorners[i].y);
   ctx.closePath();
-  ctx.fillStyle='rgba(108,60,225,0.18)';ctx.fill();
   ctx.strokeStyle='#6C3CE1';ctx.lineWidth=2.5;ctx.stroke();
+  // Bolas coloridas
   var clrs=['#FF4444','#FFD93D','#00CC66','#4D96FF'];
   scannerCorners.forEach(function(p,i){
     ctx.beginPath();ctx.arc(p.x,p.y,20,0,Math.PI*2);
@@ -1339,185 +1347,9 @@ function scannerDrawOverlay(){
   });
 }
 
-function gaussElim(A,b){
-  var n=b.length;
-  for(var i=0;i<n;i++)A[i].push(b[i]);
-  for(var col=0;col<n;col++){
-    var mr=col;
-    for(var r=col+1;r<n;r++)if(Math.abs(A[r][col])>Math.abs(A[mr][col]))mr=r;
-    var tmp=A[col];A[col]=A[mr];A[mr]=tmp;
-    for(var r=col+1;r<n;r++){
-      var f=A[r][col]/A[col][col];
-      for(var k=col;k<=n;k++)A[r][k]-=f*A[col][k];
-    }
-  }
-  var x=new Array(n);
-  for(var i=n-1;i>=0;i--){
-    x[i]=A[i][n]/A[i][i];
-    for(var k=i-1;k>=0;k--)A[k][n]-=A[k][i]*x[i];
-  }
-  return x;
-}
-
-function getPerspM(src,dst){
-  var A=[],b=[];
-  for(var i=0;i<4;i++){
-    var sx=src[i].x,sy=src[i].y,dx=dst[i].x,dy=dst[i].y;
-    A.push([sx,sy,1,0,0,0,-dx*sx,-dx*sy]);b.push(dx);
-    A.push([0,0,0,sx,sy,1,-dy*sx,-dy*sy]);b.push(dy);
-  }
-  var h=gaussElim(A,b);
-  return[h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],1];
-}
-
-function ptDist(a,b){return Math.sqrt(Math.pow(b.x-a.x,2)+Math.pow(b.y-a.y,2));}
-
-function aplicarScanFiltro(tipo){
-  var sc=scannerImg.width/scannerCanvas.width;
-  var sp=scannerCorners.map(function(c){return{x:c.x*sc,y:c.y*sc};});
-  var w=Math.round(Math.max(ptDist(sp[0],sp[1]),ptDist(sp[3],sp[2])));
-  var h=Math.round(Math.max(ptDist(sp[0],sp[3]),ptDist(sp[1],sp[2])));
-  var dp=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
-  var M=getPerspM(dp,sp);
-  var oc=document.createElement('canvas');oc.width=w;oc.height=h;
-  var octx=oc.getContext('2d');
-  var sc2=document.createElement('canvas');sc2.width=scannerImg.width;sc2.height=scannerImg.height;
-  var sc2x=sc2.getContext('2d');sc2x.drawImage(scannerImg,0,0);
-  var sd=sc2x.getImageData(0,0,sc2.width,sc2.height);
-  var od=octx.createImageData(w,h);
-  for(var y=0;y<h;y++){
-    for(var x=0;x<w;x++){
-      var dn=M[6]*x+M[7]*y+M[8];
-      var sx=Math.round((M[0]*x+M[1]*y+M[2])/dn);
-      var sy=Math.round((M[3]*x+M[4]*y+M[5])/dn);
-      if(sx>=0&&sx<sc2.width&&sy>=0&&sy<sc2.height){
-        var si=(sy*sc2.width+sx)*4;
-        var di=(y*w+x)*4;
-        var r=sd.data[si],g=sd.data[si+1],b=sd.data[si+2];
-        if(tipo==='pb'){
-          var gr=Math.round(.299*r+.587*g+.114*b);
-          od.data[di]=od.data[di+1]=od.data[di+2]=gr;
-        }else if(tipo==='doc'){
-          var gr=Math.round(.299*r+.587*g+.114*b);
-          var v=Math.min(255,Math.max(0,Math.round((gr-80)*2.2)));
-          od.data[di]=od.data[di+1]=od.data[di+2]=v;
-        }else{
-          od.data[di]=r;od.data[di+1]=g;od.data[di+2]=b;
-        }
-        od.data[di+3]=255;
-      }
-    }
-  }
-  octx.putImageData(od,0,0);
-  return oc;
-}
-
-function processarScan(tipo,btn){
-  document.querySelectorAll('.scan-btn-tipo').forEach(function(b){b.classList.remove('sel');});
-  if(btn)btn.classList.add('sel');
-  if(!scannerCorners||!scannerOvCanvas){toast('Tire uma foto primeiro',3000);return;}
-  document.getElementById('scanner-step2').style.display='none';
-  document.getElementById('scanner-processing').style.display='block';
-  setTimeout(function(){
-    try{
-      var natW=scannerImg.naturalWidth||scannerImg.width;
-      var natH=scannerImg.naturalHeight||scannerImg.height;
-      var scX=natW/scannerOvCanvas.width;
-      var scY=natH/scannerOvCanvas.height;
-      var natCorners=scannerCorners.map(function(c){return{x:c.x*scX,y:c.y*scY};});
-      scannerResultCanvas=aplicarScanFiltroNat(natCorners,tipo);
-      var img=document.getElementById('scanner-result-img');
-      img.src=scannerResultCanvas.toDataURL('image/jpeg',.95);
-      img.style.display='block';
-      document.getElementById('scanner-processing').style.display='none';
-      document.getElementById('scanner-step3').style.display='block';
-    }catch(e){
-      toast('Erro: '+e.message,5000);
-      document.getElementById('scanner-processing').style.display='none';
-      document.getElementById('scanner-step2').style.display='block';
-    }
-  },80);
-}
-
-function aplicarScanFiltroNat(sp,tipo){
-  var w=Math.round(Math.max(ptDist(sp[0],sp[1]),ptDist(sp[3],sp[2])));
-  var h=Math.round(Math.max(ptDist(sp[0],sp[3]),ptDist(sp[1],sp[2])));
-  if(w<10||h<10){throw new Error('Área muito pequena, ajuste os pontos');}
-  var dp=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
-  var M=getPerspM(dp,sp);
-  var oc=document.createElement('canvas');oc.width=w;oc.height=h;
-  var octx=oc.getContext('2d');
-  var sc2=document.createElement('canvas');
-  sc2.width=scannerImg.naturalWidth||scannerImg.width;
-  sc2.height=scannerImg.naturalHeight||scannerImg.height;
-  var sc2x=sc2.getContext('2d');sc2x.drawImage(scannerImg,0,0);
-  var sd=sc2x.getImageData(0,0,sc2.width,sc2.height);
-  var od=octx.createImageData(w,h);
-  // Auto-níveis para modo doc: calcula p5 e p95 da luminância
-  var p5=0,p95=255;
-  if(tipo==='doc'||tipo==='pb'){
-    var hist=new Array(256).fill(0);
-    for(var i=0;i<sd.data.length;i+=4){
-      hist[Math.round(.299*sd.data[i]+.587*sd.data[i+1]+.114*sd.data[i+2])]++;
-    }
-    var total=sd.data.length/4,cum=0;
-    for(var v=0;v<256;v++){cum+=hist[v];if(cum/total<0.05)p5=v;if(cum/total<0.92)p95=v;}
-  }
-  var range=p95-p5||1;
-  for(var y=0;y<h;y++){
-    for(var x=0;x<w;x++){
-      var dn=M[6]*x+M[7]*y+M[8];
-      var sx=Math.round((M[0]*x+M[1]*y+M[2])/dn);
-      var sy=Math.round((M[3]*x+M[4]*y+M[5])/dn);
-      if(sx>=0&&sx<sc2.width&&sy>=0&&sy<sc2.height){
-        var si=(sy*sc2.width+sx)*4;
-        var di=(y*w+x)*4;
-        var r=sd.data[si],g=sd.data[si+1],b=sd.data[si+2];
-        if(tipo==='doc'){
-          var gr=Math.round(.299*r+.587*g+.114*b);
-          var norm=Math.min(255,Math.max(0,Math.round((gr-p5)/range*255)));
-          var v=norm>140?255:Math.round(norm*0.4);
-          od.data[di]=od.data[di+1]=od.data[di+2]=v;
-        }else if(tipo==='pb'){
-          var gr=Math.round(.299*r+.587*g+.114*b);
-          od.data[di]=od.data[di+1]=od.data[di+2]=Math.min(255,Math.max(0,Math.round((gr-p5)/range*255)));
-        }else{
-          od.data[di]=r;od.data[di+1]=g;od.data[di+2]=b;
-        }
-        od.data[di+3]=255;
-      }
-    }
-  }
-  octx.putImageData(od,0,0);
-  return oc;
-}
-
-function salvarScannerPDF(){
-  if(!scannerResultCanvas)return;
-  try{
-    var J=window.jspdf.jsPDF;
-    var w=scannerResultCanvas.width,h=scannerResultCanvas.height;
-    var ori=w>h?'l':'p';
-    var pdf=new J({orientation:ori,unit:'px',format:[w,h]});
-    pdf.addImage(scannerResultCanvas.toDataURL('image/jpeg',.92),'JPEG',0,0,w,h);
-    pdf.save('scan_'+Date.now()+'.pdf');
-    toast('PDF salvo!');
-  }catch(e){toast('Erro ao salvar: '+e.message);}
-}
-
-function scannerCompartilhar(){
-  if(!scannerResultCanvas){toast('Nenhum scan disponível');return;}
-  if(!navigator.share||!navigator.canShare){toast('Compartilhamento não disponível neste browser');return;}
-  scannerResultCanvas.toBlob(function(blob){
-    var file=new File([blob],'scan_'+Date.now()+'.jpg',{type:'image/jpeg'});
-    if(!navigator.canShare({files:[file]})){toast('Este device não suporta compartilhar imagens');return;}
-    navigator.share({files:[file],title:'Scan Ooh!'}).catch(function(e){if(e.name!=='AbortError')toast('Erro: '+e.message);});
-  },'image/jpeg',.92);
-}
-
 function scannerNovo(){
   scannerImg=null;scannerResultCanvas=null;scannerCorners=null;
-  scannerOvCanvas=null;scannerOvCtx=null;scannerDragging=-1;
+  scannerCv=null;scannerCtx=null;scannerDragging=-1;
   document.getElementById('scanner-step1').style.display='block';
   document.getElementById('scanner-step2').style.display='none';
   document.getElementById('scanner-step3').style.display='none';
