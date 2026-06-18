@@ -1251,9 +1251,9 @@ function scannerPreview(input){
     var img=new Image();
     img.onload=function(){
       scannerImg=img;
-      scannerSetupCanvas();
       document.getElementById('scanner-step1').style.display='none';
       document.getElementById('scanner-step2').style.display='block';
+      scannerSetupCanvas();
     };
     img.src=e.target.result;
   };
