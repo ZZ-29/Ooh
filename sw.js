@@ -1,4 +1,4 @@
-const CACHE = 'ooh-v9';
+const CACHE = 'ooh-v10';
 const ASSETS = ['manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {

@@ -788,7 +788,7 @@ select{appearance:none;-webkit-appearance:none}
 <!-- SCANNER -->
 <div class="screen" id="screen-scanner">
   <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <button class="back-btn" onclick="scannerNovo();goTo('home')">&#x2190;</button>
     <div class="icon" style="background:linear-gradient(145deg,#2563EB,#1D4ED8)">&#x1F4C3;</div>
     <h1>Scanner</h1>
   </div>
@@ -921,7 +921,7 @@ function goTo(s){
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
-  if(s==='scanner')scannerNovo();
+  if(s==='scanner')setTimeout(scannerNovo,0);
 }
 
 
@@ -2413,7 +2413,7 @@ function pdfPagina(delta){
 async function checkSharedPDF(){
   if(!('caches' in window)) return;
   try{
-    var cache=await caches.open('ooh-v9');
+    var cache=await caches.open('ooh-v10');
     var resp=await cache.match('/Ooh/shared-pdf');
     if(resp){
       var nome=resp.headers.get('X-Filename')||'documento.pdf';
