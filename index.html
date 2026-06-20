@@ -92,6 +92,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .tool-card.extra{background:linear-gradient(145deg,#14C9DC,#0898AA)}
 .tool-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(255,255,255,.18)}
 .tool-name{font-size:15px;font-weight:800;color:#fff}
+.tool-alpha{position:absolute;top:8px;right:10px;font-size:11px;font-weight:900;color:rgba(255,255,255,0.30);letter-spacing:0.5px;line-height:1;font-family:monospace;text-transform:uppercase}
 .tool-desc{font-size:11.5px;color:rgba(255,255,255,.78);line-height:1.45}
 .pix-rapido-card{background:#0D2545;border:1px solid #1E5060;border-radius:var(--radius);padding:16px;border-top:3px solid #B49BFC}
 .page-head{display:flex;align-items:center;gap:12px;padding:20px 16px 8px}
@@ -198,66 +199,71 @@ select{appearance:none;-webkit-appearance:none}
   <div class="tools-grid">
     <!-- A -->
     <div class="tool-card" onclick="goTo('cal')" style="background:linear-gradient(135deg,#0f2027,#1a3a2a)">
+      <span class="tool-alpha">A</span>
       <div class="tool-icon">&#x1F4C5;</div>
-      <div class="tool-name">Agenda</div>
-      <div class="tool-desc">Compromissos e datas</div>
+      <div class="tool-name">Agenda & Avisos</div>
+      <div class="tool-desc">Calendário e lembretes</div>
     </div>
     <!-- C -->
     <div class="tool-card" onclick="goTo('calc')" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">
+      <span class="tool-alpha">C</span>
       <div class="tool-icon">&#x1F9EE;</div>
       <div class="tool-name">Calculadora</div>
       <div class="tool-desc">Operações e %</div>
     </div>
     <!-- E -->
     <div class="tool-card extra" onclick="goTo('extras')">
+      <span class="tool-alpha">E</span>
       <div class="tool-icon">&#x1F9F0;</div>
       <div class="tool-name">Extras</div>
       <div class="tool-desc">Conversores e notas</div>
     </div>
-    <!-- L -->
-    <div class="tool-card" onclick="goTo('lembretes')" style="background:linear-gradient(145deg,#B45309,#92400E)">
-      <div class="tool-icon">&#x23F0;</div>
-      <div class="tool-name">Lembretes</div>
-      <div class="tool-desc">Alarmes e avisos</div>
-    </div>
+
     <!-- O -->
     <div class="tool-card ocr" onclick="goTo('cam')">
+      <span class="tool-alpha">O</span>
       <div class="tool-icon">&#x1F50D;</div>
       <div class="tool-name">OCR</div>
       <div class="tool-desc">Extrair texto de fotos</div>
     </div>
     <!-- P -->
     <div class="tool-card pix" onclick="togglePixRapido()">
+      <span class="tool-alpha">P</span>
       <div class="tool-icon">&#x26A1;</div>
       <div class="tool-name">Pix Rápido</div>
       <div class="tool-desc">Gere QR Pix na hora</div>
     </div>
     <!-- Q -->
     <div class="tool-card qr" onclick="goTo('qr')">
+      <span class="tool-alpha">Q</span>
       <div class="tool-icon">&#x2B1B;</div>
       <div class="tool-name">QR / Barras</div>
       <div class="tool-desc">Gerar e ler códigos</div>
     </div>
     <!-- S -->
     <div class="tool-card scanner" onclick="abrirScanner()">
+      <span class="tool-alpha">S</span>
       <div class="tool-icon">&#x1F4C3;</div>
       <div class="tool-name">Scanner</div>
       <div class="tool-desc">Digitalizar e PDF</div>
     </div>
     <!-- T (Tempo) -->
     <div class="tool-card" onclick="goTo('tempo')" style="background:linear-gradient(145deg,#0369A1,#075985)">
+      <span class="tool-alpha">T·1</span>
       <div class="tool-icon">&#x26C5;</div>
       <div class="tool-name">Tempo</div>
       <div class="tool-desc">Previsão sem anúncio</div>
     </div>
     <!-- T (Timer) -->
     <div class="tool-card" onclick="goTo('timer')" style="background:linear-gradient(145deg,#DC2626,#991B1B)">
+      <span class="tool-alpha">T·2</span>
       <div class="tool-icon">&#x1F373;</div>
       <div class="tool-name">Timer</div>
       <div class="tool-desc">Cronômetro e cozinha</div>
     </div>
     <!-- V -->
     <div class="tool-card" onclick="goTo('veiculos')" style="background:linear-gradient(145deg,#059669,#047857)">
+      <span class="tool-alpha">V</span>
       <div class="tool-icon">&#x26FD;</div>
       <div class="tool-name">Veículos</div>
       <div class="tool-desc">Gastos de combustível</div>
@@ -478,32 +484,110 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 </div>
 
-<!-- TEMPO -->
+<!-- AGENDA & LEMBRETES -->
 <div class="screen" id="screen-cal">
   <div class="page-head">
     <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
     <div class="icon" style="background:linear-gradient(135deg,#0f2027,#1a3a2a)">&#x1F4C5;</div>
-    <h1>Agenda</h1>
+    <h1>Agenda &amp; Avisos</h1>
   </div>
-  <div style="padding:0 12px 80px">
-    <!-- Navegação mês -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:10px 4px 0">
-      <button onclick="calMes(-1)" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer">&#x2039;</button>
-      <button onclick="calAbrirNavMesAno()" style="background:none;border:none;color:#fff;font-size:18px;font-weight:700;cursor:pointer;letter-spacing:0.5px" id="cal-titulo"></button>
-      <button onclick="calMes(1)" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer">&#x203a;</button>
-    </div>
-    <!-- Dias da semana -->
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px" id="cal-semana"></div>
-    <!-- Grade de dias -->
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px" id="cal-grade"></div>
-    <!-- Dica de uso -->
-    <div style="text-align:center;margin-top:12px;margin-bottom:4px">
-      <span style="font-size:13px;color:#A78BFA;font-weight:600;letter-spacing:0.3px">👆 Toque em uma data para adicionar anotação</span>
-    </div>
-    <!-- Eventos do mês -->
-    <div id="cal-eventos" style="margin-top:12px"></div>
+  <div class="tabs">
+    <div class="tab active" onclick="calTabSwitch('cal')">&#x1F4C5; Calendário</div>
+    <div class="tab" onclick="calTabSwitch('lemb')">&#x23F0; Lembretes</div>
+    <div class="tab" onclick="calTabSwitch('datas')">&#x1F382; Datas</div>
   </div>
-  <!-- Modal nota -->
+
+  <!-- PANE CALENDÁRIO -->
+  <div class="pane active" id="cal-pane-cal">
+    <div style="padding:0 12px 80px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:10px 4px 0">
+        <button onclick="calMes(-1)" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer">&#x2039;</button>
+        <button onclick="calAbrirNavMesAno()" style="background:none;border:none;color:#fff;font-size:18px;font-weight:700;cursor:pointer;letter-spacing:0.5px" id="cal-titulo"></button>
+        <button onclick="calMes(1)" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer">&#x203a;</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px" id="cal-semana"></div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px" id="cal-grade"></div>
+      <div style="text-align:center;margin-top:12px;margin-bottom:4px">
+        <span style="font-size:13px;color:#A78BFA;font-weight:600;letter-spacing:0.3px">&#x1F446; Toque em uma data para adicionar anotação</span>
+      </div>
+      <div id="cal-eventos" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- PANE LEMBRETES -->
+  <div class="pane" id="cal-pane-lemb">
+    <div style="padding:0 16px 4px">
+      <div id="notif-aviso" style="display:none;background:rgba(245,158,11,.15);border:1px solid #B45309;border-radius:10px;padding:12px;font-size:13px;color:#FCD34D;margin-bottom:12px;text-align:center">
+        &#x1F514; Ative as notificacoes para receber alarmes mesmo com o app minimizado
+        <br><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pedirPermissaoNotif()">Ativar notificacoes</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="field">
+        <label class="lbl">O que precisa lembrar?</label>
+        <textarea id="lemb-texto" placeholder="Ex: Ligar para o banco, Consulta medica, Pagar boleto..." style="min-height:70px"></textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="lbl">Data</label>
+          <input type="date" id="lemb-data">
+        </div>
+        <div class="field">
+          <label class="lbl">Hora</label>
+          <input type="time" id="lemb-hora">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="salvarLembrete()">&#x23F0; Salvar Lembrete</button>
+    </div>
+    <div style="padding:0 16px 80px">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">PRÓXIMOS LEMBRETES</div>
+      <div id="lemb-lista"></div>
+    </div>
+  </div>
+
+  <!-- PANE DATAS IMPORTANTES -->
+  <div class="pane" id="cal-pane-datas">
+    <div class="section">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Aniversários, datas fixas anuais e eventos recorrentes</div>
+      <div class="field">
+        <label class="lbl">Descrição</label>
+        <input type="text" id="data-imp-desc" class="inp" placeholder="Ex: Aniversário da Maria, Vencimento IPVA...">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="field">
+          <label class="lbl">Dia</label>
+          <input type="number" id="data-imp-dia" class="inp" min="1" max="31" placeholder="1-31">
+        </div>
+        <div class="field">
+          <label class="lbl">Mês</label>
+          <select id="data-imp-mes" class="inp">
+            <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+            <option value="3">Março</option><option value="4">Abril</option>
+            <option value="5">Maio</option><option value="6">Junho</option>
+            <option value="7">Julho</option><option value="8">Agosto</option>
+            <option value="9">Setembro</option><option value="10">Outubro</option>
+            <option value="11">Novembro</option><option value="12">Dezembro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Tipo</label>
+        <select id="data-imp-tipo" class="inp">
+          <option value="aniv">🎂 Aniversário</option>
+          <option value="data">📅 Data fixa anual</option>
+          <option value="vcto">💰 Vencimento</option>
+          <option value="outro">📌 Outro</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="datasImpSalvar()">&#x2B; Adicionar data</button>
+    </div>
+    <div style="padding:0 16px 80px">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">DATAS CADASTRADAS</div>
+      <div id="data-imp-lista"></div>
+    </div>
+  </div>
+
+  <!-- Modal nota do calendário -->
   <div id="cal-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:24px">
     <div style="background:#131C2E;border:1px solid rgba(108,60,225,0.4);border-radius:18px;padding:20px;width:100%;max-width:340px">
       <div style="color:#fff;font-weight:700;font-size:16px;margin-bottom:12px" id="cal-modal-titulo"></div>
@@ -530,6 +614,7 @@ select{appearance:none;-webkit-appearance:none}
     </div>
   </div>
 </div>
+
 
 <div class="screen" id="screen-tempo">
   <div class="page-head">
@@ -790,7 +875,7 @@ select{appearance:none;-webkit-appearance:none}
     <div class="scan-hint">Le QR Codes, EAN-13, EAN-8, Code 128, UPC e mais</div>
     <div style="padding:0 16px 12px"><button class="btn btn-primary" onclick="toggleCam()" id="btn-cam">Ativar camera</button></div>
     <div style="padding:0 16px"><div id="cam-reader" style="display:none"></div></div>
-    <div id="zoom-wrap" style="display:none;padding:6px 16px 0;display:none">
+    <div id="zoom-wrap" style="display:none;padding:6px 16px 0">
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:13px;color:var(--text2)">&#x1F50D;</span>
         <input type="range" id="qr-zoom" min="1" max="4" step="0.1" value="1" style="flex:1;accent-color:var(--primary)" oninput="setQRZoom(this.value)">
@@ -798,7 +883,12 @@ select{appearance:none;-webkit-appearance:none}
       </div>
     </div>
     <div class="divider" style="margin-top:16px"></div>
-    <div style="padding:0 16px 14px"><label class="file-pick"><span>&#x1F5BC; Imagem com QR ou codigo de barras</span><input type="file" id="qr-img-file" accept="image/*" onchange="lerQRimg(this)"></label></div>
+    <!-- Preview da imagem selecionada -->
+    <div id="qr-img-preview-wrap" style="display:none;padding:0 16px 12px;text-align:center">
+      <img id="qr-img-preview" style="max-width:100%;max-height:220px;border-radius:12px;border:2px solid rgba(29,201,138,0.4);object-fit:contain">
+      <div id="qr-scan-status" style="font-size:13px;color:var(--text2);margin-top:8px">Analisando...</div>
+    </div>
+    <div style="padding:0 16px 14px"><label class="file-pick"><span>&#x1F5BC; Selecionar imagem com QR ou código de barras</span><input type="file" id="qr-img-file" accept="image/*" onchange="lerQRimg(this)"></label></div>
     <div id="qr-scan-result" style="display:none;padding:0 16px" class="result ok"></div>
     <div id="qr-acoes" style="display:none" class="btn-row"></div>
   </div>
@@ -1001,10 +1091,12 @@ function goTo(s){
   try{if(s!=='scanner')scannerFecharCamera();}catch(e){}
   if(s==='extras')carregarNotas();
   if(s==='lembretes')initLembretes();
+  if(s==='cal')setTimeout(function(){if(document.getElementById('cal-pane-lemb')&&document.getElementById('cal-pane-lemb').classList.contains('active'))initLembretes();},50);
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
   if(s==='cal'){try{calInit();}catch(e){toast('Erro agenda: '+e.message,5000);}}
+  if(s==='lembretes'){goTo('cal');calTabSwitch('lemb');return;}
   if(s==='scanner')setTimeout(scannerNovo,0);
 }
 
@@ -1126,9 +1218,62 @@ function pararCam(){
 }
 function lerQRimg(input){
   if(!input.files[0])return;
-  var tmp=document.getElementById('cam-reader');
-  var s=new Html5Qrcode('cam-reader');
-  s.scanFile(input.files[0],true).then(mostrarResultadoQR).catch(function(){toast('Nenhum codigo encontrado');});
+  var file=input.files[0];
+  var url=URL.createObjectURL(file);
+  // Mostra preview grande visível
+  var pw=document.getElementById('qr-img-preview-wrap');
+  var pi=document.getElementById('qr-img-preview');
+  var st=document.getElementById('qr-scan-status');
+  var res=document.getElementById('qr-scan-result');
+  var ac=document.getElementById('qr-acoes');
+  if(pw)pw.style.display='block';
+  if(pi)pi.src=url;
+  if(st)st.textContent='Analisando imagem...';
+  if(res)res.style.display='none';
+  if(ac)ac.style.display='none';
+  // Tenta BarcodeDetector nativo (Chrome Android / Edge)
+  if(typeof BarcodeDetector!=='undefined'){
+    var bd=new BarcodeDetector({formats:['qr_code','code_128','ean_13','ean_8','upc_a','code_39','itf']});
+    var img=new Image();
+    img.onload=function(){
+      bd.detect(img).then(function(codes){
+        if(codes.length){
+          if(st)st.textContent='✅ Código encontrado';
+          mostrarResultadoQR(codes[0].rawValue);
+        } else {
+          if(st)st.textContent='Tentando leitura alternativa...';
+          lerQRfallback(file,st);
+        }
+      }).catch(function(){lerQRfallback(file,st);});
+    };
+    img.onerror=function(){lerQRfallback(file,st);};
+    img.src=url;
+  } else {
+    lerQRfallback(file,st);
+  }
+}
+function lerQRfallback(file,stEl){
+  var tmpId='_qr_scan_tmp';
+  var tmp=document.getElementById(tmpId);
+  if(!tmp){
+    tmp=document.createElement('div');
+    tmp.id=tmpId;
+    tmp.style.cssText='position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;visibility:hidden';
+    document.body.appendChild(tmp);
+  }
+  try{
+    var s=new Html5Qrcode(tmpId);
+    s.scanFile(file,false).then(function(txt){
+      if(stEl)stEl.textContent='✅ Código encontrado';
+      mostrarResultadoQR(txt);
+    }).catch(function(){
+      if(stEl)stEl.textContent='Nenhum código encontrado';
+      toast('Nenhum código encontrado na imagem');
+    });
+  }catch(e){
+    if(stEl)stEl.textContent='Erro na leitura';
+    toast('Erro ao ler imagem');
+  }
 }
 function mostrarResultadoQR(txt){
   var res=document.getElementById('qr-scan-result'),ac=document.getElementById('qr-acoes');
@@ -2465,9 +2610,12 @@ function veiGetLogs(id){ return JSON.parse(localStorage.getItem('vei_logs_'+id)|
 function veiSetLogs(id,l){ localStorage.setItem('vei_logs_'+id, JSON.stringify(l)); }
 
 function veiRenderLista(){
-  var lista = veiGetLista();
-  document.getElementById('vei-form-cadastro').style.display='none';
+  var lista;
+  try{lista=veiGetLista();}catch(e){lista=[];}
+  var formCad=document.getElementById('vei-form-cadastro');
+  if(formCad)formCad.style.display='none';
   var el = document.getElementById('vei-lista');
+  if(!el)return;
   if(!lista.length){
     el.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:14px">'+
       '&#x26FD;<br><br>Nenhum veículo cadastrado.<br>Adicione seu primeiro veículo abaixo.</div>';
@@ -2553,6 +2701,11 @@ function veiAbrirDetalhe(id){
   goTo('vei-detalhe');
 }
 
+function chip(label,val,cor){
+  return '<div style="background:var(--surface2);border-radius:10px;padding:10px 12px;border-left:3px solid '+cor+'">'+
+    '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">'+label+'</div>'+
+    '<div style="font-size:17px;font-weight:800;color:#fff">'+val+'</div></div>';
+}
 function veiRenderResumo(){
   var el = document.getElementById('vei-detalhe-resumo');
   var logs = veiGetLogs(veiIdAtivo);
@@ -2572,11 +2725,6 @@ function veiRenderResumo(){
   });
   var kmRodado = kmArr.length>1 ? Math.max.apply(null,kmArr)-Math.min.apply(null,kmArr) : 0;
   var custoPorKm = (kmRodado>0 && totalAno>0) ? 'R$ '+(totalAno/kmRodado).toFixed(2)+'/km' : '--';
-  function chip(label,val,cor){
-    return '<div style="background:var(--surface2);border-radius:10px;padding:10px 12px;border-left:3px solid '+cor+'">'+
-      '<div style="font-size:10px;color:var(--text2);margin-bottom:2px">'+label+'</div>'+
-      '<div style="font-size:17px;font-weight:800;color:#fff">'+val+'</div></div>';
-  }
   el.innerHTML =
     chip('Gasto este mês','R$ '+totalMes.toFixed(2),'#F8AA22')+
     chip('Litros este mês',litrosMes.toFixed(1)+'L','#F8AA22')+
@@ -3056,6 +3204,67 @@ function tradCopiar(){
   if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('Copiado!');});}
   else{toast('Copie manualmente o texto acima');}
 }
+
+// ── Aba da tela Agenda & Avisos ──────────────────────────────
+function calTabSwitch(tab){
+  var panes={cal:'cal-pane-cal',lemb:'cal-pane-lemb',datas:'cal-pane-datas'};
+  var tabs=document.querySelectorAll('#screen-cal .tab');
+  var idx={cal:0,lemb:1,datas:2}[tab]||0;
+  tabs.forEach(function(t,i){t.classList.toggle('active',i===idx);});
+  Object.keys(panes).forEach(function(k){
+    var el=document.getElementById(panes[k]);
+    if(el)el.classList.toggle('active',k===tab);
+  });
+  if(tab==='lemb')initLembretes();
+  if(tab==='datas')datasImpRender();
+}
+
+// ── Datas Importantes ────────────────────────────────────────
+function datasImpGetLista(){return JSON.parse(localStorage.getItem('datas_imp')||'[]');}
+function datasImpSetLista(l){localStorage.setItem('datas_imp',JSON.stringify(l));}
+function datasImpSalvar(){
+  var desc=document.getElementById('data-imp-desc').value.trim();
+  var dia=parseInt(document.getElementById('data-imp-dia').value)||0;
+  var mes=parseInt(document.getElementById('data-imp-mes').value)||0;
+  var tipo=document.getElementById('data-imp-tipo').value;
+  if(!desc||!dia||!mes){toast('Preencha descrição, dia e mês');return;}
+  var lista=datasImpGetLista();
+  lista.push({id:'d_'+Date.now(),desc:desc,dia:dia,mes:mes,tipo:tipo});
+  lista.sort(function(a,b){return a.mes!==b.mes?a.mes-b.mes:a.dia-b.dia;});
+  datasImpSetLista(lista);
+  document.getElementById('data-imp-desc').value='';
+  document.getElementById('data-imp-dia').value='';
+  datasImpRender();
+  toast('Data salva!');
+}
+function datasImpRender(){
+  var lista=datasImpGetLista();
+  var el=document.getElementById('data-imp-lista');
+  if(!el)return;
+  if(!lista.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text2);font-size:14px">Nenhuma data cadastrada</div>';return;}
+  var meses=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var icones={aniv:'🎂',data:'📅',vcto:'💰',outro:'📌'};
+  var hoje=new Date();var hm=hoje.getMonth()+1,hd=hoje.getDate();
+  el.innerHTML=lista.map(function(d){
+    var ico=icones[d.tipo]||'📌';
+    var proximo=d.mes>hm||(d.mes===hm&&d.dia>=hd);
+    var hoje_=d.mes===hm&&d.dia===hd;
+    var borda=hoje_?'#F59E0B':proximo?'#10B981':'#4B5563';
+    return '<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-left:3px solid '+borda+'">'
+      +'<div style="font-size:24px">'+ico+'</div>'
+      +'<div style="flex:1">'
+        +'<div style="font-weight:700;color:#fff;font-size:14px">'+(hoje_?'🔔 HOJE — ':'')+d.desc+'</div>'
+        +'<div style="color:var(--text2);font-size:12px;margin-top:2px">Todo dia '+d.dia+' de '+meses[d.mes]+'</div>'
+      +'</div>'
+      +'<button onclick="datasImpExcluir(''+d.id+'')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">✕</button>'
+    +'</div>';
+  }).join('');
+}
+function datasImpExcluir(id){
+  datasImpSetLista(datasImpGetLista().filter(function(d){return d.id!==id;}));
+  datasImpRender();
+}
+
 </script>
 </body>
 </html>
