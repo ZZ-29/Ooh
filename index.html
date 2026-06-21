@@ -74,6 +74,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 
 .cook-cat{background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.tempo-cidade-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;color:#7DD3FC;font-size:12px;font-weight:700;padding:7px 13px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.tempo-cidade-btn:active{background:#0369A1;border-color:#0369A1;color:#fff}
 .cook-cat.active{background:#6C3CE1;border-color:#6C3CE1;color:#fff}
 .cook-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1.5px solid transparent;transition:all .2s}
 .cook-item:active{border-color:#6C3CE1;background:var(--surface3)}
@@ -624,15 +626,36 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 
   <!-- Busca -->
-  <div style="padding:0 16px 4px">
+  <div style="padding:0 16px 8px">
+    <!-- Input + botão buscar -->
     <div style="display:flex;gap:8px">
-      <input type="text" id="tempo-cidade" placeholder="Buscar cidade..." style="flex:1" 
-        onkeydown="if(event.key==='Enter')buscarCidade()">
+      <input type="text" id="tempo-cidade" placeholder="Digite a cidade..." style="flex:1"
+        onclick="this.focus()"
+        onfocus="this.select()"
+        onkeydown="if(event.key==='Enter'){buscarCidade();this.blur();}">
       <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
     </div>
-    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="usarGPS()">
-      &#x1F4CD; Usar minha localização
+    <!-- Cidades rápidas -->
+    <div style="margin-top:10px">
+      <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:6px;letter-spacing:0.5px">CIDADES RÁPIDAS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="tempo-cidades-rapidas">
+        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Florianópolis','SC',-27.5954,-48.5480)">🏠 Florianópolis</button>
+        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('São Paulo','SP',-23.5505,-46.6333)">São Paulo</button>
+        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Curitiba','PR',-25.4284,-49.2733)">Curitiba</button>
+        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Porto Alegre','RS',-30.0346,-51.2177)">Porto Alegre</button>
+        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Rio de Janeiro','RJ',-22.9068,-43.1729)">Rio de Janeiro</button>
+        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Brasília','DF',-15.7801,-47.9292)">Brasília</button>
+      </div>
+    </div>
+    <!-- GPS (secundário) -->
+    <button id="tempo-btn-gps" class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;font-size:12px" onclick="usarGPS()">
+      &#x1F4CD; Detectar minha localização (GPS)
     </button>
+    <!-- Local salvo -->
+    <div id="tempo-local-salvo" style="display:none;margin-top:6px;font-size:12px;color:var(--text2);align-items:center;justify-content:center;gap:8px">
+      <span id="tempo-local-salvo-nome"></span>
+      <button onclick="tempoLimparLocal()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px;padding:0">&#x2715; limpar</button>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -1098,6 +1121,7 @@ function goTo(s){
   if(s==='cal'){try{calInit();}catch(e){toast('Erro agenda: '+e.message,5000);}}
   if(s==='lembretes'){goTo('cal');calTabSwitch('lemb');return;}
   if(s==='scanner')setTimeout(scannerNovo,0);
+  if(s==='tempo')setTimeout(tempoInit,50);
 }
 
 
@@ -2373,6 +2397,49 @@ function renderCronoVoltas(){
 
 
 // ===== PREVISAO DO TEMPO =====
+function tempoInit(){
+  var lat=parseFloat(localStorage.getItem('ooh_tempo_lat')||'');
+  var lon=parseFloat(localStorage.getItem('ooh_tempo_lon')||'');
+  var nome=localStorage.getItem('ooh_tempo_nome')||'';
+  var btn=document.getElementById('tempo-btn-gps');
+  var divSalvo=document.getElementById('tempo-local-salvo');
+  var nomeSalvo=document.getElementById('tempo-local-salvo-nome');
+  if(lat&&lon&&nome){
+    if(btn)btn.textContent='📍 Atualizar: '+nome;
+    if(divSalvo)divSalvo.style.display='flex';
+    if(nomeSalvo)nomeSalvo.textContent='🗃 Local salvo: '+nome;
+    buscarTempoCoords(lat,lon,nome);
+  } else {
+    // Padrão: Florianópolis, SC
+    if(btn)btn.textContent='📍 Usar minha localização';
+    if(divSalvo)divSalvo.style.display='none';
+    buscarTempoCoords(-27.5954,-48.5480,'Florianópolis, SC');
+  }
+}
+function tempoLimparLocal(){
+  localStorage.removeItem('ooh_tempo_lat');
+  localStorage.removeItem('ooh_tempo_lon');
+  localStorage.removeItem('ooh_tempo_nome');
+  var btn=document.getElementById('tempo-btn-gps');
+  if(btn)btn.textContent='📍 Usar minha localização';
+  var divSalvo=document.getElementById('tempo-local-salvo');
+  if(divSalvo)divSalvo.style.display='none';
+  document.getElementById('tempo-resultado').style.display='none';
+  document.getElementById('tempo-vazio').style.display='block';
+  document.getElementById('tempo-cidade').value='';
+  toast('Local salvo apagado',2000);
+}
+function tempoCidadeRapida(nome,uf,lat,lon){
+  buscarTempoCoords(lat,lon,nome+', '+uf);
+}
+function tempoSalvarLocal(lat,lon,nome){
+  try{
+    localStorage.setItem('ooh_tempo_lat',lat);
+    localStorage.setItem('ooh_tempo_lon',lon);
+    localStorage.setItem('ooh_tempo_nome',nome);
+  }catch(e){}
+}
+
 function tempoIcone(cod){
   var m={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
   return m[cod]||'🌡️';
@@ -2383,17 +2450,17 @@ function tempoDesc(cod){
 }
 
 function usarGPS(){
-  if(!navigator.geolocation){toast('GPS indisponível');return;}
+  if(!navigator.geolocation){toast('GPS indisponível neste dispositivo');return;}
   mostrarTempoLoading();
-  toast('📡 Obtendo GPS...',3000);
+  toast('📡 Obtendo localização...',3000);
   navigator.geolocation.getCurrentPosition(function(pos){
     var lat=pos.coords.latitude,lon=pos.coords.longitude;
-    toast('📍 GPS OK: '+lat.toFixed(2)+','+lon.toFixed(2),3000);
     buscarTempoCoords(lat,lon,'Minha localização');
   },function(err){
     esconderTempoLoading();
-    toast('GPS erro: '+err.message);
-  },{timeout:10000,maximumAge:60000});
+    var msgs={1:'Permissão de localização negada — habilite nas configurações do navegador.',2:'Localização indisponível no momento.',3:'Tempo esgotado ao obter GPS. Tente novamente.'};
+    toast(msgs[err.code]||'Erro GPS: '+err.message,5000);
+  },{timeout:15000,maximumAge:300000,enableHighAccuracy:true});
 }
 
 function buscarCidade(){
@@ -2418,38 +2485,30 @@ function wttrToWmo(c){
 function buscarTempoCoords(lat,lon,nomeCidade){
   toast('🌐 Buscando clima...',3000);
   var ctrl=new AbortController();
-  var timer=setTimeout(function(){ctrl.abort();},10000);
-  var url='https://wttr.in/'+lat+','+lon+'?format=j1';
+  var timer=setTimeout(function(){ctrl.abort();},12000);
+  var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
+    '&current=temperature_2m,apparent_temperature,weather_code,windspeed_10m,relativehumidity_2m'+
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'+
+    '&timezone=auto&forecast_days=7';
   fetch(url,{signal:ctrl.signal})
     .then(function(r){clearTimeout(timer);return r.json();})
     .then(function(d){
       esconderTempoLoading();
-      if(!d||!d.current_condition||!d.current_condition[0]){toast('Dados indisponíveis');return;}
-      var cur=d.current_condition[0];
-      var adapted={
-        current:{
-          temperature_2m:parseFloat(cur.temp_C),
-          apparent_temperature:parseFloat(cur.FeelsLikeC),
-          weather_code:wttrToWmo(parseInt(cur.weatherCode)),
-          windspeed_10m:parseFloat(cur.windspeedKmph),
-          relativehumidity_2m:parseInt(cur.humidity)
-        },
-        daily:{
-          time:(d.weather||[]).map(function(w){return w.date;}),
-          weather_code:(d.weather||[]).map(function(w){return wttrToWmo(parseInt((w.hourly&&w.hourly[4]?w.hourly[4].weatherCode:113)));}),
-          temperature_2m_max:(d.weather||[]).map(function(w){return parseFloat(w.maxtempC);}),
-          temperature_2m_min:(d.weather||[]).map(function(w){return parseFloat(w.mintempC);}),
-          precipitation_probability_max:(d.weather||[]).map(function(w){
-            return Math.max.apply(null,(w.hourly||[{chanceofrain:0}]).map(function(h){return parseInt(h.chanceofrain||0);}));
-          })
-        }
-      };
-      try{renderTempo(adapted,nomeCidade);}
-      catch(e){toast('render:'+e.message,5000);}
+      if(!d||!d.current){toast('Dados indisponíveis');return;}
+      try{
+        renderTempo(d,nomeCidade);
+        tempoSalvarLocal(lat,lon,nomeCidade);
+        var btn=document.getElementById('tempo-btn-gps');
+        if(btn)btn.textContent='📍 Atualizar: '+nomeCidade;
+        var divSalvo=document.getElementById('tempo-local-salvo');
+        if(divSalvo)divSalvo.style.display='flex';
+        var nomeSalvo=document.getElementById('tempo-local-salvo-nome');
+        if(nomeSalvo)nomeSalvo.textContent='🗃 Local salvo: '+nomeCidade;
+      }catch(e){toast('Erro ao exibir clima: '+e.message,5000);}
     })
     .catch(function(e){
       clearTimeout(timer);esconderTempoLoading();
-      toast('Clima: '+(e&&e.name==='AbortError'?'sem resposta (10s)':e.message),5000);
+      toast('Clima: '+(e&&e.name==='AbortError'?'sem resposta (12s)':e.message),5000);
     });
 }
 
