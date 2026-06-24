@@ -630,9 +630,9 @@ select{appearance:none;-webkit-appearance:none}
     <!-- Input + botão buscar -->
     <div style="display:flex;gap:8px">
       <input type="text" id="tempo-cidade" placeholder="Digite a cidade..." style="flex:1"
-        onclick="this.focus()"
-        onfocus="this.select()"
-        onkeydown="if(event.key==='Enter'){buscarCidade();this.blur();}">
+        inputmode="search" enterkeyhint="search"
+        autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"
+        onkeyup="if(event.key==='Enter'){buscarCidade();this.blur();}">
       <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
     </div>
     <!-- Cidades rápidas -->
@@ -853,7 +853,7 @@ select{appearance:none;-webkit-appearance:none}
 
 <!-- QR -->
 <div class="screen" id="screen-qr">
-  <div class="page-head"><div class="icon" style="background:#0a3322">&#x2B1B;</div><h1>QR / Barras</h1></div>
+  <div class="page-head"><button class="back-btn" onclick="goTo('home')">&#x2190;</button><div class="icon" style="background:#0a3322">&#x2B1B;</div><h1>QR / Barras</h1></div>
   <div class="tabs">
     <div class="tab active" onclick="qrTab('gerar')">Gerar</div>
     <div class="tab" onclick="qrTab('ler')">Ler</div>
@@ -929,7 +929,7 @@ select{appearance:none;-webkit-appearance:none}
 
 <!-- CAMERA -->
 <div class="screen" id="screen-cam">
-  <div class="page-head"><div class="icon" style="background:#3d2a00">&#x1F4F7;</div><h1>Camera</h1></div>
+  <div class="page-head"><button class="back-btn" onclick="goTo('home')">&#x2190;</button><div class="icon" style="background:#3d2a00">&#x1F4F7;</div><h1>Camera</h1></div>
   <div class="tabs">
     <div class="tab active" onclick="camTab('ocr')">OCR - Texto</div>
   </div>
@@ -1037,7 +1037,7 @@ select{appearance:none;-webkit-appearance:none}
 
 <!-- EXTRAS -->
 <div class="screen" id="screen-extras">
-  <div class="page-head"><div class="icon" style="background:#042a30">&#x1F9F0;</div><h1>Extras</h1></div>
+  <div class="page-head"><button class="back-btn" onclick="goTo('home')">&#x2190;</button><div class="icon" style="background:#042a30">&#x1F9F0;</div><h1>Extras</h1></div>
   <div class="tabs">
     <div class="tab active" onclick="extrasTab('conv')">Conversor</div>
     <div class="tab" onclick="extrasTab('notas')">Notas</div>
@@ -1217,7 +1217,22 @@ function toggleCam(){camAtiva?pararCam():iniciarCam();}
 function setQRZoom(v){
   document.getElementById('zoom-val').textContent=parseFloat(v).toFixed(1)+'x';
   var vid=document.querySelector('#cam-reader video');
-  if(vid)vid.style.transform='scale('+v+')';
+  if(!vid)return;
+  // Tenta zoom nativo da câmera (Android Chrome) — melhor qualidade
+  if(vid.srcObject){
+    var track=vid.srcObject.getVideoTracks&&vid.srcObject.getVideoTracks()[0];
+    if(track){
+      var cap=track.getCapabilities&&track.getCapabilities();
+      if(cap&&cap.zoom){
+        var zMin=cap.zoom.min||1,zMax=cap.zoom.max||10;
+        var zVal=zMin+(zMax-zMin)*((v-1)/3);
+        try{track.applyConstraints({advanced:[{zoom:zVal}]});return;}catch(e){}
+      }
+    }
+  }
+  // Fallback CSS: zoom com transform-origin no centro para não cortar
+  vid.style.transformOrigin='center center';
+  vid.style.transform='scale('+v+')';
 }
 function iniciarCam(){
   var reader=document.getElementById('cam-reader');
@@ -3309,21 +3324,4 @@ function datasImpRender(){
     var proximo=d.mes>hm||(d.mes===hm&&d.dia>=hd);
     var hoje_=d.mes===hm&&d.dia===hd;
     var borda=hoje_?'#F59E0B':proximo?'#10B981':'#4B5563';
-    return '<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:8px;border-left:3px solid '+borda+'">'
-      +'<div style="font-size:24px">'+ico+'</div>'
-      +'<div style="flex:1">'
-        +'<div style="font-weight:700;color:#fff;font-size:14px">'+(hoje_?'🔔 HOJE — ':'')+d.desc+'</div>'
-        +'<div style="color:var(--text2);font-size:12px;margin-top:2px">Todo dia '+d.dia+' de '+meses[d.mes]+'</div>'
-      +'</div>'
-      +'<button onclick="datasImpExcluir(''+d.id+'')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">✕</button>'
-    +'</div>';
-  }).join('');
-}
-function datasImpExcluir(id){
-  datasImpSetLista(datasImpGetLista().filter(function(d){return d.id!==id;}));
-  datasImpRender();
-}
-
-</script>
-</body>
-</html>
+    return '<div style="display:flex;align-items:center
