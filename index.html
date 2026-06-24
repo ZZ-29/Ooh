@@ -85,10 +85,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:#6C3CE1;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.sc-handle{position:absolute;width:32px;height:32px;border-radius:50%;border:2.5px solid #fff;cursor:grab;transform:translate(-50%,-50%);z-index:20;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,0.7)}
+
 .scan-btn-tipo{flex:1;padding:10px 4px;border-radius:10px;border:2px solid transparent;background:var(--surface2);color:var(--text);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
 .scan-btn-tipo:hover,.scan-btn-tipo.sel{border-color:#6C3CE1;background:#1a1040;color:#fff}
-.scan-handle{position:absolute;width:42px;height:42px;border-radius:50%;border:3px solid #fff;cursor:grab;transform:translate(-50%,-50%);z-index:10;touch-action:none;box-shadow:0 2px 10px rgba(0,0,0,.6)}
+
 
 .tool-card.pix{background:linear-gradient(145deg,#B49BFC,#8B6BE8)}
 .tool-card.extra{background:linear-gradient(145deg,#14C9DC,#0898AA)}
@@ -206,42 +206,6 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-name">Agenda & Avisos</div>
       <div class="tool-desc">Calendário e lembretes</div>
     </div>
-    <!-- C -->
-    <div class="tool-card" onclick="goTo('calc')" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">
-      <span class="tool-alpha">C</span>
-      <div class="tool-icon">&#x1F9EE;</div>
-      <div class="tool-name">Calculadora</div>
-      <div class="tool-desc">Operações e %</div>
-    </div>
-    <!-- E -->
-    <div class="tool-card extra" onclick="goTo('extras')">
-      <span class="tool-alpha">E</span>
-      <div class="tool-icon">&#x1F9F0;</div>
-      <div class="tool-name">Extras</div>
-      <div class="tool-desc">Conversores e notas</div>
-    </div>
-
-    <!-- O -->
-    <div class="tool-card ocr" onclick="goTo('cam')">
-      <span class="tool-alpha">O</span>
-      <div class="tool-icon">&#x1F50D;</div>
-      <div class="tool-name">OCR</div>
-      <div class="tool-desc">Extrair texto de fotos</div>
-    </div>
-    <!-- P -->
-    <div class="tool-card pix" onclick="togglePixRapido()">
-      <span class="tool-alpha">P</span>
-      <div class="tool-icon">&#x26A1;</div>
-      <div class="tool-name">Pix Rápido</div>
-      <div class="tool-desc">Gere QR Pix na hora</div>
-    </div>
-    <!-- Q -->
-    <div class="tool-card qr" onclick="goTo('qr')">
-      <span class="tool-alpha">Q</span>
-      <div class="tool-icon">&#x2B1B;</div>
-      <div class="tool-name">QR / Barras</div>
-      <div class="tool-desc">Gerar e ler códigos</div>
-    </div>
     <!-- S -->
     <div class="tool-card scanner" onclick="abrirScanner()">
       <span class="tool-alpha">S</span>
@@ -271,22 +235,6 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-desc">Gastos de combustível</div>
     </div>
   </div>
-
-  <div style="padding:12px 16px 20px">
-    <div class="pix-rapido-card" id="pix-rapido-card">
-      <div id="pix-rapido-body" style="display:none">
-        <div class="field"><label class="lbl">Chave Pix</label><input type="text" id="pr-chave" placeholder="CPF, e-mail, celular ou aleatoria"></div>
-        <div class="row">
-          <div class="field"><label class="lbl">Seu nome</label><input type="text" id="pr-nome" placeholder="Ex: Joao Silva"></div>
-          <div class="field"><label class="lbl">Valor (R$)</label><input type="number" id="pr-valor" placeholder="0.00" step="0.01"></div>
-        </div>
-        <button class="btn btn-success" onclick="gerarPixRapido()" style="margin-bottom:14px">Gerar QR Pix</button>
-        <div id="pr-output" style="display:none;flex-direction:column;align-items:center;gap:10px;margin-top:14px">
-          <div style="background:#fff;padding:12px;border-radius:12px"><div id="pr-qr-div"></div></div>
-          <button class="btn btn-ghost btn-sm" onclick="baixarPixRapido()">Baixar imagem</button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -413,80 +361,6 @@ select{appearance:none;-webkit-appearance:none}
 </div>
 
 
-<!-- PDF VIEWER -->
-<div class="screen" id="screen-pdf">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#DC2626,#991B1B)">&#x1F4C4;</div>
-    <h1 id="pdf-titulo">Documento</h1>
-  </div>
-  <div style="padding:0 16px 16px">
-    <div id="pdf-info" style="font-size:12px;color:var(--text2);margin-bottom:10px;text-align:center"></div>
-    <div id="pdf-loading" style="text-align:center;padding:40px">
-      <div class="spinner" style="margin:0 auto 12px"></div>
-      <div style="color:var(--text2);font-size:14px">Carregando PDF...</div>
-    </div>
-    <div id="pdf-canvas-wrap" style="display:none"></div>
-    <div id="pdf-nav" style="display:none;display:flex;justify-content:space-between;align-items:center;padding:12px 0;margin-top:8px">
-      <button type="button" onclick="pdfPagina(-1)" style="background:var(--surface2);border:none;color:var(--text);padding:10px 20px;border-radius:10px;font-size:14px;cursor:pointer">&#x2190; Anterior</button>
-      <span id="pdf-pag-info" style="font-size:13px;color:var(--text2)"></span>
-      <button type="button" onclick="pdfPagina(1)" style="background:var(--surface2);border:none;color:var(--text);padding:10px 20px;border-radius:10px;font-size:14px;cursor:pointer">Próxima &#x2192;</button>
-    </div>
-  </div>
-</div>
-
-<!-- CALCULADORA -->
-<div class="screen" id="screen-calc">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#7C3AED,#5B21B6)">&#x1F9EE;</div>
-    <h1>Calculadora</h1>
-  </div>
-  <div style="padding:0 16px 16px;max-width:380px;margin:0 auto">
-    <!-- Display -->
-    <div style="background:var(--surface);border-radius:16px;padding:16px 20px 12px;margin-bottom:12px;border:1px solid var(--border)">
-      <div id="calc-expr" style="font-size:13px;color:var(--text2);min-height:18px;text-align:right;word-break:break-all"></div>
-      <div id="calc-display" style="font-size:48px;font-weight:700;text-align:right;color:#fff;line-height:1.1;word-break:break-all;min-height:58px">0</div>
-    </div>
-    <!-- Botões -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
-      <!-- Row 1 -->
-      <button class="calc-btn calc-fn" onclick="calcAC()">AC</button>
-      <button class="calc-btn calc-fn" onclick="calcPlusMinus()">+/-</button>
-      <button class="calc-btn calc-fn" onclick="calcPercent()">%</button>
-      <button class="calc-btn calc-op" onclick="calcOp('/')">&#xF7;</button>
-      <!-- Row 2 -->
-      <button class="calc-btn" onclick="calcNum('7')">7</button>
-      <button class="calc-btn" onclick="calcNum('8')">8</button>
-      <button class="calc-btn" onclick="calcNum('9')">9</button>
-      <button class="calc-btn calc-op" onclick="calcOp('*')">&#xD7;</button>
-      <!-- Row 3 -->
-      <button class="calc-btn" onclick="calcNum('4')">4</button>
-      <button class="calc-btn" onclick="calcNum('5')">5</button>
-      <button class="calc-btn" onclick="calcNum('6')">6</button>
-      <button class="calc-btn calc-op" onclick="calcOp('-')">&#x2212;</button>
-      <!-- Row 4 -->
-      <button class="calc-btn" onclick="calcNum('1')">1</button>
-      <button class="calc-btn" onclick="calcNum('2')">2</button>
-      <button class="calc-btn" onclick="calcNum('3')">3</button>
-      <button class="calc-btn calc-op" onclick="calcOp('+')">+</button>
-      <!-- Row 5 -->
-      <button class="calc-btn" onclick="calcNum('0')" style="grid-column:span 2">0</button>
-      <button class="calc-btn" onclick="calcDot()">.</button>
-      <button class="calc-btn calc-eq" onclick="calcEquals()">=</button>
-    </div>
-    <!-- Histórico -->
-    <div style="margin-top:14px">
-      <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between">
-        <span>HISTÓRICO</span>
-        <span onclick="calcClearHist()" style="cursor:pointer;color:var(--danger)">limpar</span>
-      </div>
-      <div id="calc-hist" style="font-size:13px;color:var(--text2);max-height:120px;overflow-y:auto"></div>
-    </div>
-  </div>
-</div>
-
-<!-- AGENDA & LEMBRETES -->
 <div class="screen" id="screen-cal">
   <div class="page-head">
     <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
@@ -801,169 +675,6 @@ select{appearance:none;-webkit-appearance:none}
     <div id="lemb-lista"></div>
   </div>
 </div>
-
-<!-- DOCS -->
-<div class="screen" id="screen-docs">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#0F766E,#0D5F58)">&#x1F9FE;</div>
-    <h1>CPF / CNPJ</h1>
-  </div>
-  <div class="tabs">
-    <div class="tab active" onclick="docsTab('cpf')">CPF</div>
-    <div class="tab" onclick="docsTab('cnpj')">CNPJ</div>
-  </div>
-
-  <!-- CPF -->
-  <div class="pane active" id="pane-cpf">
-    <div class="section">
-      <div class="field">
-        <label class="lbl">Numero do CPF</label>
-        <input type="text" id="cpf-input" placeholder="000.000.000-00" maxlength="14"
-          oninput="cpfMask(this)" inputmode="numeric">
-      </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button class="btn btn-primary" style="flex:1" onclick="validarCPF()">Validar</button>
-        <button class="btn btn-ghost" style="flex:1" onclick="limparDoc('cpf')">Limpar</button>
-      </div>
-    </div>
-    <div id="cpf-result" style="padding:0 16px 16px;display:none"></div>
-    <div class="section" style="margin-top:4px">
-      <div class="section-title" style="font-size:12px;color:var(--text2);margin-bottom:10px">Sobre o CPF</div>
-      <p style="font-size:13px;color:var(--text2);line-height:1.6">O CPF e validado pelo calculo dos digitos verificadores (10º e 11º digito). Um CPF pode ter formato correto mas ainda ser invalido matematicamente.</p>
-    </div>
-  </div>
-
-  <!-- CNPJ -->
-  <div class="pane" id="pane-cnpj">
-    <div class="section">
-      <div class="field">
-        <label class="lbl">Numero do CNPJ</label>
-        <input type="text" id="cnpj-input" placeholder="00.000.000/0000-00" maxlength="18"
-          oninput="cnpjMask(this)" inputmode="numeric">
-      </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button class="btn btn-primary" style="flex:1" onclick="validarCNPJ()">Validar</button>
-        <button class="btn btn-ghost" style="flex:1" onclick="limparDoc('cnpj')">Limpar</button>
-      </div>
-    </div>
-    <div id="cnpj-result" style="padding:0 16px 16px;display:none"></div>
-  </div>
-</div>
-
-<!-- QR -->
-<div class="screen" id="screen-qr">
-  <div class="page-head"><button class="back-btn" onclick="goTo('home')">&#x2190;</button><div class="icon" style="background:#0a3322">&#x2B1B;</div><h1>QR / Barras</h1></div>
-  <div class="tabs">
-    <div class="tab active" onclick="qrTab('gerar')">Gerar</div>
-    <div class="tab" onclick="qrTab('ler')">Ler</div>
-    <div class="tab" onclick="qrTab('boleto')">Boleto</div>
-  </div>
-  <div class="pane active" id="pane-gerar">
-    <div class="section">
-      <div class="field"><label class="lbl">Tipo</label>
-        <select id="qr-tipo" onchange="qrTipoChange()">
-          <option value="texto">Texto / Link</option>
-          <option value="pix">Pix</option>
-          <option value="wifi">Wi-Fi</option>
-          <option value="tel">Telefone</option>
-        </select>
-      </div>
-    </div>
-    <div class="section" id="qr-form-texto"><div class="field"><label class="lbl">Texto ou URL</label><textarea id="qr-texto-val" placeholder="Digite o texto ou link..." style="min-height:80px"></textarea></div></div>
-    <div class="section" id="qr-form-pix" style="display:none">
-      <div class="section-title">Dados Pix</div>
-      <div class="field"><label class="lbl">Chave Pix</label><input type="text" id="pix-chave" placeholder="CPF, e-mail, celular ou aleatoria"></div>
-      <div class="field"><label class="lbl">Nome do recebedor</label><input type="text" id="pix-nome" placeholder="Ex: Joao Silva"></div>
-      <div class="field"><label class="lbl">Cidade</label><input type="text" id="pix-cidade" placeholder="Ex: SAO PAULO"></div>
-      <div class="row">
-        <div class="field"><label class="lbl">Valor (opcional)</label><input type="number" id="pix-valor" placeholder="0.00" step="0.01"></div>
-        <div class="field"><label class="lbl">Descricao</label><input type="text" id="pix-desc" placeholder="Opcional"></div>
-      </div>
-    </div>
-    <div class="section" id="qr-form-wifi" style="display:none">
-      <div class="section-title">Wi-Fi</div>
-      <div class="field"><label class="lbl">Nome da rede</label><input type="text" id="wifi-ssid"></div>
-      <div class="field"><label class="lbl">Senha</label><input type="text" id="wifi-senha"></div>
-      <div class="field"><label class="lbl">Seguranca</label><select id="wifi-tipo"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">Sem senha</option></select></div>
-    </div>
-    <div class="section" id="qr-form-tel" style="display:none"><div class="field"><label class="lbl">Telefone</label><input type="tel" id="tel-num" placeholder="+5511999999999"></div></div>
-    <div style="padding:0 16px 16px"><button class="btn btn-primary" onclick="gerarQR()">Gerar QR Code</button></div>
-    <div id="qr-output" style="display:none">
-      <div id="qr-canvas-wrap"></div>
-      <button class="btn btn-ghost btn-sm" onclick="baixarQR()">Baixar imagem</button>
-    </div>
-  </div>
-  <div class="pane" id="pane-ler-qr">
-    <div class="scan-hint">Le QR Codes, EAN-13, EAN-8, Code 128, UPC e mais</div>
-    <div style="padding:0 16px 12px"><button class="btn btn-primary" onclick="toggleCam()" id="btn-cam">Ativar camera</button></div>
-    <div style="padding:0 16px"><div id="cam-reader" style="display:none"></div></div>
-    <div id="zoom-wrap" style="display:none;padding:6px 16px 0">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:13px;color:var(--text2)">&#x1F50D;</span>
-        <input type="range" id="qr-zoom" min="1" max="4" step="0.1" value="1" style="flex:1;accent-color:var(--primary)" oninput="setQRZoom(this.value)">
-        <span style="font-size:12px;color:var(--text2);width:30px" id="zoom-val">1x</span>
-      </div>
-    </div>
-    <div class="divider" style="margin-top:16px"></div>
-    <!-- Preview da imagem selecionada -->
-    <div id="qr-img-preview-wrap" style="display:none;padding:0 16px 12px;text-align:center">
-      <img id="qr-img-preview" style="max-width:100%;max-height:220px;border-radius:12px;border:2px solid rgba(29,201,138,0.4);object-fit:contain">
-      <div id="qr-scan-status" style="font-size:13px;color:var(--text2);margin-top:8px">Analisando...</div>
-    </div>
-    <div style="padding:0 16px 14px"><label class="file-pick"><span>&#x1F5BC; Selecionar imagem com QR ou código de barras</span><input type="file" id="qr-img-file" accept="image/*" onchange="lerQRimg(this)"></label></div>
-    <div id="qr-scan-result" style="display:none;padding:0 16px" class="result ok"></div>
-    <div id="qr-acoes" style="display:none" class="btn-row"></div>
-  </div>
-  <div class="pane" id="pane-boleto">
-    <div style="padding:0 16px 6px;font-size:12px;color:var(--text2)">Cole o codigo do boleto (44-48 digitos)</div>
-    <div class="section">
-      <div class="field"><label class="lbl">Codigo do boleto</label><textarea id="boleto-codigo" placeholder="Ex: 34191.09067 07891.302627..." style="min-height:80px;font-size:13px;font-family:monospace" oninput="autoParseBoleto()"></textarea></div>
-      <button class="btn btn-primary" onclick="parseBoleto()">Analisar boleto</button>
-    </div>
-    <div id="boleto-reader-tmp" style="display:none"></div>
-    <div style="padding:0 16px 12px"><label class="file-pick"><span>&#x1F4F7; Escanear codigo de barras do boleto</span><input type="file" id="boleto-img" accept="image/*" onchange="lerBoletoImg(this)"></label></div>
-    <div id="boleto-result" style="display:none"></div>
-  </div>
-</div>
-
-<!-- CAMERA -->
-<div class="screen" id="screen-cam">
-  <div class="page-head"><button class="back-btn" onclick="goTo('home')">&#x2190;</button><div class="icon" style="background:#3d2a00">&#x1F4F7;</div><h1>Camera</h1></div>
-  <div class="tabs">
-    <div class="tab active" onclick="camTab('ocr')">OCR - Texto</div>
-  </div>
-  <div class="pane active" id="pane-ocr">
-    <div style="padding:12px 16px 4px;font-size:13px;color:#ccc;text-align:center">Selecione uma foto com texto para extrair</div>
-    <div class="file-duo">
-      <label class="fp-btn" style="background:linear-gradient(135deg,#F8AA22,#D4880A)">
-        <span class="ic">&#x1F4F7;</span><span>Tirar Foto</span>
-        <input type="file" id="ocr-file-cam" accept="image/*" capture="environment" onchange="previewOCR(this)">
-      </label>
-      <label class="fp-btn" style="background:linear-gradient(135deg,#8B5CF6,#6C3CE1)">
-        <span class="ic">&#x1F5BC;</span><span>Da Galeria</span>
-        <input type="file" id="ocr-file" accept="image/*" onchange="previewOCR(this)">
-      </label>
-    </div>
-    <div style="padding:0 16px"><img id="ocr-preview" style="width:100%;border-radius:8px;margin-top:4px;display:none"></div>
-    <div class="progresso ocr-prog" id="ocr-progress"></div>
-    <div style="padding:4px 16px 16px">
-      <button class="btn btn-primary" id="btn-ocr" style="display:none" onclick="iniciarOCR()">Extrair Texto da Imagem</button>
-    </div>
-    <div id="ocr-result-wrap" style="display:none">
-      <div class="section">
-        <div class="section-title" style="color:#F8AA22">Texto extraido</div>
-        <div id="ocr-result" class="ocr-result-box"></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-ghost btn-sm" onclick="copiarOCR()" style="color:#fff">Copiar</button>
-        <button class="btn btn-primary btn-sm" onclick="ocrParaPDF()">Salvar PDF</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 <!-- SCANNER -->
 <div class="screen" id="screen-scanner">
   <!-- Step 1: Capturar foto via câmera nativa ou galeria -->
@@ -1034,40 +745,6 @@ select{appearance:none;-webkit-appearance:none}
     </div>
   </div>
 </div>
-
-<!-- EXTRAS -->
-<div class="screen" id="screen-extras">
-  <div class="page-head"><button class="back-btn" onclick="goTo('home')">&#x2190;</button><div class="icon" style="background:#042a30">&#x1F9F0;</div><h1>Extras</h1></div>
-  <div class="tabs">
-    <div class="tab active" onclick="extrasTab('conv')">Conversor</div>
-    <div class="tab" onclick="extrasTab('notas')">Notas</div>
-  </div>
-  <div class="pane active" id="pane-conv">
-    <div class="ctabs">
-      <div class="ctab active" onclick="setCategoria('comp',this)">Comprimento</div>
-      <div class="ctab" onclick="setCategoria('peso',this)">Peso</div>
-      <div class="ctab" onclick="setCategoria('temp',this)">Temp.</div>
-      <div class="ctab" onclick="setCategoria('area',this)">Area</div>
-      <div class="ctab" onclick="setCategoria('moeda',this)">Moeda</div>
-    </div>
-    <div class="section">
-      <div class="field"><label class="lbl">Valor</label><input type="number" id="conv-valor" placeholder="0" oninput="converter()"></div>
-      <div class="row">
-        <div class="field"><label class="lbl">De</label><select id="conv-de" onchange="converter()"></select></div>
-        <div class="field"><label class="lbl">Para</label><select id="conv-para" onchange="converter()"></select></div>
-      </div>
-      <div class="conv-result" id="conv-result">-</div>
-    </div>
-  </div>
-  <div class="pane" id="pane-notas">
-    <div class="section">
-      <div class="field"><label class="lbl">Nova nota</label><textarea id="nota-texto" placeholder="Escreva sua nota..."></textarea></div>
-      <button class="btn btn-primary" onclick="salvarNota()">Salvar nota</button>
-    </div>
-    <div id="notas-lista" style="padding:0 16px"></div>
-  </div>
-</div>
-
 <!-- NAV -->
 <nav class="nav">
   <button class="nav-btn active" id="nav-home" onclick="goTo('home')">
@@ -1110,7 +787,6 @@ function goTo(s){
   tela.classList.add('active');
   var nb=document.getElementById('nav-'+s);
   if(nb)nb.classList.add('active');
-  try{if(s!=='qr')pararCam();}catch(e){}
   try{if(s!=='scanner')scannerFecharCamera();}catch(e){}
   if(s==='extras')carregarNotas();
   if(s==='lembretes')initLembretes();
@@ -1130,7 +806,6 @@ window.addEventListener('popstate',function(){
 });
 function qrTab(t){var idx=t==='gerar'?0:t==='ler'?1:2;switchTabs('#screen-qr .tab','#screen-qr .pane',idx);if(t!=='ler')pararCam();}
 function camTab(t){switchTabs('#screen-cam .tab','#screen-cam .pane',t==='ocr'?0:1);}
-function extrasTab(t){switchTabs('#screen-extras .tab','#screen-extras .pane',t==='conv'?0:1);if(t==='notas')carregarNotas();}
 function switchTabs(ts,ps,idx){
   document.querySelectorAll(ts).forEach(function(el,i){el.classList.toggle('active',i===idx);});
   document.querySelectorAll(ps).forEach(function(el,i){el.classList.toggle('active',i===idx);});
@@ -1162,21 +837,6 @@ document.getElementById('pdf-file').addEventListener('change',lerPDF);
 
 
 
-function qrTipoChange(){
-  var t=document.getElementById('qr-tipo').value;
-  ['texto','pix','wifi','tel'].forEach(function(x){document.getElementById('qr-form-'+x).style.display=x===t?'block':'none';});
-}
-
-function gerarQR(){
-  var c=buildQrConteudo();
-  if(!c){toast('Preencha os dados');return;}
-  if(typeof QRCode==='undefined'){toast('Aguarde o carregamento...');return;}
-  var wrap=document.getElementById('qr-canvas-wrap');
-  wrap.innerHTML='';
-  document.getElementById('qr-output').style.display='flex';
-  new QRCode(wrap,{text:c,width:240,height:240,colorDark:'#000000',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.H});
-}
-
 function buildQrConteudo(){
   var t=document.getElementById('qr-tipo').value;
   if(t==='texto')return document.getElementById('qr-texto-val').value.trim();
@@ -1205,56 +865,6 @@ function crc16(str){
   return((crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0'));
 }
 
-function baixarQR(){
-  var canvas=document.querySelector('#qr-canvas-wrap canvas');
-  if(!canvas){toast('Gere um QR primeiro');return;}
-  var a=document.createElement('a');
-  a.download='qrcode_unibox.png';a.href=canvas.toDataURL();a.click();
-  toast('Imagem salva!');
-}
-
-function toggleCam(){camAtiva?pararCam():iniciarCam();}
-function setQRZoom(v){
-  document.getElementById('zoom-val').textContent=parseFloat(v).toFixed(1)+'x';
-  var vid=document.querySelector('#cam-reader video');
-  if(!vid)return;
-  // Tenta zoom nativo da câmera (Android Chrome) — melhor qualidade
-  if(vid.srcObject){
-    var track=vid.srcObject.getVideoTracks&&vid.srcObject.getVideoTracks()[0];
-    if(track){
-      var cap=track.getCapabilities&&track.getCapabilities();
-      if(cap&&cap.zoom){
-        var zMin=cap.zoom.min||1,zMax=cap.zoom.max||10;
-        var zVal=zMin+(zMax-zMin)*((v-1)/3);
-        try{track.applyConstraints({advanced:[{zoom:zVal}]});return;}catch(e){}
-      }
-    }
-  }
-  // Fallback CSS: zoom com transform-origin no centro para não cortar
-  vid.style.transformOrigin='center center';
-  vid.style.transform='scale('+v+')';
-}
-function iniciarCam(){
-  var reader=document.getElementById('cam-reader');
-  reader.style.display='block';reader.innerHTML='';
-  document.getElementById('btn-cam').textContent='Parar camera';
-  document.getElementById('zoom-wrap').style.display='block';
-  document.getElementById('qr-zoom').value=1;
-  document.getElementById('zoom-val').textContent='1x';
-  camAtiva=true;
-  html5QrScanner=new Html5Qrcode('cam-reader');
-  var fmts=[Html5QrcodeSupportedFormats.QR_CODE,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.ITF];
-  html5QrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:260,height:160},formatsToSupport:fmts},
-    function(txt){mostrarResultadoQR(txt);pararCam();},function(){})
-    .catch(function(){toast('Camera indisponivel');pararCam();});
-}
-function pararCam(){
-  if(html5QrScanner){html5QrScanner.stop().catch(function(){});html5QrScanner=null;}
-  var r=document.getElementById('cam-reader');r.style.display='none';r.innerHTML='';
-  var b=document.getElementById('btn-cam');if(b)b.textContent='Ativar camera';
-  document.getElementById('zoom-wrap').style.display='none';
-  camAtiva=false;
-}
 function lerQRimg(input){
   if(!input.files[0])return;
   var file=input.files[0];
@@ -1291,45 +901,6 @@ function lerQRimg(input){
     lerQRfallback(file,st);
   }
 }
-function lerQRfallback(file,stEl){
-  var tmpId='_qr_scan_tmp';
-  var tmp=document.getElementById(tmpId);
-  if(!tmp){
-    tmp=document.createElement('div');
-    tmp.id=tmpId;
-    tmp.style.cssText='position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;visibility:hidden';
-    document.body.appendChild(tmp);
-  }
-  try{
-    var s=new Html5Qrcode(tmpId);
-    s.scanFile(file,false).then(function(txt){
-      if(stEl)stEl.textContent='✅ Código encontrado';
-      mostrarResultadoQR(txt);
-    }).catch(function(){
-      if(stEl)stEl.textContent='Nenhum código encontrado';
-      toast('Nenhum código encontrado na imagem');
-    });
-  }catch(e){
-    if(stEl)stEl.textContent='Erro na leitura';
-    toast('Erro ao ler imagem');
-  }
-}
-function mostrarResultadoQR(txt){
-  var res=document.getElementById('qr-scan-result'),ac=document.getElementById('qr-acoes');
-  res.style.display='block';res.textContent=txt;ac.style.display='flex';ac.innerHTML='';
-  var b1=document.createElement('button');b1.className='btn btn-ghost btn-sm';b1.textContent='Copiar';b1.style.color='#fff';
-  b1.onclick=function(){navigator.clipboard.writeText(txt);toast('Copiado!');};ac.appendChild(b1);
-  if(/^https?:\/\//.test(txt)){
-    var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
-    if(isIOS){
-      var b2=document.createElement('button');b2.className='btn btn-primary btn-sm';b2.textContent='🔗 Abrir link';b2.onclick=function(){window.open(txt,'_blank');};ac.appendChild(b2);
-    } else {
-      window.open(txt,'_blank');toast('🔗 Link aberto!',2000);
-    }
-  }
-}
-
-var ocrFileAtual=null;
 function previewOCR(input){
   if(!input.files[0])return;
   ocrFileAtual=input.files[0];
@@ -1430,15 +1001,6 @@ function lerBoletoImg(input){
   qs.scanFile(input.files[0],true).then(function(txt){document.getElementById('boleto-codigo').value=txt;parseBoleto();}).catch(function(){toast('Codigo nao encontrado');});
 }
 
-function togglePixRapido(){
-  var body=document.getElementById('pix-rapido-body');
-  var card=document.getElementById('pix-rapido-card');
-  var open=body.style.display==='none'||body.style.display==='';
-  body.style.display=open?'block':'none';
-  var seta=document.getElementById('pix-seta');
-  if(seta)seta.textContent=open?'▲':'▼';
-  if(open){setTimeout(function(){card.scrollIntoView({behavior:'smooth',block:'start'});},80);}
-}
 function gerarPixRapido(){
   var chave=document.getElementById('pr-chave').value.trim();
   if(!chave){toast('Informe a chave Pix');return;}
@@ -1467,42 +1029,11 @@ var categorias={
   moeda:{units:{'Real BRL':1,'Dolar USD':5.10,'Euro EUR':5.55,'Libra GBP':6.50,'Peso ARS':0.006}}
 };
 var categoriaAtual='comp';
-function setCategoria(cat,el){categoriaAtual=cat;document.querySelectorAll('.ctab').forEach(function(c){c.classList.remove('active');});el.classList.add('active');preencherUnidades();converter();}
 function preencherUnidades(){
   var units=Object.keys(categorias[categoriaAtual].units);
   var de=document.getElementById('conv-de'),para=document.getElementById('conv-para');
   de.innerHTML=units.map(function(u){return '<option>'+u+'</option>';}).join('');
   para.innerHTML=units.map(function(u,i){return '<option'+(i===1?' selected':'')+'>'+u+'</option>';}).join('');
-}
-function converter(){
-  var val=parseFloat(document.getElementById('conv-valor').value);
-  if(isNaN(val)){document.getElementById('conv-result').textContent='-';return;}
-  var de=document.getElementById('conv-de').value,para=document.getElementById('conv-para').value;
-  var units=categorias[categoriaAtual].units;
-  var result;
-  if(categoriaAtual==='temp'){
-    var tf=units[de],tt=units[para];
-    var c=tf==='C'?val:tf==='F'?(val-32)*5/9:val-273.15;
-    result=tt==='C'?c:tt==='F'?c*9/5+32:c+273.15;
-  }else{result=(val*units[de])/units[para];}
-  var fmt=Math.abs(result)<0.001?result.toExponential(4):parseFloat(result.toFixed(4)).toString();
-  document.getElementById('conv-result').textContent=val+' '+de+' = '+fmt+' '+para;
-}
-
-function salvarNota(){
-  var txt=document.getElementById('nota-texto').value.trim();
-  if(!txt){toast('Digite algo');return;}
-  var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
-  notas.unshift({txt:txt,data:new Date().toLocaleString('pt-BR')});
-  localStorage.setItem('ub-notas',JSON.stringify(notas));
-  document.getElementById('nota-texto').value='';
-  carregarNotas();toast('Nota salva!');
-}
-function carregarNotas(){
-  var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
-  var lista=document.getElementById('notas-lista');if(!lista)return;
-  if(!notas.length){lista.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:13px">Nenhuma nota ainda</div>';return;}
-  lista.innerHTML=notas.map(function(n,i){return '<div class="nota-card"><button class="nota-card-del" onclick="deletarNota('+i+')">x</button><div class="nota-card-text">'+escHtml(n.txt)+'</div><div class="nota-card-date">'+escHtml(n.data)+'</div></div>';}).join('');
 }
 function deletarNota(i){
   var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
@@ -2008,31 +1539,6 @@ function salvarScannerPDF(){
 
 
 // ===== CPF / CNPJ =====
-function docsTab(t){switchTabs('#screen-docs .tab','#screen-docs .pane',t==='cpf'?0:1);}
-
-function cpfMask(el){
-  var v=el.value.replace(/\D/g,'').slice(0,11);
-  if(v.length>9)v=v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6,9)+'-'+v.slice(9);
-  else if(v.length>6)v=v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6);
-  else if(v.length>3)v=v.slice(0,3)+'.'+v.slice(3);
-  el.value=v;
-}
-
-function cnpjMask(el){
-  var v=el.value.replace(/\D/g,'').slice(0,14);
-  if(v.length>12)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8,12)+'-'+v.slice(12);
-  else if(v.length>8)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8);
-  else if(v.length>5)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5);
-  else if(v.length>2)v=v.slice(0,2)+'.'+v.slice(2);
-  el.value=v;
-}
-
-function limparDoc(tipo){
-  document.getElementById(tipo+'-input').value='';
-  var r=document.getElementById(tipo+'-result');
-  r.style.display='none';r.innerHTML='';
-}
-
 function calcCPF(cpf){
   cpf=cpf.replace(/\D/g,'');
   if(cpf.length!==11)return false;
@@ -2045,24 +1551,6 @@ function calcCPF(cpf){
   for(var i=0;i<10;i++)s+=parseInt(cpf[i])*(11-i);
   r=(s*10)%11;if(r>=10)r=0;
   return r===parseInt(cpf[10]);
-}
-
-function validarCPF(){
-  var val=document.getElementById('cpf-input').value;
-  var nums=val.replace(/\D/g,'');
-  var wrap=document.getElementById('cpf-result');
-  wrap.style.display='block';
-  if(nums.length!==11){
-    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x26A0;</div><div class="doc-status">CPF incompleto</div><div class="doc-detalhe">Digite os 11 digitos do CPF</div></div>';
-    return;
-  }
-  var ok=calcCPF(nums);
-  var fmt=nums.slice(0,3)+'.'+nums.slice(3,6)+'.'+nums.slice(6,9)+'-'+nums.slice(9);
-  if(ok){
-    wrap.innerHTML='<div class="doc-result valido"><div class="doc-emoji">&#x2705;</div><div class="doc-status">CPF Valido</div><div class="doc-detalhe">'+fmt+'<br>Digitos verificadores corretos</div></div>';
-  }else{
-    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x274C;</div><div class="doc-status">CPF Invalido</div><div class="doc-detalhe">'+fmt+'<br>Os digitos verificadores nao conferem</div></div>';
-  }
 }
 
 function calcCNPJ(cnpj){
@@ -2079,25 +1567,6 @@ function calcCNPJ(cnpj){
   var d2=calc(base+d1,6);
   return d1===parseInt(cnpj[12])&&d2===parseInt(cnpj[13]);
 }
-
-function validarCNPJ(){
-  var val=document.getElementById('cnpj-input').value;
-  var nums=val.replace(/\D/g,'');
-  var wrap=document.getElementById('cnpj-result');
-  wrap.style.display='block';
-  if(nums.length!==14){
-    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x26A0;</div><div class="doc-status">CNPJ incompleto</div><div class="doc-detalhe">Digite os 14 digitos do CNPJ</div></div>';
-    return;
-  }
-  var ok=calcCNPJ(nums);
-  var fmt=nums.slice(0,2)+'.'+nums.slice(2,5)+'.'+nums.slice(5,8)+'/'+nums.slice(8,12)+'-'+nums.slice(12);
-  if(ok){
-    wrap.innerHTML='<div class="doc-result valido"><div class="doc-emoji">&#x2705;</div><div class="doc-status">CNPJ Valido</div><div class="doc-detalhe">'+fmt+'<br>Digitos verificadores corretos</div></div>';
-  }else{
-    wrap.innerHTML='<div class="doc-result invalido"><div class="doc-emoji">&#x274C;</div><div class="doc-status">CNPJ Invalido</div><div class="doc-detalhe">'+fmt+'<br>Os digitos verificadores nao conferem</div></div>';
-  }
-}
-
 
 // ===== LEMBRETES =====
 var lembInterval = null;
