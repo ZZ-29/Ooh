@@ -2635,9 +2635,9 @@ var timerTempos={
   'arroz':          [8,10,10,'Proporção 1 xíc arroz : 1,5 xíc água'],
   'milho':          [10,12,15,'Espiga cortada ao meio']
 };
-var timerInterval=null;
-var timerSegundos=0;
-var timerRodando=false;
+var panInterval=null;
+var panSeg=0;
+var panRodando=false;
 
 function timerSelecionarTempo(){
   var alimento=document.getElementById('timer-alimento').value;
@@ -2652,37 +2652,37 @@ function timerSelecionarTempo(){
   val.textContent=dados[idx]+' minutos';
   obs.textContent=dados[3];
   sug.style.display='block';
-  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-  timerRodando=false;
-  timerSegundos=dados[idx]*60;
-  timerAtualizarDisplay();
+  if(panInterval){clearInterval(panInterval);panInterval=null;}
+  panRodando=false;
+  panSeg=dados[idx]*60;
+  panTimerDisplay();
   document.getElementById('timer-btn-start').textContent='▶ Iniciar';
 }
 
-function timerAtualizarDisplay(){
-  var m=Math.floor(timerSegundos/60);
-  var s=timerSegundos%60;
+function panTimerDisplay(){
+  var m=Math.floor(panSeg/60);
+  var s=panSeg%60;
   document.getElementById('timer-clock').textContent=
     (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
 }
 
 function timerStart(){
   var btn=document.getElementById('timer-btn-start');
-  if(timerRodando){
-    clearInterval(timerInterval);timerInterval=null;
-    timerRodando=false;
+  if(panRodando){
+    clearInterval(panInterval);panInterval=null;
+    panRodando=false;
     btn.textContent='▶ Continuar';
     return;
   }
-  if(timerSegundos<=0){toast('Selecione um alimento primeiro');return;}
-  timerRodando=true;
+  if(panSeg<=0){toast('Selecione um alimento primeiro');return;}
+  panRodando=true;
   btn.textContent='⏸ Pausar';
-  timerInterval=setInterval(function(){
-    timerSegundos--;
-    timerAtualizarDisplay();
-    if(timerSegundos<=0){
-      clearInterval(timerInterval);timerInterval=null;
-      timerRodando=false;
+  panInterval=setInterval(function(){
+    panSeg--;
+    panTimerDisplay();
+    if(panSeg<=0){
+      clearInterval(panInterval);panInterval=null;
+      panRodando=false;
       btn.textContent='▶ Iniciar';
       toast('🍳 Tempo esgotado! Desligue o fogo.',5000);
       if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
@@ -2693,16 +2693,16 @@ function timerStart(){
 }
 
 function timerReset(){
-  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-  timerRodando=false;
+  if(panInterval){clearInterval(panInterval);panInterval=null;}
+  panRodando=false;
   document.getElementById('timer-btn-start').textContent='▶ Iniciar';
   var alimento=document.getElementById('timer-alimento').value;
   var panela=document.getElementById('timer-panela').value;
   if(alimento&&timerTempos[alimento]){
     var idx=panela==='5'?0:panela==='10'?1:2;
-    timerSegundos=timerTempos[alimento][idx]*60;
-  } else { timerSegundos=0; }
-  timerAtualizarDisplay();
+    panSeg=timerTempos[alimento][idx]*60;
+  } else { panSeg=0; }
+  panTimerDisplay();
 }
 
 </script>
