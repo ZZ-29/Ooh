@@ -17,7 +17,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden}
-.screen{display:none;position:fixed;inset:0 0 var(--nav-h) 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.screen{display:none;position:fixed;top:0;right:0;bottom:0;left:0 0 var(--nav-h) 0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .screen.active{display:block;animation:fadeUp .22s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:#0D2545;border-top:1px solid #1E5060;display:flex;align-items:center;z-index:100;padding:6px 8px env(safe-area-inset-bottom);gap:6px}
@@ -198,6 +198,30 @@ select{appearance:none;-webkit-appearance:none}
       <span style="font-size:11px;color:#10B981;font-weight:600;letter-spacing:0.3px">Seus dados ficam só no seu celular</span>
     </div>
   </div>
+  <!-- Compartilhar App -->
+  <div style="padding:0 16px 4px">
+    <div style="background:linear-gradient(135deg,#1a1040,#0D1525);border-radius:16px;padding:16px;border:1px solid rgba(108,60,225,0.3)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff">📲 Compartilhar Ooh!</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">Aponte a câmera ou envie o link</div>
+        </div>
+        <div id="ooh-qrcode" style="background:#fff;padding:6px;border-radius:8px;width:72px;height:72px;flex-shrink:0"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="compartilharWhatsApp()" style="flex:1;padding:10px 6px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">
+          💬 WhatsApp
+        </button>
+        <button onclick="compartilharImagem()" style="flex:1;padding:10px 6px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">
+          🖼️ QR Imagem
+        </button>
+        <button onclick="compartilharLink()" style="flex:1;padding:10px 6px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">
+          🔗 Link
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="tools-grid">
     <!-- A -->
     <div class="tool-card" onclick="goTo('cal')" style="background:linear-gradient(135deg,#0f2027,#1a3a2a)">
@@ -636,41 +660,6 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 </div>
 
-<!-- LEMBRETES -->
-<div class="screen" id="screen-lembretes">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#B45309,#92400E)">&#x23F0;</div>
-    <h1>Lembretes</h1>
-  </div>
-  <div style="padding:0 16px 4px">
-    <div id="notif-aviso" style="display:none;background:rgba(245,158,11,.15);border:1px solid #B45309;border-radius:10px;padding:12px;font-size:13px;color:#FCD34D;margin-bottom:12px;text-align:center">
-      &#x1F514; Ative as notificacoes para receber alarmes mesmo com o app minimizado
-      <br><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pedirPermissaoNotif()">Ativar notificacoes</button>
-    </div>
-  </div>
-  <div class="section">
-    <div class="field">
-      <label class="lbl">O que precisa lembrar?</label>
-      <textarea id="lemb-texto" placeholder="Ex: Ligar para o banco, Consulta medica, Pagar boleto..." style="min-height:70px"></textarea>
-    </div>
-    <div class="row">
-      <div class="field">
-        <label class="lbl">Data</label>
-        <input type="date" id="lemb-data">
-      </div>
-      <div class="field">
-        <label class="lbl">Hora</label>
-        <input type="time" id="lemb-hora">
-      </div>
-    </div>
-    <button class="btn btn-primary" onclick="salvarLembrete()">&#x23F0; Salvar Lembrete</button>
-  </div>
-  <div style="padding:0 16px 8px">
-    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">PROXIMOS LEMBRETES</div>
-    <div id="lemb-lista"></div>
-  </div>
-</div>
 <!-- SCANNER -->
 <div class="screen" id="screen-scanner">
   <!-- Step 1: Capturar foto via câmera nativa ou galeria -->
@@ -761,7 +750,7 @@ select{appearance:none;-webkit-appearance:none}
 </nav>
 
 <!-- Modal Definir Minha Cidade -->
-<div id="modal-minha-cidade" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;justify-content:center;align-items:center;">
+<div id="modal-minha-cidade" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.75);z-index:9999;justify-content:center;align-items:center;">
   <div style="background:var(--surface);border-radius:16px;padding:24px 20px;width:90%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
     <h3 style="margin:0 0 16px;font-size:15px;color:var(--text)">🏠 Definir Minha Cidade</h3>
     <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -782,6 +771,43 @@ select{appearance:none;-webkit-appearance:none}
 <script>
 var camAtiva=false,html5QrScanner=null;
 
+// ── Compartilhar App ──
+var OOH_URL='https://ZZ-29.github.io/Ooh/';
+function oohGerarQR(){
+  var el=document.getElementById('ooh-qrcode');
+  if(!el||el.querySelector('canvas')||el.querySelector('img'))return;
+  if(typeof QRCode==='undefined')return;
+  try{
+    new QRCode(el,{text:OOH_URL,width:60,height:60,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){}
+}
+function compartilharWhatsApp(){
+  var txt='Instale o Ooh! — app gratuito sem anúncio, seus dados ficam só no seu celular 🔒\n'+OOH_URL;
+  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+}
+async function compartilharImagem(){
+  var el=document.getElementById('ooh-qrcode');
+  var canvas=el?el.querySelector('canvas'):null;
+  if(!canvas){toast('QR não gerado ainda, aguarde');return;}
+  if(navigator.share&&navigator.canShare){
+    canvas.toBlob(async function(blob){
+      var file=new File([blob],'ooh-app.png',{type:'image/png'});
+      if(navigator.canShare({files:[file]})){
+        try{
+          await navigator.share({files:[file],title:'Ooh! App',text:'Instale o Ooh! — gratuito e sem anúncio\n'+OOH_URL});
+        }catch(e){if(e.name!=='AbortError')toast('Erro ao compartilhar');}
+      } else { compartilharLink(); }
+    },'image/png');
+  } else { compartilharLink(); }
+}
+function compartilharLink(){
+  if(navigator.share){
+    navigator.share({title:'Ooh! App',text:'App gratuito e sem anúncio 🔒',url:OOH_URL}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(OOH_URL).then(function(){toast('Link copiado!');}).catch(function(){toast(OOH_URL);});
+  }
+}
+
 // Sanitização: escapa HTML em dados do usuário antes de injetar no DOM
 function escHtml(s){
   if(!s)return '';
@@ -795,6 +821,8 @@ function escHtml(s){
 
 
 function goTo(s){
+  // 'lembretes' é atalho para cal + aba Lembretes
+  if(s==='lembretes'){goTo('cal');calTabSwitch('lemb');return;}
   if(s!=='home')history.pushState({screen:s},'','');
   document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(x){x.classList.remove('active');});
@@ -804,14 +832,19 @@ function goTo(s){
   var nb=document.getElementById('nav-'+s);
   if(nb)nb.classList.add('active');
   try{if(s!=='scanner')scannerFecharCamera();}catch(e){}
-  if(s==='lembretes')initLembretes();
-  if(s==='cal')setTimeout(function(){if(document.getElementById('cal-pane-lemb')&&document.getElementById('cal-pane-lemb').classList.contains('active'))initLembretes();},50);
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
-  if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
+  if(s==='timer'){resetTimer();renderCookPresets();}
   if(s==='cal'){try{calInit();}catch(e){toast('Erro agenda: '+e.message,5000);}}
-  if(s==='lembretes'){goTo('cal');calTabSwitch('lemb');return;}
   if(s==='scanner')setTimeout(scannerNovo,0);
   if(s==='tempo')setTimeout(tempoInit,50);
+  if(s==='home')setTimeout(oohGerarQR,100);
+}
+
+function calTabSwitch(pane){
+  var idx={'cal':0,'lemb':1,'datas':2}[pane];
+  if(idx===undefined)return;
+  switchTabs('#screen-cal .tab','#screen-cal .pane',idx);
+  if(pane==='lemb')setTimeout(initLembretes,50);
 }
 
 
@@ -1724,51 +1757,62 @@ function timerTab(t){
   if(t==='crono')renderCronoVoltas();
 }
 
+// setTimer: define inputs, atualiza display imediatamente e inicia
 function setTimer(min,seg){
+  // Para qualquer timer em andamento
+  clearInterval(timerAtivo);
+  timerRodando=false;
+  timerAtivo=null;
+  // Define o tempo
+  timerSeg=(min*60)+seg;
+  // Atualiza inputs para refletir o tempo escolhido
   document.getElementById('timer-min').value=min;
   document.getElementById('timer-seg').value=seg;
-  resetTimer();
+  // Atualiza display ANTES de iniciar (exibe o tempo correto, não 00:00)
+  document.getElementById('timer-display').textContent=String(min).padStart(2,'0')+':'+String(seg).padStart(2,'0');
+  document.getElementById('timer-display').style.color='#fff';
+  document.getElementById('timer-status').textContent='Iniciando...';
+  // Inicia imediatamente
+  iniciarTimer();
 }
 
 function toggleTimer(){
-  if(timerRodando){
-    pausarTimer();
-  } else {
-    iniciarTimer();
-  }
+  if(timerRodando) pausarTimer(); else iniciarTimer();
 }
 
 function iniciarTimer(){
-  if(!timerRodando){
+  if(timerRodando) return; // já rodando, ignora
+  // Se timerSeg é 0, lê dos inputs
+  if(timerSeg===0){
     var m=parseInt(document.getElementById('timer-min').value)||0;
     var s=parseInt(document.getElementById('timer-seg').value)||0;
-    if(timerSeg===0) timerSeg=(m*60)+s;
-    if(timerSeg<=0){toast('Defina um tempo');return;}
-    timerRodando=true;
-    document.getElementById('btn-timer-start').innerHTML='&#x23F8; Pausar';
-    document.getElementById('timer-status').textContent='Contando...';
-    timerAtivo=setInterval(function(){
-      timerSeg--;
-      atualizarDisplayTimer();
-      if(timerSeg<=0){
-        clearInterval(timerAtivo);timerRodando=false;
-        document.getElementById('btn-timer-start').innerHTML='&#x25B6; Iniciar';
-        document.getElementById('timer-display').style.color='#10B981';
-        document.getElementById('timer-status').textContent='Tempo esgotado!';
-        dispararTimerAlarme('Timer concluido!');
-      }
-    },1000);
+    timerSeg=(m*60)+s;
   }
+  if(timerSeg<=0){toast('Defina um tempo');return;}
+  timerRodando=true;
+  document.getElementById('btn-timer-start').innerHTML='&#x23F8; Pausar';
+  document.getElementById('timer-status').textContent='Contando...';
+  timerAtivo=setInterval(function(){
+    timerSeg--;
+    atualizarDisplayTimer();
+    if(timerSeg<=0){
+      clearInterval(timerAtivo);timerAtivo=null;timerRodando=false;
+      document.getElementById('btn-timer-start').innerHTML='&#x25B6; Iniciar';
+      document.getElementById('timer-display').style.color='#10B981';
+      document.getElementById('timer-status').textContent='Tempo esgotado!';
+      dispararTimerAlarme('Timer concluido!');
+    }
+  },1000);
 }
 
 function pausarTimer(){
-  clearInterval(timerAtivo);timerRodando=false;
+  clearInterval(timerAtivo);timerAtivo=null;timerRodando=false;
   document.getElementById('btn-timer-start').innerHTML='&#x25B6; Continuar';
   document.getElementById('timer-status').textContent='Pausado';
 }
 
 function resetTimer(){
-  clearInterval(timerAtivo);timerRodando=false;timerSeg=0;
+  clearInterval(timerAtivo);timerAtivo=null;timerRodando=false;timerSeg=0;
   document.getElementById('btn-timer-start').innerHTML='&#x25B6; Iniciar';
   document.getElementById('timer-display').textContent='00:00';
   document.getElementById('timer-display').style.color='#fff';
@@ -1778,10 +1822,8 @@ function resetTimer(){
 function atualizarDisplayTimer(){
   var m=Math.floor(timerSeg/60);
   var s=timerSeg%60;
-  var txt=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-  document.getElementById('timer-display').textContent=txt;
-  if(timerSeg<=10) document.getElementById('timer-display').style.color='#EF4444';
-  else document.getElementById('timer-display').style.color='#fff';
+  document.getElementById('timer-display').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('timer-display').style.color=timerSeg<=10?'#EF4444':'#fff';
 }
 
 function adicionarTimer(){
@@ -1832,11 +1874,24 @@ function removerTimer(id){
 }
 
 function dispararTimerAlarme(msg){
-  toast('&#x23F0; '+msg, 5000);
+  toast('&#x23F0; '+msg,5000);
   if('vibrate' in navigator) navigator.vibrate([500,200,500,200,500,200,500]);
   if('Notification' in window && Notification.permission==='granted'){
     new Notification('Ooh! '+msg,{icon:'/Ooh/icon-512.png',vibrate:[300,100,300]});
   }
+  try{
+    var ctx=new (window.AudioContext||window.webkitAudioContext)();
+    [0,300,600].forEach(function(delay){
+      setTimeout(function(){
+        var o=ctx.createOscillator();var g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.frequency.value=880;
+        g.gain.setValueAtTime(0.3,ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+        o.start();o.stop(ctx.currentTime+0.4);
+      },delay);
+    });
+  }catch(e){}
 }
 
 // CRONOMETRO
@@ -1897,19 +1952,20 @@ function tempoInit(){
   var lat=parseFloat(localStorage.getItem('ooh_tempo_lat')||'');
   var lon=parseFloat(localStorage.getItem('ooh_tempo_lon')||'');
   var nome=localStorage.getItem('ooh_tempo_nome')||'';
-  var btn=document.getElementById('tempo-btn-gps');
-  var divSalvo=document.getElementById('tempo-local-salvo');
-  var nomeSalvo=document.getElementById('tempo-local-salvo-nome');
   renderBotoesTempo();
   if(lat&&lon&&nome){
+    var btn=document.getElementById('tempo-btn-gps');
     if(btn)btn.textContent='📍 Atualizar: '+nome;
+    var divSalvo=document.getElementById('tempo-local-salvo');
     if(divSalvo)divSalvo.style.display='flex';
+    var nomeSalvo=document.getElementById('tempo-local-salvo-nome');
     if(nomeSalvo)nomeSalvo.textContent='🗃 Local salvo: '+nome;
     buscarTempoCoords(lat,lon,nome);
   } else {
-    if(btn)btn.textContent='📍 Usar minha localização';
-    if(divSalvo)divSalvo.style.display='none';
-    // Usa Minha Cidade se definida, senão Florianópolis como padrão
+    var btn2=document.getElementById('tempo-btn-gps');
+    if(btn2)btn2.textContent='📍 Usar minha localização';
+    var divSalvo2=document.getElementById('tempo-local-salvo');
+    if(divSalvo2)divSalvo2.style.display='none';
     var mc=null;
     try{mc=JSON.parse(localStorage.getItem('ooh_minha_cidade')||'null');}catch(e){}
     if(mc&&mc.lat&&mc.lon){
@@ -1919,6 +1975,7 @@ function tempoInit(){
     }
   }
 }
+
 function tempoLimparLocal(){
   localStorage.removeItem('ooh_tempo_lat');
   localStorage.removeItem('ooh_tempo_lon');
@@ -1932,9 +1989,7 @@ function tempoLimparLocal(){
   document.getElementById('tempo-cidade').value='';
   toast('Local salvo apagado',2000);
 }
-function tempoCidadeRapida(nome,uf,lat,lon){
-  buscarTempoCoords(lat,lon,nome+', '+uf);
-}
+
 function tempoSalvarLocal(lat,lon,nome){
   try{
     localStorage.setItem('ooh_tempo_lat',lat);
@@ -1982,11 +2037,14 @@ function abrirDefinirMinhaCidade(){
   var modal=document.getElementById('modal-minha-cidade');
   if(!modal)return;
   modal.style.display='flex';
-  var inp=document.getElementById('input-minha-cidade');
-  if(inp){inp.value='';setTimeout(function(){inp.focus();},100);}
   document.getElementById('minha-cidade-resultado').style.display='none';
   document.getElementById('minha-cidade-loading').style.display='none';
   _minhaCidadePendente=null;
+  var inp=document.getElementById('input-minha-cidade');
+  if(inp){
+    inp.value='';
+    inp.focus(); // direto — sem setTimeout, mantém contexto do gesto do usuário no Android
+  }
 }
 
 function fecharDefinirMinhaCidade(){
@@ -2033,6 +2091,7 @@ function tempoIcone(cod){
   var m={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
   return m[cod]||'🌡️';
 }
+
 function tempoDesc(cod){
   var m={0:'Céu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',45:'Neblina',48:'Neblina com gelo',51:'Garoa leve',53:'Garoa moderada',55:'Garoa intensa',61:'Chuva leve',63:'Chuva moderada',65:'Chuva forte',71:'Neve leve',73:'Neve moderada',75:'Neve forte',80:'Pancadas leves',81:'Pancadas moderadas',82:'Pancadas fortes',95:'Trovoada',96:'Trovoada com granizo',99:'Trovoada com granizo forte'};
   return m[cod]||'Desconhecido';
@@ -2043,11 +2102,10 @@ function usarGPS(){
   mostrarTempoLoading();
   toast('📡 Obtendo localização...',3000);
   navigator.geolocation.getCurrentPosition(function(pos){
-    var lat=pos.coords.latitude,lon=pos.coords.longitude;
-    buscarTempoCoords(lat,lon,'Minha localização');
+    buscarTempoCoords(pos.coords.latitude,pos.coords.longitude,'Minha localização');
   },function(err){
     esconderTempoLoading();
-    var msgs={1:'Permissão de localização negada — habilite nas configurações do navegador.',2:'Localização indisponível no momento.',3:'Tempo esgotado ao obter GPS. Tente novamente.'};
+    var msgs={1:'Permissão de localização negada.',2:'Localização indisponível.',3:'Timeout ao obter GPS.'};
     toast(msgs[err.code]||'Erro GPS: '+err.message,5000);
   },{timeout:15000,maximumAge:300000,enableHighAccuracy:true});
 }
@@ -2062,7 +2120,6 @@ function buscarCidade(){
       if(!d.results||!d.results.length){esconderTempoLoading();toast('Cidade não encontrada');return;}
       var r=d.results[0];
       var nome=r.name+(r.admin1?', '+r.admin1:'')+(r.country_code?', '+r.country_code:'');
-      // Salva como último destino (se diferente de Minha Cidade)
       try{
         var mc=JSON.parse(localStorage.getItem('ooh_minha_cidade')||'null');
         if(!mc||nome!==mc.nome){
@@ -2075,12 +2132,8 @@ function buscarCidade(){
     .catch(function(){esconderTempoLoading();toast('Erro ao buscar cidade');});
 }
 
-function wttrToWmo(c){
-  var m={113:0,116:2,119:3,122:3,143:45,176:80,200:95,248:45,260:48,263:51,266:53,293:61,296:63,299:65,353:80,356:81,359:82,386:95,389:96};
-  return m[c]||0;
-}
 function buscarTempoCoords(lat,lon,nomeCidade){
-  toast('🌐 Buscando clima...',3000);
+  mostrarTempoLoading();
   var ctrl=new AbortController();
   var timer=setTimeout(function(){ctrl.abort();},12000);
   var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
@@ -2112,21 +2165,15 @@ function buscarTempoCoords(lat,lon,nomeCidade){
 function renderTempo(d,cidade){
   var c=d.current||{};
   var daily=d.daily||{};
-
-  // Mostra container + reset scroll
   document.getElementById('tempo-vazio').style.display='none';
   document.getElementById('tempo-resultado').style.display='block';
   var scr=document.getElementById('screen-tempo');
-  if(scr) scr.scrollTop=0;
-
-  // Dados atuais — cada campo com fallback seguro
+  if(scr)scr.scrollTop=0;
   document.getElementById('tempo-local').textContent='📍 '+cidade;
   document.getElementById('tempo-icone').textContent=tempoIcone(c.weather_code||0);
   document.getElementById('tempo-temp').textContent=(c.temperature_2m!=null?Math.round(c.temperature_2m):'--')+'°C';
   document.getElementById('tempo-desc').textContent=tempoDesc(c.weather_code||0);
   document.getElementById('tempo-sensacao').textContent='Sensação: '+(c.apparent_temperature!=null?Math.round(c.apparent_temperature)+'°C':'--');
-
-  // Chips de detalhes
   var chuvaHoje=Array.isArray(daily.precipitation_probability_max)?daily.precipitation_probability_max[0]:0;
   var dets=[
     {ic:'💧',val:(c.relativehumidity_2m!=null?c.relativehumidity_2m:'--')+'%',lbl:'Umidade'},
@@ -2139,8 +2186,6 @@ function renderTempo(d,cidade){
       '<div style="font-size:16px;font-weight:700;color:#fff">'+x.val+'</div>'+
       '<div style="font-size:11px;color:var(--text2)">'+x.lbl+'</div></div>';
   }).join('');
-
-  // 7 dias — seguro mesmo sem dados diários
   var dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
   var times=Array.isArray(daily.time)?daily.time:[];
   if(!times.length){
@@ -2176,13 +2221,14 @@ function mostrarTempoLoading(){
   document.getElementById('tempo-resultado').style.display='none';
   document.getElementById('tempo-vazio').style.display='none';
 }
+
 function esconderTempoLoading(){
   document.getElementById('tempo-loading').style.display='none';
 }
 
 
 // ===== ASSISTENTE CULINARIO =====
-var cookData = {
+var cookData={
   graos:[
     {n:'Arroz Branco',min:12,seg:0,d:'Agua fervendo, fogo medio-baixo'},
     {n:'Arroz Integral',min:40,seg:0,d:'Precisa de mais agua — 2 xicaras por 1'},
@@ -2190,7 +2236,7 @@ var cookData = {
     {n:'Risoto',min:18,seg:0,d:'Mexer sempre, adicionar caldo aos poucos'},
     {n:'Feijao Preto',min:90,seg:0,d:'Panela normal — ou 40min na pressao'},
     {n:'Feijao Carioca',min:80,seg:0,d:'Panela normal — ou 35min na pressao'},
-    {n:'Lentilha',min:20,seg:0,d:'Não precisa molhar, cozinha rápido'},
+    {n:'Lentilha',min:20,seg:0,d:'Nao precisa molhar, cozinha rapido'},
     {n:'Grao de Bico',min:120,seg:0,d:'Deixar de molho 8h antes'},
     {n:'Quinoa',min:15,seg:0,d:'2 partes de agua para 1 de quinoa'},
   ],
@@ -2199,15 +2245,15 @@ var cookData = {
     {n:'Espaguete bem cozido',min:11,seg:0,d:'Ideal para criancas'},
     {n:'Penne',min:10,seg:0,d:'Al dente — 12min para mais mole'},
     {n:'Fusilli / Parafuso',min:9,seg:0,d:'Agitar a panela no meio do cozimento'},
-    {n:'Talharim',min:7,seg:0,d:'Massa fina, cozinha rápido'},
-    {n:'Macarrão Instantâneo',min:3,seg:0,d:'Não jogar o tempero fora ainda'},
+    {n:'Talharim',min:7,seg:0,d:'Massa fina, cozinha rapido'},
+    {n:'Macarrao Instantaneo',min:3,seg:0,d:'Nao jogar o tempero fora ainda'},
     {n:'Lasanha (montar+forno)',min:40,seg:0,d:'Cobrir com papel aluminio os primeiros 30min'},
   ],
   ovos:[
     {n:'Ovo Mole',min:5,seg:0,d:'Gema liquida, clara firme — perfeito'},
     {n:'Ovo Medio',min:7,seg:0,d:'Gema cremosa no centro'},
-    {n:'Ovo Duro',min:10,seg:0,d:'Colocar em água fria logo após para descascar fácil'},
-    {n:'Ovo Poché',min:3,seg:30,d:'Agua quase fervendo com um fio de vinagre'},
+    {n:'Ovo Duro',min:10,seg:0,d:'Colocar em agua fria logo apos para descascar facil'},
+    {n:'Ovo Poche',min:3,seg:30,d:'Agua quase fervendo com um fio de vinagre'},
     {n:'Ovo Frito',min:2,seg:30,d:'Frigideira quente com pouco oleo'},
     {n:'Omelete',min:3,seg:0,d:'Fogo medio, dobrar quando as bordas firmarem'},
   ],
@@ -2216,46 +2262,43 @@ var cookData = {
     {n:'Frango 2kg (forno)',min:90,seg:0,d:'200°C — descobrir nos ultimos 20min'},
     {n:'Frango Grelhado',min:12,seg:0,d:'6min cada lado em fogo medio-alto'},
     {n:'Carne ao Ponto',min:45,seg:0,d:'180°C no forno — ou 6min cada lado na grelha'},
-    {n:'Peixe Forno',min:20,seg:0,d:'200°C — não virar para não desmanchar'},
-    {n:'Linguica',min:25,seg:0,d:'Furar antes para não estourar'},
+    {n:'Peixe Forno',min:20,seg:0,d:'200°C — nao virar para nao desmanchar'},
+    {n:'Linguica',min:25,seg:0,d:'Furar antes para nao estourar'},
     {n:'Costela (forno)',min:180,seg:0,d:'160°C, embrulhada em aluminio'},
   ],
   legumes:[
     {n:'Batata Cozida',min:20,seg:0,d:'Em cubos — inteira leva 35min'},
     {n:'Brocolis Cozido',min:8,seg:0,d:'Al dente — 5min se preferir mais firme'},
     {n:'Cenoura Cozida',min:15,seg:0,d:'Em rodelas — inteira leva 25min'},
-    {n:'Abobrinha',min:6,seg:0,d:'Não deixar passar — fica mole rápido'},
+    {n:'Abobrinha',min:6,seg:0,d:'Nao deixar passar — fica mole rapido'},
     {n:'Beterraba',min:45,seg:0,d:'Inteira com casca — pressao: 20min'},
     {n:'Mandioca',min:30,seg:0,d:'Retirar o fio central antes de cozinhar'},
     {n:'Bolo (forma media)',min:35,seg:0,d:'180°C — testar com palito antes de tirar'},
   ]
 };
 
-var cookCatAtual = 'graos';
+var cookCatAtual='graos';
 
-function setCookCat(cat, btn){
-  cookCatAtual = cat;
+function setCookCat(cat,btn){
+  cookCatAtual=cat;
   document.querySelectorAll('.cook-cat').forEach(function(b){b.classList.remove('active');});
-  if(btn) btn.classList.add('active');
+  if(btn)btn.classList.add('active');
   renderCookPresets();
 }
 
 function renderCookPresets(){
-  var el = document.getElementById('cook-presets');
-  if(!el) return;
-  var items = cookData[cookCatAtual]||[];
-  el.innerHTML = items.map(function(item){
-    var t = item.min>0 ? item.min+'min'+(item.seg>0?' '+item.seg+'s':'') : item.seg+'s';
-    var msg = item.n + ' — ' + t;
-    return '<div class="cook-item" onclick="setTimer('+item.min+','+item.seg+');toast(&quot;'+msg+'&quot;)">' +
+  var el=document.getElementById('cook-presets');
+  if(!el)return;
+  var items=cookData[cookCatAtual]||[];
+  el.innerHTML=items.map(function(item){
+    var t=item.min>0?item.min+'min'+(item.seg>0?' '+item.seg+'s':''):item.seg+'s';
+    var msg=item.n+' — '+t;
+    return '<div class="cook-item" onclick="setTimer('+item.min+','+item.seg+');toast(&quot;'+msg+'&quot;)">'+
       '<div><div class="cook-nome">'+item.n+'</div><div class="cook-dica">&#x1F4A1; '+item.d+'</div></div>'+
       '<div class="cook-tempo">'+t+'</div>'+
       '</div>';
   }).join('');
 }
-
-// Renderiza ao entrar na tela
-var _origGoTo = goTo;
 
 // ============ VEÍCULOS ============
 var veiIdAtivo = null;
@@ -2584,6 +2627,9 @@ if('launchQueue' in window){
 
 
 <script>
+// Gera QR na home ao carregar
+window.addEventListener('load',function(){setTimeout(oohGerarQR,500);});
+
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('/Ooh/sw.js')
@@ -2836,74 +2882,4 @@ function tradTexto(){
   var txt=document.getElementById('trad-texto-input').value.trim();
   if(!txt){toast('Digite ou cole um texto');return;}
   document.getElementById('trad-loading').style.display='block';
-  document.getElementById('trad-resultado').style.display='none';
-  tradTranslate(txt);
-}
-
-function tradTranslate(texto){
-  fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(texto.substring(0,500))+'&langpair=en|pt-BR')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      document.getElementById('trad-loading').style.display='none';
-      var tr=d.responseData&&d.responseData.translatedText?d.responseData.translatedText:'—';
-      document.getElementById('trad-original').textContent=texto;
-      document.getElementById('trad-traducao').textContent=tr;
-      document.getElementById('trad-resultado').style.display='block';
-    })
-    .catch(function(){
-      document.getElementById('trad-loading').style.display='none';
-      toast('Erro ao traduzir — verifique conexão');
-    });
-}
-function tradCopiar(){
-  var t=document.getElementById('trad-traducao').textContent;
-  if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('Copiado!');});}
-  else{toast('Copie manualmente o texto acima');}
-}
-
-// ── Aba da tela Agenda & Avisos ──────────────────────────────
-function calTabSwitch(tab){
-  var panes={cal:'cal-pane-cal',lemb:'cal-pane-lemb',datas:'cal-pane-datas'};
-  var tabs=document.querySelectorAll('#screen-cal .tab');
-  var idx={cal:0,lemb:1,datas:2}[tab]||0;
-  tabs.forEach(function(t,i){t.classList.toggle('active',i===idx);});
-  Object.keys(panes).forEach(function(k){
-    var el=document.getElementById(panes[k]);
-    if(el)el.classList.toggle('active',k===tab);
-  });
-  if(tab==='lemb')initLembretes();
-  if(tab==='datas')datasImpRender();
-}
-
-// ── Datas Importantes ────────────────────────────────────────
-function datasImpGetLista(){return JSON.parse(localStorage.getItem('datas_imp')||'[]');}
-function datasImpSetLista(l){localStorage.setItem('datas_imp',JSON.stringify(l));}
-function datasImpSalvar(){
-  var desc=document.getElementById('data-imp-desc').value.trim();
-  var dia=parseInt(document.getElementById('data-imp-dia').value)||0;
-  var mes=parseInt(document.getElementById('data-imp-mes').value)||0;
-  var tipo=document.getElementById('data-imp-tipo').value;
-  if(!desc||!dia||!mes){toast('Preencha descrição, dia e mês');return;}
-  var lista=datasImpGetLista();
-  lista.push({id:'d_'+Date.now(),desc:desc,dia:dia,mes:mes,tipo:tipo});
-  lista.sort(function(a,b){return a.mes!==b.mes?a.mes-b.mes:a.dia-b.dia;});
-  datasImpSetLista(lista);
-  document.getElementById('data-imp-desc').value='';
-  document.getElementById('data-imp-dia').value='';
-  datasImpRender();
-  toast('Data salva!');
-}
-function datasImpRender(){
-  var lista=datasImpGetLista();
-  var el=document.getElementById('data-imp-lista');
-  if(!el)return;
-  if(!lista.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text2);font-size:14px">Nenhuma data cadastrada</div>';return;}
-  var meses=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  var icones={aniv:'🎂',data:'📅',vcto:'💰',outro:'📌'};
-  var hoje=new Date();var hm=hoje.getMonth()+1,hd=hoje.getDate();
-  el.innerHTML=lista.map(function(d){
-    var ico=icones[d.tipo]||'📌';
-    var proximo=d.mes>hm||(d.mes===hm&&d.dia>=hd);
-    var hoje_=d.mes===hm&&d.dia===hd;
-    var borda=hoje_?'#F59E0B':proximo?'#10B981':'#4B5563';
-    return '<div style="display:flex;align
+  document.getElementById('trad-resultado').style.di                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
