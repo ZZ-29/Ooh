@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://geocoding-api.open-meteo.com https://api.open-meteo.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://geocoding-api.open-meteo.com https://api.open-meteo.com; worker-src 'self' blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com https://unpkg.com https://api.qrserver.com https://geocoding-api.open-meteo.com https://api.open-meteo.com https://api.mymemory.translated.net; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://api.qrserver.com; connect-src 'self' https://geocoding-api.open-meteo.com https://api.open-meteo.com https://api.mymemory.translated.net; worker-src 'self' blob:;">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ooh!">
+<meta name="apple-mobile-web-app-title" content="UniBox">
 <meta name="theme-color" content="#6C3CE1">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-512.png">
@@ -26,16 +26,16 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .nav-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;padding:7px 4px 6px;border-radius:12px;transition:all .22s}
 #nav-home .nav-box{background:linear-gradient(145deg,#7A68CC,#5B45AA)}
 #nav-scanner .nav-box{background:linear-gradient(145deg,#2563EB,#1D4ED8)}
-#nav-tempo .nav-box{background:linear-gradient(145deg,#12995E,#0A6640)}
-#nav-veiculos .nav-box{background:linear-gradient(145deg,#C07A10,#8A5508)}
-#nav-cal .nav-box{background:linear-gradient(145deg,#0D9AAA,#076878)}
+#nav-qr .nav-box{background:linear-gradient(145deg,#12995E,#0A6640)}
+#nav-cam .nav-box{background:linear-gradient(145deg,#C07A10,#8A5508)}
+#nav-extras .nav-box{background:linear-gradient(145deg,#0D9AAA,#076878)}
 .nav-lbl{font-size:9px;font-weight:700;letter-spacing:.3px;color:#fff;line-height:1}
 .nav-btn svg{width:20px;height:20px;stroke-width:1.9;color:#fff}
 #nav-home.active .nav-box{background:linear-gradient(145deg,#B49BFC,#8B6BE8)!important;box-shadow:0 4px 14px rgba(139,107,232,.7)!important}
 #nav-scanner.active .nav-box{background:linear-gradient(145deg,#3B82F6,#2563EB)!important;box-shadow:0 4px 14px rgba(37,99,235,.7)!important}
-#nav-tempo.active .nav-box{background:linear-gradient(145deg,#1DC98A,#0D9966)!important;box-shadow:0 4px 14px rgba(16,185,129,.6)!important}
-#nav-veiculos.active .nav-box{background:linear-gradient(145deg,#F8AA22,#D4880A)!important;box-shadow:0 4px 14px rgba(245,158,11,.6)!important}
-#nav-cal.active .nav-box{background:linear-gradient(145deg,#14C9DC,#0898AA)!important;box-shadow:0 4px 14px rgba(6,182,212,.6)!important}
+#nav-qr.active .nav-box{background:linear-gradient(145deg,#1DC98A,#0D9966)!important;box-shadow:0 4px 14px rgba(16,185,129,.6)!important}
+#nav-cam.active .nav-box{background:linear-gradient(145deg,#F8AA22,#D4880A)!important;box-shadow:0 4px 14px rgba(245,158,11,.6)!important}
+#nav-extras.active .nav-box{background:linear-gradient(145deg,#14C9DC,#0898AA)!important;box-shadow:0 4px 14px rgba(6,182,212,.6)!important}
 .nav-btn.active .nav-lbl{color:#fff!important}
 .nav-btn.active svg{color:#fff!important}
 .home-hero{padding:24px 20px 16px;background:linear-gradient(160deg,#0D2A50 0%,#091C35 70%)}
@@ -178,8 +178,7 @@ select{appearance:none;-webkit-appearance:none}
 .calc-op.calc-op-active{background:#A78BFA;color:#1a0040}
 .calc-eq{background:#F8AA22;color:#1a0a00}
 .calc-eq:active{background:#e09910}
-.sc-handle{position:absolute;width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,0.9);z-index:10;transform:translate(-50%,-50%);touch-action:none;cursor:pointer}
-.parc-result-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+
 </style>
 </head>
 <body>
@@ -234,13 +233,6 @@ select{appearance:none;-webkit-appearance:none}
       <div class="tool-icon">&#x26FD;</div>
       <div class="tool-name">Veículos</div>
       <div class="tool-desc">Gastos de combustível</div>
-    </div>
-    <!-- F -->
-    <div class="tool-card" onclick="goTo('extras')" style="background:linear-gradient(145deg,#14C9DC,#0898AA)">
-      <span class="tool-alpha">F</span>
-      <div class="tool-icon">🔧</div>
-      <div class="tool-name">Ferramentas</div>
-      <div class="tool-desc">Calculadora, Conversor e mais</div>
     </div>
   </div>
   </div>
@@ -517,17 +509,13 @@ select{appearance:none;-webkit-appearance:none}
         onkeyup="if(event.key==='Enter'){buscarCidade();this.blur();}">
       <button class="btn btn-primary" style="padding:12px 16px" onclick="buscarCidade()">&#x1F50D;</button>
     </div>
-    <!-- Cidades rápidas -->
+    <!-- Atalhos dinâmicos -->
     <div style="margin-top:10px">
-      <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:6px;letter-spacing:0.5px">CIDADES RÁPIDAS</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px" id="tempo-cidades-rapidas">
-        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Florianópolis','SC',-27.5954,-48.5480)">🏠 Florianópolis</button>
-        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('São Paulo','SP',-23.5505,-46.6333)">São Paulo</button>
-        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Curitiba','PR',-25.4284,-49.2733)">Curitiba</button>
-        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Porto Alegre','RS',-30.0346,-51.2177)">Porto Alegre</button>
-        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Rio de Janeiro','RJ',-22.9068,-43.1729)">Rio de Janeiro</button>
-        <button class="tempo-cidade-btn" onclick="tempoCidadeRapida('Brasília','DF',-15.7801,-47.9292)">Brasília</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:0.5px">ATALHOS</div>
+        <button onclick="abrirDefinirMinhaCidade()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;padding:2px 6px;opacity:.8">⚙️ minha cidade</button>
       </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="tempo-btns-dinamicos"></div>
     </div>
     <!-- GPS (secundário) -->
     <button id="tempo-btn-gps" class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;font-size:12px" onclick="usarGPS()">
@@ -558,8 +546,6 @@ select{appearance:none;-webkit-appearance:none}
     </div>
     <!-- Detalhes -->
     <div style="display:flex;justify-content:center;gap:8px;padding:8px 16px 16px;flex-wrap:wrap" id="tempo-detalhes"></div>
-    <!-- Conforto Térmico -->
-    <div id="tempo-conforto" style="display:none;padding:0 16px 8px"></div>
     <!-- Previsão 7 dias -->
     <div style="padding:0 16px 24px">
       <div style="font-size:12px;color:var(--text2);font-weight:700;margin-bottom:10px">PRÓXIMOS 7 DIAS</div><!-- v4 -->
@@ -650,7 +636,42 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 </div>
 
-<!-- SCANNER (a tela screen-lembretes foi removida — seus IDs duplicavam screen-cal; goTo('lembretes') redireciona para screen-cal) -->
+<!-- LEMBRETES -->
+<div class="screen" id="screen-lembretes">
+  <div class="page-head">
+    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
+    <div class="icon" style="background:linear-gradient(145deg,#B45309,#92400E)">&#x23F0;</div>
+    <h1>Lembretes</h1>
+  </div>
+  <div style="padding:0 16px 4px">
+    <div id="notif-aviso" style="display:none;background:rgba(245,158,11,.15);border:1px solid #B45309;border-radius:10px;padding:12px;font-size:13px;color:#FCD34D;margin-bottom:12px;text-align:center">
+      &#x1F514; Ative as notificacoes para receber alarmes mesmo com o app minimizado
+      <br><button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="pedirPermissaoNotif()">Ativar notificacoes</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="field">
+      <label class="lbl">O que precisa lembrar?</label>
+      <textarea id="lemb-texto" placeholder="Ex: Ligar para o banco, Consulta medica, Pagar boleto..." style="min-height:70px"></textarea>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label class="lbl">Data</label>
+        <input type="date" id="lemb-data">
+      </div>
+      <div class="field">
+        <label class="lbl">Hora</label>
+        <input type="time" id="lemb-hora">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="salvarLembrete()">&#x23F0; Salvar Lembrete</button>
+  </div>
+  <div style="padding:0 16px 8px">
+    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">PROXIMOS LEMBRETES</div>
+    <div id="lemb-lista"></div>
+  </div>
+</div>
+<!-- SCANNER -->
 <div class="screen" id="screen-scanner">
   <!-- Step 1: Capturar foto via câmera nativa ou galeria -->
   <div id="scanner-step1" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:#0B1120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px">
@@ -720,143 +741,6 @@ select{appearance:none;-webkit-appearance:none}
     </div>
   </div>
 </div>
-</div>
-<!-- EXTRAS -->
-<div class="screen" id="screen-extras">
-  <div class="page-head">
-    <button class="back-btn" onclick="goTo('home')">&#x2190;</button>
-    <div class="icon" style="background:linear-gradient(145deg,#14C9DC,#0898AA)">🔧</div>
-    <h1>Ferramentas</h1>
-  </div>
-  <div class="tabs" style="font-size:11px">
-    <div class="tab active" onclick="extrasTab('calc')">🧮 Calc</div>
-    <div class="tab" onclick="extrasTab('conv')">↔️ Conversor</div>
-    <div class="tab" onclick="extrasTab('parc')">💰 Parcelas</div>
-    <div class="tab" onclick="extrasTab('timer')">⏱️ Timer</div>
-  </div>
-  <!-- Calculadora -->
-  <div class="pane active" id="pane-extras-calc">
-    <div style="padding:0 16px 12px">
-      <div id="calc-expr" style="min-height:22px;font-size:13px;color:var(--text2);text-align:right;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px"></div>
-      <div id="calc-display" style="font-size:52px;font-weight:700;color:#fff;text-align:right;line-height:1.1;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">0</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px 16px">
-      <button class="calc-btn calc-fn" onclick="calcAC()">AC</button>
-      <button class="calc-btn calc-fn" onclick="calcPlusMinus()">+/-</button>
-      <button class="calc-btn calc-fn" onclick="calcPercent()">%</button>
-      <button class="calc-btn calc-op" onclick="calcOp('/',this)">÷</button>
-      <button class="calc-btn" onclick="calcNum('7')">7</button>
-      <button class="calc-btn" onclick="calcNum('8')">8</button>
-      <button class="calc-btn" onclick="calcNum('9')">9</button>
-      <button class="calc-btn calc-op" onclick="calcOp('*',this)">×</button>
-      <button class="calc-btn" onclick="calcNum('4')">4</button>
-      <button class="calc-btn" onclick="calcNum('5')">5</button>
-      <button class="calc-btn" onclick="calcNum('6')">6</button>
-      <button class="calc-btn calc-op" onclick="calcOp('-',this)">−</button>
-      <button class="calc-btn" onclick="calcNum('1')">1</button>
-      <button class="calc-btn" onclick="calcNum('2')">2</button>
-      <button class="calc-btn" onclick="calcNum('3')">3</button>
-      <button class="calc-btn calc-op" onclick="calcOp('+',this)">+</button>
-      <button class="calc-btn" onclick="calcNum('0')" style="grid-column:span 2">0</button>
-      <button class="calc-btn" onclick="calcDot()">.</button>
-      <button class="calc-btn calc-eq" onclick="calcEquals()">=</button>
-    </div>
-    <div id="calc-hist" style="padding:0 16px 16px"></div>
-  </div>
-  <!-- Conversor -->
-  <div class="pane" id="pane-extras-conv">
-    <div class="ctabs" id="conv-ctabs">
-      <button class="ctab active" onclick="convSetCat('comp',this)">📏 Comp.</button>
-      <button class="ctab" onclick="convSetCat('massa',this)">⚖️ Massa</button>
-      <button class="ctab" onclick="convSetCat('vol',this)">🧴 Volume</button>
-      <button class="ctab" onclick="convSetCat('temp',this)">🌡️ Temp.</button>
-      <button class="ctab" onclick="convSetCat('area',this)">🔲 Área</button>
-      <button class="ctab" onclick="convSetCat('vel',this)">🚗 Vel.</button>
-    </div>
-    <div style="padding:0 16px">
-      <input type="number" id="conv-val" placeholder="Valor" inputmode="decimal" oninput="converter()" style="margin-bottom:10px">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-        <select id="conv-de" onchange="converter()" style="flex:1"></select>
-        <span style="color:var(--text2);font-size:18px">→</span>
-        <select id="conv-para" onchange="converter()" style="flex:1"></select>
-      </div>
-      <div class="conv-result" id="conv-resultado">--</div>
-    </div>
-  </div>
-  <!-- Parcelamento -->
-  <div class="pane" id="pane-extras-parc">
-    <div style="padding:0 16px">
-      <div class="field"><label class="lbl">Valor total (R$)</label><input type="number" id="parc-valor" placeholder="Ex: 1500" inputmode="decimal" oninput="calcParcelamento()"></div>
-      <div class="field"><label class="lbl">Juros ao mês (%)</label><input type="number" id="parc-juros" placeholder="0 = sem juros" inputmode="decimal" step="0.01" oninput="calcParcelamento()"></div>
-      <div class="field"><label class="lbl">Número de parcelas</label><input type="number" id="parc-parcelas" placeholder="Ex: 12" inputmode="numeric" oninput="calcParcelamento()"></div>
-      <div id="parc-resultado"></div>
-    </div>
-  </div>
-  <!-- Timer de Cozinha -->
-  <div class="pane" id="pane-extras-timer">
-    <div style="padding:0 16px 16px">
-      <div class="field">
-        <label class="lbl">Alimento</label>
-        <select id="timer-alimento" onchange="timerSelecionarTempo()">
-          <option value="">— selecione —</option>
-          <optgroup label="🐔 Frango / Aves">
-            <option value="frango-pedacos">Frango em pedaços</option>
-            <option value="frango-peito">Peito de frango</option>
-            <option value="frango-inteiro">Frango inteiro</option>
-            <option value="frango-desfiado">Frango p/ desfiar</option>
-          </optgroup>
-          <optgroup label="🥩 Carne Bovina">
-            <option value="carne-cubos">Carne em cubos (acém/músculo)</option>
-            <option value="carne-peca">Carne em peça (lagarto/coxão)</option>
-            <option value="carne-seca">Carne seca</option>
-            <option value="costela">Costela</option>
-          </optgroup>
-          <optgroup label="🐷 Porco / Suíno">
-            <option value="porco-cubos">Carne de porco em cubos</option>
-            <option value="linguica">Linguiça</option>
-          </optgroup>
-          <optgroup label="🫘 Leguminosas">
-            <option value="feijao-molho">Feijão (de molho)</option>
-            <option value="feijao-seco">Feijão (sem molho)</option>
-            <option value="grao-bico">Grão-de-bico (de molho)</option>
-            <option value="lentilha">Lentilha</option>
-          </optgroup>
-          <optgroup label="🥦 Legumes / Vegetais">
-            <option value="batata">Batata</option>
-            <option value="cenoura">Cenoura</option>
-            <option value="mandioca">Mandioca</option>
-            <option value="beterraba">Beterraba</option>
-          </optgroup>
-          <optgroup label="🍚 Cereais">
-            <option value="arroz">Arroz branco</option>
-            <option value="milho">Milho em espiga</option>
-          </optgroup>
-        </select>
-      </div>
-      <div class="field">
-        <label class="lbl">Tamanho da panela</label>
-        <select id="timer-panela" onchange="timerSelecionarTempo()">
-          <option value="5">5 litros</option>
-          <option value="10">10 litros</option>
-          <option value="20">20 litros (restaurante)</option>
-        </select>
-      </div>
-      <div id="timer-sugestao" style="display:none;background:var(--surface2);border-radius:12px;padding:12px 16px;margin-bottom:16px">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">⏱ Tempo recomendado (após pegar pressão)</div>
-        <div id="timer-sugestao-val" style="font-size:22px;font-weight:700;color:var(--primary)"></div>
-        <div id="timer-sugestao-obs" style="font-size:11px;color:var(--text2);margin-top:4px"></div>
-      </div>
-      <div id="timer-display" style="text-align:center;padding:8px 0 16px">
-        <div id="timer-clock" style="font-size:56px;font-weight:700;color:#fff;letter-spacing:2px;font-variant-numeric:tabular-nums">00:00</div>
-        <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
-          <button class="btn-primary" onclick="timerStart()" id="timer-btn-start">▶ Iniciar</button>
-          <button class="btn-secondary" onclick="timerReset()" id="timer-btn-reset">↺ Reset</button>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--text2);text-align:center;padding-top:4px">Dica: conte o tempo <strong>após</strong> a válvula começar a apitar</div>
-    </div>
-  </div>
-</div>
 <!-- NAV -->
 <nav class="nav">
   <button class="nav-btn active" id="nav-home" onclick="goTo('home')">
@@ -875,6 +759,26 @@ select{appearance:none;-webkit-appearance:none}
     <div class="nav-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="nav-lbl">Agenda</span></div>
   </button>
 </nav>
+
+<!-- Modal Definir Minha Cidade -->
+<div id="modal-minha-cidade" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;justify-content:center;align-items:center;">
+  <div style="background:var(--surface);border-radius:16px;padding:24px 20px;width:90%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
+    <h3 style="margin:0 0 16px;font-size:15px;color:var(--text)">🏠 Definir Minha Cidade</h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" id="input-minha-cidade" placeholder="Ex: Florianópolis" style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px"
+        inputmode="search" enterkeyhint="search" autocomplete="off"
+        onkeyup="if(event.key==='Enter'){pesquisarMinhaCidade();this.blur();}">
+      <button class="btn btn-primary" style="padding:10px 14px;font-size:16px" onclick="pesquisarMinhaCidade()">🔍</button>
+    </div>
+    <div id="minha-cidade-resultado" style="display:none;background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div id="minha-cidade-nome" style="font-weight:700;color:var(--text);margin-bottom:10px;font-size:14px"></div>
+      <button class="btn btn-primary" style="width:100%;padding:12px" onclick="confirmarMinhaCidade()">✅ Definir como Minha Cidade</button>
+    </div>
+    <div id="minha-cidade-loading" style="display:none;text-align:center;padding:12px;color:var(--text2);font-size:14px">⏳ Buscando...</div>
+    <button onclick="fecharDefinirMinhaCidade()" style="width:100%;padding:10px;background:none;border:1.5px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;margin-top:4px;font-size:14px">Cancelar</button>
+  </div>
+</div>
+
 <script>
 var camAtiva=false,html5QrScanner=null;
 
@@ -908,7 +812,6 @@ function goTo(s){
   if(s==='lembretes'){goTo('cal');calTabSwitch('lemb');return;}
   if(s==='scanner')setTimeout(scannerNovo,0);
   if(s==='tempo')setTimeout(tempoInit,50);
-  if(s==='extras')setTimeout(function(){preencherUnidades();},50);
 }
 
 
@@ -933,10 +836,217 @@ function setQual(q,el){
   el.classList.add('active');
 }
 
-// dead PDF listener code removed
+document.getElementById('pdf-img').addEventListener('change',function(){
+  var file=this.files[0];
+  document.getElementById('pdf-img-nome').textContent=file?file.name:'';
+  if(file){
+    document.getElementById('pdf-img-preview').src=URL.createObjectURL(file);
+    document.getElementById('pdf-img-preview-wrap').style.display='block';
+    document.getElementById('pdf-img-info').textContent='Tamanho: '+(file.size/1024).toFixed(0)+' KB';
+  }else{document.getElementById('pdf-img-preview-wrap').style.display='none';}
+});
+document.getElementById('pdf-file').addEventListener('change',lerPDF);
 
 
 
+function buildQrConteudo(){
+  var t=document.getElementById('qr-tipo').value;
+  if(t==='texto')return document.getElementById('qr-texto-val').value.trim();
+  if(t==='tel')return 'tel:'+document.getElementById('tel-num').value.trim();
+  if(t==='wifi'){var s=document.getElementById('wifi-ssid').value,p=document.getElementById('wifi-senha').value,tp=document.getElementById('wifi-tipo').value;return 'WIFI:T:'+tp+';S:'+s+';P:'+p+';;';}
+  if(t==='pix')return buildPix();
+  return '';
+}
+
+function buildPix(){
+  var chave=document.getElementById('pix-chave').value.trim();
+  var nome=(document.getElementById('pix-nome').value.trim()||'RECEBEDOR').substring(0,25).toUpperCase();
+  var cidade=(document.getElementById('pix-cidade').value.trim()||'CIDADE').substring(0,15).toUpperCase();
+  var valor=parseFloat(document.getElementById('pix-valor').value)||0;
+  var desc=(document.getElementById('pix-desc').value.trim()||'').substring(0,35);
+  if(!chave){toast('Informe a chave Pix');return '';}
+  function tlv(id,val){return id+String(val.length).padStart(2,'0')+val;}
+  var gui=tlv('00','BR.GOV.BCB.PIX')+tlv('01',chave)+(desc?tlv('02',desc):'');
+  var payload='000201'+tlv('26',gui)+tlv('52','0000')+tlv('53','986')+(valor>0?tlv('54',valor.toFixed(2)):'')+tlv('58','BR')+tlv('59',nome)+tlv('60',cidade)+tlv('62',tlv('05','***'))+'6304';
+  return payload+crc16(payload);
+}
+
+function crc16(str){
+  var crc=0xFFFF;
+  for(var i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(var j=0;j<8;j++)crc=(crc&0x8000)?((crc<<1)^0x1021):(crc<<1);}
+  return((crc&0xFFFF).toString(16).toUpperCase().padStart(4,'0'));
+}
+
+function lerQRimg(input){
+  if(!input.files[0])return;
+  var file=input.files[0];
+  var url=URL.createObjectURL(file);
+  // Mostra preview grande visível
+  var pw=document.getElementById('qr-img-preview-wrap');
+  var pi=document.getElementById('qr-img-preview');
+  var st=document.getElementById('qr-scan-status');
+  var res=document.getElementById('qr-scan-result');
+  var ac=document.getElementById('qr-acoes');
+  if(pw)pw.style.display='block';
+  if(pi)pi.src=url;
+  if(st)st.textContent='Analisando imagem...';
+  if(res)res.style.display='none';
+  if(ac)ac.style.display='none';
+  // Tenta BarcodeDetector nativo (Chrome Android / Edge)
+  if(typeof BarcodeDetector!=='undefined'){
+    var bd=new BarcodeDetector({formats:['qr_code','code_128','ean_13','ean_8','upc_a','code_39','itf']});
+    var img=new Image();
+    img.onload=function(){
+      bd.detect(img).then(function(codes){
+        if(codes.length){
+          if(st)st.textContent='✅ Código encontrado';
+          mostrarResultadoQR(codes[0].rawValue);
+        } else {
+          if(st)st.textContent='Tentando leitura alternativa...';
+          lerQRfallback(file,st);
+        }
+      }).catch(function(){lerQRfallback(file,st);});
+    };
+    img.onerror=function(){lerQRfallback(file,st);};
+    img.src=url;
+  } else {
+    lerQRfallback(file,st);
+  }
+}
+function previewOCR(input){
+  if(!input.files[0])return;
+  ocrFileAtual=input.files[0];
+  var p=document.getElementById('ocr-preview');p.src=URL.createObjectURL(ocrFileAtual);p.style.display='block';
+  document.getElementById('btn-ocr').style.display='flex';
+  document.getElementById('ocr-result-wrap').style.display='none';
+  document.getElementById('ocr-progress').style.display='none';
+}
+async function iniciarOCR(){
+  if(!ocrFileAtual){toast('Selecione uma imagem');return;}
+  var btn=document.getElementById('btn-ocr'),prog=document.getElementById('ocr-progress');
+  btn.innerHTML='<span class="spin"></span> Processando...';btn.disabled=true;
+  prog.style.display='block';prog.textContent='Iniciando leitura do texto...';
+  document.getElementById('ocr-result-wrap').style.display='none';
+  try{
+    if(typeof Tesseract==='undefined'){
+      prog.textContent='Carregando modulo OCR... aguarde';
+      await carregarScript('https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js');
+    }
+    var worker=await Tesseract.createWorker('por+eng',1,{
+      logger:function(m){if(m.status==='recognizing text')prog.textContent='Lendo imagem... '+Math.round(m.progress*100)+'%';}
+    });
+    var result=await worker.recognize(ocrFileAtual);
+    await worker.terminate();
+    var text=result.data.text.trim()||'(nenhum texto encontrado)';
+    document.getElementById('ocr-result').textContent=text;
+    document.getElementById('ocr-result-wrap').style.display='block';
+    prog.style.display='none';
+  }catch(e){prog.textContent='Erro: '+e.message;}
+  btn.innerHTML='Extrair Texto da Imagem';btn.disabled=false;
+}
+function copiarOCR(){navigator.clipboard.writeText(document.getElementById('ocr-result').textContent).then(function(){toast('Copiado!');});}
+function ocrParaPDF(){
+  var txt=document.getElementById('ocr-result').textContent;
+  if(!txt)return;
+  if(!window.jspdf){toast('Aguarde o carregamento...');return;}
+  var doc=new window.jspdf.jsPDF();
+  doc.setFontSize(11);doc.text(doc.splitTextToSize(txt,180),15,20);
+  doc.save('ocr_unibox.pdf');toast('PDF salvo!');
+}
+
+var notaFileAtual=null;
+
+function loadImg(src){return new Promise(function(res,rej){var i=new Image();i.onload=function(){res(i);};i.onerror=rej;i.src=src;});}
+function analisarPixels(imageData,w,h){
+  var data=imageData.data,r=0,g=0,b=0,n=data.length/4;
+  for(var i=0;i<data.length;i+=4){r+=data[i];g+=data[i+1];b+=data[i+2];}
+  r/=n;g/=n;b/=n;
+  var brightness=(r+g+b)/3;
+  var colorVariance=Math.sqrt(((r-128)*(r-128)+(g-128)*(g-128)+(b-128)*(b-128))/3);
+  var sharpness=0;
+  for(var y=1;y<h-1;y+=8){for(var x=1;x<w-1;x+=8){var idx=(y*w+x)*4,idxR=(y*w+x+1)*4;sharpness+=Math.abs(data[idx]-data[idxR]);}}
+  return{brightness:brightness,colorVariance:colorVariance,sharpness:sharpness/(w/8*h/8)};
+}
+function validarSerialReal(serial){return /^[A-Z]{1,2}\d{8,11}$/.test(serial);}
+function mostrarResultadoNota(checks,serialOk,serialNum){
+  var wrap=document.getElementById('nota-result-wrap');
+  var itens=[],score=0;
+  var brightOk=checks.brightness>60&&checks.brightness<210;itens.push({ok:brightOk,txt:brightOk?'Luminosidade adequada':'Imagem muito escura ou clara'});if(brightOk)score++;
+  var colorOk=checks.colorVariance>15;itens.push({ok:colorOk,txt:colorOk?'Variacao de cores detectada':'Cores uniformes - pode ser fotocopia'});if(colorOk)score++;
+  var sharpOk=checks.sharpness>8;itens.push({ok:sharpOk,txt:sharpOk?'Detalhes visiveis na imagem':'Imagem sem nitidez - aproxime a camera'});if(sharpOk)score++;
+  if(serialOk===true){itens.push({ok:true,txt:'Serie: '+serialNum+' (formato valido)'});score++;}
+  else if(serialOk===false){itens.push({ok:false,txt:'Serie: '+serialNum+' (formato invalido)'});}
+  else{itens.push({ok:null,txt:'Serie: '+serialNum});}
+  var valid=itens.filter(function(i){return i.ok!==null;}).length;
+  var pct=valid>0?Math.round(score/valid*100):0;
+  var cls,emoji,titulo,sub;
+  if(pct>=75){cls='ok';emoji='OK';titulo='Aparenta ser autentica';sub='Para certeza use luz UV ou banco.';}
+  else if(pct>=40){cls='warn';emoji='??';titulo='Resultado inconclusivo';sub='Tire uma foto melhor com mais luz.';}
+  else{cls='err';emoji='!!';titulo='Suspeita de falsificacao';sub='Apresente ao banco ou Policia Federal.';}
+  wrap.style.display='block';
+  wrap.innerHTML='<div class="nota-score '+cls+'"><div class="nota-emoji">'+emoji+'</div><div class="nota-titulo">'+titulo+'</div><div class="nota-sub">'+sub+'</div></div><div class="nota-items">'+itens.map(function(it){return '<div class="nota-item"><div class="nota-dot" style="background:'+(it.ok===true?'var(--success)':it.ok===false?'var(--danger)':'var(--warn)')+'"></div><div class="nota-item-text">'+it.txt+'</div></div>';}).join('')+'</div><div style="margin-top:14px;font-size:11px;color:var(--text2);text-align:center;padding-bottom:16px">Analise auxiliar sem valor legal.</div>';
+}
+
+var BANCOS={'001':'Banco do Brasil','033':'Santander','104':'Caixa Economica','237':'Bradesco','341':'Itau','356':'BMG','422':'Safra','756':'Sicoob','748':'Sicredi','077':'Inter','260':'Nubank','336':'C6 Bank','290':'PagBank'};
+function autoParseBoleto(){var cod=document.getElementById('boleto-codigo').value.replace(/[\s.]/g,'');if(cod.length>=44)parseBoleto();}
+function parseBoleto(){
+  var cod=document.getElementById('boleto-codigo').value.replace(/[\s.]/g,'');
+  if(cod.length<44){toast('Codigo incompleto');return;}
+  var banco=cod.substring(0,3),valor=0,vencimento='';
+  if(cod.length===44){
+    var fator=parseInt(cod.substring(5,9));
+    valor=parseInt(cod.substring(9,19))/100;
+    if(fator>0){var base=new Date(1997,9,7);base.setDate(base.getDate()+fator);vencimento=base.toLocaleDateString('pt-BR');}
+  }else{valor=parseInt(cod.substring(37,47))/100;}
+  var nomeBanco=BANCOS[banco]||('Banco '+banco);
+  var valorFmt=valor>0?'R$ '+valor.toLocaleString('pt-BR',{minimumFractionDigits:2}):'Não informado';
+  var wrap=document.getElementById('boleto-result');
+  wrap.style.display='block';
+  var codS=cod.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  wrap.innerHTML='<div class="boleto-result"><div style="font-size:11px;font-weight:700;color:#1DC98A;margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px">Dados do Boleto</div><div class="boleto-row"><span class="boleto-lbl">Banco</span><span class="boleto-val">'+nomeBanco+'</span></div><div class="boleto-row"><span class="boleto-lbl">Valor</span><span class="boleto-val big">'+valorFmt+'</span></div>'+(vencimento?'<div class="boleto-row"><span class="boleto-lbl">Vencimento</span><span class="boleto-val">'+vencimento+'</span></div>':'')+'<div class="boleto-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span class="boleto-lbl">Codigo</span><span style="font-size:11px;font-family:monospace;color:#fff;word-break:break-all">'+cod+'</span></div></div><div class="btn-row" style="margin-top:10px"><button class="btn btn-ghost btn-sm" style="color:#fff" onclick="navigator.clipboard.writeText(\''+codS+'\');toast(\'Codigo copiado!\')">Copiar codigo</button></div>';
+  toast('Boleto analisado!');
+}
+function lerBoletoImg(input){
+  if(!input.files[0])return;
+  toast('Lendo codigo...');
+  var qs=new Html5Qrcode('boleto-reader-tmp');
+  qs.scanFile(input.files[0],true).then(function(txt){document.getElementById('boleto-codigo').value=txt;parseBoleto();}).catch(function(){toast('Codigo nao encontrado');});
+}
+
+function gerarPixRapido(){
+  var chave=document.getElementById('pr-chave').value.trim();
+  if(!chave){toast('Informe a chave Pix');return;}
+  if(typeof QRCode==='undefined'){toast('Aguarde o carregamento...');return;}
+  document.getElementById('pix-chave').value=chave;
+  document.getElementById('pix-nome').value=document.getElementById('pr-nome').value.trim()||'RECEBEDOR';
+  document.getElementById('pix-valor').value=document.getElementById('pr-valor').value||'';
+  document.getElementById('pix-cidade').value='BRASIL';document.getElementById('pix-desc').value='';
+  var payload=buildPix();if(!payload)return;
+  var out=document.getElementById('pr-output');out.style.display='flex';
+  var qrDiv=document.getElementById('pr-qr-div');qrDiv.innerHTML='';
+  new QRCode(qrDiv,{text:payload,width:200,height:200,colorDark:'#000000',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.H});
+}
+function baixarPixRapido(){
+  var canvas=document.querySelector('#pr-qr-div canvas');
+  if(!canvas){toast('Gere o QR primeiro');return;}
+  var a=document.createElement('a');a.download='pix_rapido.png';a.href=canvas.toDataURL();a.click();
+  toast('QR Pix salvo!');
+}
+
+var categorias={
+  comp:{units:{'Metros':1,'Quilometros':1000,'Centimetros':0.01,'Milimetros':0.001,'Polegadas':0.0254,'Pes':0.3048,'Milhas':1609.34}},
+  peso:{units:{'Quilogramas':1,'Gramas':0.001,'Miligramas':0.000001,'Libras':0.453592,'Oncas':0.0283495,'Toneladas':1000}},
+  temp:{units:{'Celsius':'C','Fahrenheit':'F','Kelvin':'K'}},
+  area:{units:{'Metros2':1,'Quilometros2':1e6,'Centimetros2':0.0001,'Hectares':10000,'Pes2':0.092903,'Acres':4046.86}},
+  moeda:{units:{'Real BRL':1,'Dolar USD':5.10,'Euro EUR':5.55,'Libra GBP':6.50,'Peso ARS':0.006}}
+};
+var categoriaAtual='comp';
+function preencherUnidades(){
+  var units=Object.keys(categorias[categoriaAtual].units);
+  var de=document.getElementById('conv-de'),para=document.getElementById('conv-para');
+  de.innerHTML=units.map(function(u){return '<option>'+u+'</option>';}).join('');
+  para.innerHTML=units.map(function(u,i){return '<option'+(i===1?' selected':'')+'>'+u+'</option>';}).join('');
+}
 function deletarNota(i){
   var notas=JSON.parse(localStorage.getItem('ub-notas')||'[]');
   notas.splice(i,1);localStorage.setItem('ub-notas',JSON.stringify(notas));
@@ -951,7 +1061,7 @@ function carregarScript(src){
   });
 }
 
-// preencherUnidades() — chamada apenas de goTo('extras') e extrasTab('conv')
+preencherUnidades();
 
 // ===== SCANNER =====
 // ===== SCANNER =====
@@ -1181,11 +1291,10 @@ function processarScan(tipo,btn){
       ctx.drawImage(scannerImg,sx,sy,sw,sh,0,0,outW,outH);
       // Aplicar filtro
       if(tipo==='pb'||tipo==='doc'){
-        var id=ctx.getImageData(0,0,outW,outH), d=id.data;
+        var id=ctx.getImageData(0,0,sw,sh), d=id.data;
         if(tipo==='doc'){
           // Auto-níveis p5/p95 + threshold para texto nítido
-          var nPix=d.length/4;
-          var grays=new Uint8Array(nPix);
+          var grays=new Uint8Array(d.length/4);
           for(var i=0,j=0;i<d.length;i+=4,j++)
             grays[j]=Math.round(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114);
           var hist=new Array(256).fill(0);
@@ -1223,6 +1332,121 @@ function processarScan(tipo,btn){
   },60);
 }
 
+
+function aplicarScanFiltroNat(sp,tipo){
+  // Transformada de perspectiva
+  var pts=sp; // [{x,y}] TL,TR,BR,BL
+  var wA=Math.hypot(pts[1].x-pts[0].x,pts[1].y-pts[0].y);
+  var wB=Math.hypot(pts[2].x-pts[3].x,pts[2].y-pts[3].y);
+  var W=Math.round(Math.max(wA,wB));
+  var hA=Math.hypot(pts[3].x-pts[0].x,pts[3].y-pts[0].y);
+  var hB=Math.hypot(pts[2].x-pts[1].x,pts[2].y-pts[1].y);
+  var H=Math.round(Math.max(hA,hB));
+  var dst=[[0,0],[W-1,0],[W-1,H-1],[0,H-1]];
+  var M=getPerspM(pts.map(function(p){return[p.x,p.y];}),dst);
+  var out=document.createElement('canvas');
+  out.width=W; out.height=H;
+  var ctx=out.getContext('2d');
+  // Desenhar imagem original
+  var tmp=document.createElement('canvas');
+  tmp.width=scannerImg.naturalWidth||scannerImg.width;
+  tmp.height=scannerImg.naturalHeight||scannerImg.height;
+  tmp.getContext('2d').drawImage(scannerImg,0,0);
+  var srcData=tmp.getContext('2d').getImageData(0,0,tmp.width,tmp.height);
+  var dstData=ctx.createImageData(W,H);
+  var Minv=invertM3(M);
+  for(var dy=0;dy<H;dy++){
+    for(var dx=0;dx<W;dx++){
+      var sx=Minv[0]*dx+Minv[1]*dy+Minv[2];
+      var sy=Minv[3]*dx+Minv[4]*dy+Minv[5];
+      var sw=Minv[6]*dx+Minv[7]*dy+Minv[8];
+      sx=Math.round(sx/sw); sy=Math.round(sy/sw);
+      if(sx<0||sy<0||sx>=tmp.width||sy>=tmp.height)continue;
+      var si=(sy*tmp.width+sx)*4;
+      var di=(dy*W+dx)*4;
+      dstData.data[di]=srcData.data[si];
+      dstData.data[di+1]=srcData.data[si+1];
+      dstData.data[di+2]=srcData.data[si+2];
+      dstData.data[di+3]=255;
+    }
+  }
+  ctx.putImageData(dstData,0,0);
+  // Aplicar filtro de acordo com tipo
+  if(tipo==='color'){return out;}
+  var id=ctx.getImageData(0,0,W,H);
+  var d=id.data;
+  if(tipo==='pb'){
+    for(var i=0;i<d.length;i+=4){
+      var g=Math.round(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114);
+      d[i]=d[i+1]=d[i+2]=g;
+    }
+  } else if(tipo==='doc'){
+    // Converter para cinza
+    var grays=[];
+    for(var i=0;i<d.length;i+=4){
+      grays.push(Math.round(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114));
+    }
+    // Histogram para p5/p95
+    var hist=new Array(256).fill(0);
+    for(var i=0;i<grays.length;i++)hist[grays[i]]++;
+    var total=grays.length, cumul=0, p5=0, p95=255;
+    for(var v=0;v<256;v++){cumul+=hist[v];if(cumul/total>=0.05&&p5===0)p5=v;if(cumul/total>=0.95){p95=v;break;}}
+    var range=Math.max(1,p95-p5);
+    for(var i=0,j=0;i<d.length;i+=4,j++){
+      var norm=Math.round((grays[j]-p5)*255/range);
+      norm=Math.max(0,Math.min(255,norm));
+      // Threshold: fundo branco, texto escuro
+      var out2=norm>145?255:Math.round(norm*0.35);
+      d[i]=d[i+1]=d[i+2]=out2;
+    }
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+
+function getPerspM(src,dst){
+  // Resolver sistema 8x8 para perspectiva
+  var A=[],b=[];
+  for(var i=0;i<4;i++){
+    var sx=src[i][0],sy=src[i][1],dx=dst[i][0],dy=dst[i][1];
+    A.push([sx,sy,1,0,0,0,-dx*sx,-dx*sy]);b.push(dx);
+    A.push([0,0,0,sx,sy,1,-dy*sx,-dy*sy]);b.push(dy);
+  }
+  var h=gaussElim(A,b);
+  return[h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],1];
+}
+
+function invertM3(m){
+  var a=m[0],b=m[1],c=m[2],d=m[3],e=m[4],f=m[5],g=m[6],h=m[7],k=m[8];
+  var det=a*(e*k-f*h)-b*(d*k-f*g)+c*(d*h-e*g);
+  if(Math.abs(det)<1e-10)return m;
+  var inv=1/det;
+  return[(e*k-f*h)*inv,(c*h-b*k)*inv,(b*f-c*e)*inv,
+         (f*g-d*k)*inv,(a*k-c*g)*inv,(c*d-a*f)*inv,
+         (d*h-e*g)*inv,(b*g-a*h)*inv,(a*e-b*d)*inv];
+}
+
+function gaussElim(A,b){
+  var n=b.length;
+  for(var i=0;i<n;i++)A[i].push(b[i]);
+  for(var col=0;col<n;col++){
+    var max=col;
+    for(var r=col+1;r<n;r++)if(Math.abs(A[r][col])>Math.abs(A[max][col]))max=r;
+    var tmp=A[col];A[col]=A[max];A[max]=tmp;
+    if(Math.abs(A[col][col])<1e-12)continue;
+    for(var r=col+1;r<n;r++){
+      var f=A[r][col]/A[col][col];
+      for(var c=col;c<=n;c++)A[r][c]-=f*A[col][c];
+    }
+  }
+  var x=new Array(n).fill(0);
+  for(var i=n-1;i>=0;i--){
+    x[i]=A[i][n];
+    for(var j=i+1;j<n;j++)x[i]-=A[i][j]*x[j];
+    x[i]/=A[i][i];
+  }
+  return x;
+}
 
 function _scanShare(blob,name){
   var file=new File([blob],name,{type:blob.type});
@@ -1325,6 +1549,36 @@ function salvarScannerPDF(){
   }catch(e){toast('Erro PDF: '+e.message,4000);}
 }
 
+
+// ===== CPF / CNPJ =====
+function calcCPF(cpf){
+  cpf=cpf.replace(/\D/g,'');
+  if(cpf.length!==11)return false;
+  if(/^(\d)\1{10}$/.test(cpf))return false;
+  var s=0;
+  for(var i=0;i<9;i++)s+=parseInt(cpf[i])*(10-i);
+  var r=(s*10)%11;if(r>=10)r=0;
+  if(r!==parseInt(cpf[9]))return false;
+  s=0;
+  for(var i=0;i<10;i++)s+=parseInt(cpf[i])*(11-i);
+  r=(s*10)%11;if(r>=10)r=0;
+  return r===parseInt(cpf[10]);
+}
+
+function calcCNPJ(cnpj){
+  cnpj=cnpj.replace(/\D/g,'');
+  if(cnpj.length!==14)return false;
+  if(/^(\d)\1{13}$/.test(cnpj))return false;
+  var calc=function(c,n){
+    var s=0,p=n;
+    for(var i=0;i<c.length;i++){s+=parseInt(c[i])*p--;if(p<2)p=9;}
+    var r=s%11;return r<2?0:11-r;
+  };
+  var base=cnpj.slice(0,12);
+  var d1=calc(base,5);
+  var d2=calc(base+d1,6);
+  return d1===parseInt(cnpj[12])&&d2===parseInt(cnpj[13]);
+}
 
 // ===== LEMBRETES =====
 var lembInterval = null;
@@ -1443,8 +1697,8 @@ function dispararAlarme(l){
   if('Notification' in window && Notification.permission === 'granted'){
     new Notification('Ooh! Lembrete', {
       body: l.txt,
-      icon: '/Ooh/icon-512.png',
-      badge: '/Ooh/icon-512.png',
+      icon: '/UniBox/icon-512.png',
+      badge: '/UniBox/icon-512.png',
       vibrate: [300, 100, 300]
     });
   }
@@ -1646,16 +1900,23 @@ function tempoInit(){
   var btn=document.getElementById('tempo-btn-gps');
   var divSalvo=document.getElementById('tempo-local-salvo');
   var nomeSalvo=document.getElementById('tempo-local-salvo-nome');
+  renderBotoesTempo();
   if(lat&&lon&&nome){
     if(btn)btn.textContent='📍 Atualizar: '+nome;
     if(divSalvo)divSalvo.style.display='flex';
     if(nomeSalvo)nomeSalvo.textContent='🗃 Local salvo: '+nome;
     buscarTempoCoords(lat,lon,nome);
   } else {
-    // Padrão: Florianópolis, SC
     if(btn)btn.textContent='📍 Usar minha localização';
     if(divSalvo)divSalvo.style.display='none';
-    buscarTempoCoords(-27.5954,-48.5480,'Florianópolis, SC');
+    // Usa Minha Cidade se definida, senão Florianópolis como padrão
+    var mc=null;
+    try{mc=JSON.parse(localStorage.getItem('ooh_minha_cidade')||'null');}catch(e){}
+    if(mc&&mc.lat&&mc.lon){
+      buscarTempoCoords(mc.lat,mc.lon,mc.nome);
+    } else {
+      buscarTempoCoords(-27.5954,-48.5480,'Florianópolis, SC');
+    }
   }
 }
 function tempoLimparLocal(){
@@ -1680,6 +1941,92 @@ function tempoSalvarLocal(lat,lon,nome){
     localStorage.setItem('ooh_tempo_lon',lon);
     localStorage.setItem('ooh_tempo_nome',nome);
   }catch(e){}
+}
+
+// ── Minha Cidade + Último Destino ──
+var _minhaCidadePendente=null;
+
+function renderBotoesTempo(){
+  var container=document.getElementById('tempo-btns-dinamicos');
+  if(!container)return;
+  var mc=null,ud=null;
+  try{mc=JSON.parse(localStorage.getItem('ooh_minha_cidade')||'null');}catch(e){}
+  try{ud=JSON.parse(localStorage.getItem('ooh_ultimo_destino')||'null');}catch(e){}
+  var h='';
+  if(mc&&mc.nome){
+    h+='<button class="tempo-cidade-btn" onclick="usarMinhaCidade()">🏠 '+mc.nome+'</button>';
+  } else {
+    h+='<button class="tempo-cidade-btn" onclick="abrirDefinirMinhaCidade()" style="border-style:dashed;opacity:.8">🏠 Definir cidade</button>';
+  }
+  if(ud&&ud.nome&&(!mc||ud.nome!==mc.nome)){
+    h+='<button class="tempo-cidade-btn" onclick="usarUltimoDestino()">🕐 '+ud.nome+'</button>';
+  }
+  container.innerHTML=h;
+}
+
+function usarMinhaCidade(){
+  var mc=null;
+  try{mc=JSON.parse(localStorage.getItem('ooh_minha_cidade')||'null');}catch(e){}
+  if(!mc||!mc.lat)return;
+  buscarTempoCoords(mc.lat,mc.lon,mc.nome);
+}
+
+function usarUltimoDestino(){
+  var ud=null;
+  try{ud=JSON.parse(localStorage.getItem('ooh_ultimo_destino')||'null');}catch(e){}
+  if(!ud||!ud.lat)return;
+  buscarTempoCoords(ud.lat,ud.lon,ud.nome);
+}
+
+function abrirDefinirMinhaCidade(){
+  var modal=document.getElementById('modal-minha-cidade');
+  if(!modal)return;
+  modal.style.display='flex';
+  var inp=document.getElementById('input-minha-cidade');
+  if(inp){inp.value='';setTimeout(function(){inp.focus();},100);}
+  document.getElementById('minha-cidade-resultado').style.display='none';
+  document.getElementById('minha-cidade-loading').style.display='none';
+  _minhaCidadePendente=null;
+}
+
+function fecharDefinirMinhaCidade(){
+  var modal=document.getElementById('modal-minha-cidade');
+  if(modal)modal.style.display='none';
+  _minhaCidadePendente=null;
+}
+
+function pesquisarMinhaCidade(){
+  var cidade=document.getElementById('input-minha-cidade').value.trim();
+  if(!cidade){toast('Digite o nome da cidade');return;}
+  document.getElementById('minha-cidade-resultado').style.display='none';
+  document.getElementById('minha-cidade-loading').style.display='block';
+  _minhaCidadePendente=null;
+  fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(cidade)+'&count=1&language=pt&format=json')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      document.getElementById('minha-cidade-loading').style.display='none';
+      if(!d.results||!d.results.length){toast('Cidade não encontrada. Tente outra grafia.');return;}
+      var r=d.results[0];
+      var nome=r.name+(r.admin1?', '+r.admin1:'')+(r.country_code?', '+r.country_code:'');
+      _minhaCidadePendente={nome:nome,lat:r.latitude,lon:r.longitude};
+      document.getElementById('minha-cidade-nome').textContent='📍 '+nome;
+      document.getElementById('minha-cidade-resultado').style.display='block';
+    })
+    .catch(function(){
+      document.getElementById('minha-cidade-loading').style.display='none';
+      toast('Erro de conexão ao buscar cidade');
+    });
+}
+
+function confirmarMinhaCidade(){
+  if(!_minhaCidadePendente)return;
+  try{
+    localStorage.setItem('ooh_minha_cidade',JSON.stringify(_minhaCidadePendente));
+  }catch(e){toast('Erro ao salvar');return;}
+  var nome=_minhaCidadePendente.nome;
+  fecharDefinirMinhaCidade();
+  renderBotoesTempo();
+  toast('🏠 '+nome+' definida como Minha Cidade!',3000);
 }
 
 function tempoIcone(cod){
@@ -1712,9 +2059,17 @@ function buscarCidade(){
   fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(cidade)+'&count=1&language=pt&format=json')
     .then(function(r){return r.json();})
     .then(function(d){
-      if(!d.results||!d.results.length){esconderTempoLoading();toast('Cidade nao encontrada');return;}
+      if(!d.results||!d.results.length){esconderTempoLoading();toast('Cidade não encontrada');return;}
       var r=d.results[0];
       var nome=r.name+(r.admin1?', '+r.admin1:'')+(r.country_code?', '+r.country_code:'');
+      // Salva como último destino (se diferente de Minha Cidade)
+      try{
+        var mc=JSON.parse(localStorage.getItem('ooh_minha_cidade')||'null');
+        if(!mc||nome!==mc.nome){
+          localStorage.setItem('ooh_ultimo_destino',JSON.stringify({nome:nome,lat:r.latitude,lon:r.longitude}));
+          renderBotoesTempo();
+        }
+      }catch(e){}
       buscarTempoCoords(r.latitude,r.longitude,nome);
     })
     .catch(function(){esconderTempoLoading();toast('Erro ao buscar cidade');});
@@ -1784,12 +2139,6 @@ function renderTempo(d,cidade){
       '<div style="font-size:16px;font-weight:700;color:#fff">'+x.val+'</div>'+
       '<div style="font-size:11px;color:var(--text2)">'+x.lbl+'</div></div>';
   }).join('');
-
-  // Conforto Térmico
-  confortoTermico(
-    c.temperature_2m!=null?Math.round(c.temperature_2m):null,
-    c.relativehumidity_2m!=null?c.relativehumidity_2m:null
-  );
 
   // 7 dias — seguro mesmo sem dados diários
   var dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
@@ -2032,14 +2381,12 @@ function veiRenderResumo(){
   });
   var kmRodado = kmArr.length>1 ? Math.max.apply(null,kmArr)-Math.min.apply(null,kmArr) : 0;
   var custoPorKm = (kmRodado>0 && totalAno>0) ? 'R$ '+(totalAno/kmRodado).toFixed(2)+'/km' : '--';
-  var autonomia = (kmRodado>0 && litrosAno>0) ? (kmRodado/litrosAno).toFixed(1)+' km/L' : '--';
   el.innerHTML =
     chip('Gasto este mês','R$ '+totalMes.toFixed(2),'#F8AA22')+
     chip('Litros este mês',litrosMes.toFixed(1)+'L','#F8AA22')+
     chip('Gasto este ano','R$ '+totalAno.toFixed(2),'#A78BFA')+
     chip('Litros no ano',litrosAno.toFixed(1)+'L','#10B981')+
-    chip('Custo por km',custoPorKm,'#3B82F6')+
-    chip('Autonomia',autonomia,'#10B981');
+    chip('Custo por km',custoPorKm,'#3B82F6');
 }
 
 
@@ -2115,33 +2462,99 @@ function veiExcluirVeiculo(){
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- pdf.js, qrcodejs, html5-qrcode removidos — não utilizados -->
-<script>
-// pdfAbrirBlob, pdfRenderPag, pdfPagina, checkSharedPDF removidos — requerem pdf.js
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
+// ===== PDF VIEWER =====
+var pdfDoc=null, pdfPagAtual=1, pdfTotalPags=0;
 
-// Abre PDF via card (escolher arquivo) — abre no visualizador nativo
+function pdfAbrirBlob(blob, nome){
+  goTo('pdf');
+  document.getElementById('pdf-titulo').textContent = nome.replace('.pdf','').substring(0,25);
+  document.getElementById('pdf-loading').style.display='block';
+  document.getElementById('pdf-canvas-wrap').style.display='none';
+  document.getElementById('pdf-nav').style.display='none';
+  var url = URL.createObjectURL(blob);
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  pdfjsLib.getDocument(url).promise.then(function(doc){
+    pdfDoc=doc;
+    pdfTotalPags=doc.numPages;
+    pdfPagAtual=1;
+    document.getElementById('pdf-loading').style.display='none';
+    document.getElementById('pdf-canvas-wrap').style.display='block';
+    if(pdfTotalPags>1) document.getElementById('pdf-nav').style.display='flex';
+    pdfRenderPag(1);
+  }).catch(function(){
+    document.getElementById('pdf-loading').innerHTML='<div style="color:#f87171;padding:20px">Erro ao abrir o PDF</div>';
+  });
+}
+
+function pdfRenderPag(n){
+  document.getElementById('pdf-info').textContent='Página '+n+' de '+pdfTotalPags;
+  document.getElementById('pdf-pag-info').textContent=n+' / '+pdfTotalPags;
+  pdfDoc.getPage(n).then(function(page){
+    var wrap=document.getElementById('pdf-canvas-wrap');
+    wrap.innerHTML='';
+    var canvas=document.createElement('canvas');
+    canvas.style.width='100%';
+    canvas.style.borderRadius='8px';
+    wrap.appendChild(canvas);
+    var vp=page.getViewport({scale:1.5});
+    canvas.width=vp.width;
+    canvas.height=vp.height;
+    page.render({canvasContext:canvas.getContext('2d'),viewport:vp});
+  });
+}
+
+function pdfPagina(delta){
+  var nova=pdfPagAtual+delta;
+  if(nova<1||nova>pdfTotalPags) return;
+  pdfPagAtual=nova;
+  pdfRenderPag(nova);
+  document.getElementById('screen-pdf').scrollTop=0;
+}
+
+// Verifica PDF compartilhado ao abrir o app
+async function checkSharedPDF(){
+  if(!('caches' in window)) return;
+  try{
+    var cache=await caches.open('ooh-v42');
+    var resp=await cache.match('/Ooh/shared-pdf');
+    if(resp){
+      var nome=resp.headers.get('X-Filename')||'documento.pdf';
+      var blob=await resp.blob();
+      await cache.delete('/Ooh/shared-pdf');
+      pdfAbrirBlob(blob, nome);
+    }
+  }catch(e){}
+}
+
+// Abre PDF via card (escolher arquivo)
 function pdfEscolherArquivo(){
   var input=document.createElement('input');
   input.type='file';input.accept='application/pdf,.pdf';
   input.onchange=function(){
-    if(!input.files||!input.files[0])return;
-    var file=input.files[0];
-    var url=URL.createObjectURL(file);
-    // Abre no visualizador PDF nativo do browser/Android
-    var a=document.createElement('a');
-    a.href=url;
-    a.target='_blank';
-    a.rel='noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast('📄 PDF aberto no visualizador',3000);
-    setTimeout(function(){URL.revokeObjectURL(url);},30000);
+    if(input.files&&input.files[0]) pdfAbrirBlob(input.files[0],input.files[0].name);
   };
   input.click();
 }
 
-// launchQueue / checkSharedPDF removidos
+// Verifica PDF ao abrir (share target ou file handler)
+window.addEventListener('load',function(){
+  if(location.search.indexOf('pdf=1')>-1) checkSharedPDF();
+});
+
+// File Handler API — aparece no "Abrir com" do Android
+if('launchQueue' in window){
+  window.launchQueue.setConsumer(async function(params){
+    if(!params.files||!params.files.length) return;
+    try{
+      var fh=params.files[0];
+      var file=await fh.getFile();
+      pdfAbrirBlob(file, file.name);
+    }catch(e){}
+  });
+}
 
 </script>
 
@@ -2260,14 +2673,14 @@ function calcAC(){
 }
 function calcPlusMinus(){calcVal=String(parseFloat(calcVal)*-1);calcDisplay(calcVal);}
 function calcPercent(){calcVal=String(parseFloat(calcVal)/100);calcDisplay(calcVal);}
-function calcOp(op,el){
+function calcOp(op){
   if(calcOper&&!calcNewNum)calcEquals(true);
   calcPrev=parseFloat(calcVal);
   calcOper=op;
   calcNewNum=true;
   document.getElementById('calc-expr').textContent=calcVal+' '+calcOpSymbols[op];
   document.querySelectorAll('.calc-op').forEach(function(b){b.classList.remove('calc-op-active');});
-  if(el)el.classList.add('calc-op-active');
+  if(event&&event.target)event.target.classList.add('calc-op-active');
 }
 function calcEquals(silent){
   if(calcOper===null)return;
@@ -2417,7 +2830,36 @@ function calIrParaMesAno(){
   calRender();
 }
 
-// tradTexto, tradTranslate, tradCopiar removidos — não há tela de tradutor
+// ===== TRADUTOR =====
+
+function tradTexto(){
+  var txt=document.getElementById('trad-texto-input').value.trim();
+  if(!txt){toast('Digite ou cole um texto');return;}
+  document.getElementById('trad-loading').style.display='block';
+  document.getElementById('trad-resultado').style.display='none';
+  tradTranslate(txt);
+}
+
+function tradTranslate(texto){
+  fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(texto.substring(0,500))+'&langpair=en|pt-BR')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      document.getElementById('trad-loading').style.display='none';
+      var tr=d.responseData&&d.responseData.translatedText?d.responseData.translatedText:'—';
+      document.getElementById('trad-original').textContent=texto;
+      document.getElementById('trad-traducao').textContent=tr;
+      document.getElementById('trad-resultado').style.display='block';
+    })
+    .catch(function(){
+      document.getElementById('trad-loading').style.display='none';
+      toast('Erro ao traduzir — verifique conexão');
+    });
+}
+function tradCopiar(){
+  var t=document.getElementById('trad-traducao').textContent;
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast('Copiado!');});}
+  else{toast('Copie manualmente o texto acima');}
+}
 
 // ── Aba da tela Agenda & Avisos ──────────────────────────────
 function calTabSwitch(tab){
@@ -2464,247 +2906,4 @@ function datasImpRender(){
     var proximo=d.mes>hm||(d.mes===hm&&d.dia>=hd);
     var hoje_=d.mes===hm&&d.dia===hd;
     var borda=hoje_?'#F59E0B':proximo?'#10B981':'#4B5563';
-    return '<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:8px;border-left:3px solid '+borda+'">'+
-      '<div style="font-size:28px">'+ico+'</div>'+
-      '<div style="flex:1">'+
-        '<div style="font-size:14px;font-weight:700;color:#fff">'+escHtml(d.desc)+'</div>'+
-        '<div style="font-size:12px;color:var(--text2);margin-top:2px">'+d.dia+' de '+meses[d.mes]+(hoje_?' — <span style="color:#F59E0B;font-weight:700">Hoje!</span>':proximo?' — próximo':'')+'</div>'+
-      '</div>'+
-      '<button onclick="datasImpExcluir(\''+d.id+'\')" style="background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:4px">&#x2715;</button>'+
-    '</div>';
-  }).join('');
-}
-function datasImpExcluir(id){
-  var lista=datasImpGetLista().filter(function(d){return d.id!==id;});
-  datasImpSetLista(lista);
-  datasImpRender();
-  toast('Data removida');
-}
-
-/* =========================================================
-   EXTRAS SCREEN
-========================================================= */
-function extrasTab(tab){
-  ['calc','conv','parc','timer'].forEach(function(t){
-    var p=document.getElementById('pane-extras-'+t);
-    if(p)p.style.display=(t===tab)?'block':'none';
-  });
-  document.querySelectorAll('#screen-extras .tab').forEach(function(el,i){
-    el.classList.toggle('active',['calc','conv','parc','timer'][i]===tab);
-  });
-  if(tab==='conv')preencherUnidades();
-}
-
-/* =========================================================
-   CONVERSOR DE UNIDADES
-========================================================= */
-var categoriaAtual='comp';
-var categorias={
-  comp:{label:'Comprimento',units:{'Metros':1,'Quilômetros':1000,'Centímetros':0.01,'Milímetros':0.001,'Polegadas':0.0254,'Pés':0.3048,'Milhas':1609.34}},
-  massa:{label:'Massa',units:{'Quilogramas':1,'Gramas':0.001,'Miligramas':0.000001,'Libras':0.453592,'Onças':0.0283495,'Toneladas':1000}},
-  vol:{label:'Volume',units:{'Litros':1,'Mililitros':0.001,'Metros³':1000,'Galões':3.78541,'Onças fl.':0.0295735,'Copos (250ml)':0.25}},
-  temp:{label:'Temperatura',units:{'Celsius':'C','Fahrenheit':'F','Kelvin':'K'}},
-  area:{label:'Área',units:{'m²':1,'km²':1e6,'cm²':0.0001,'Hectares':10000,'ft²':0.092903,'Acres':4046.86}},
-  vel:{label:'Velocidade',units:{'km/h':1,'m/s':3.6,'mph':1.60934,'nós':1.852}}
-};
-function convSetCat(cat,btn){
-  categoriaAtual=cat;
-  document.querySelectorAll('#pane-extras-conv .ctab').forEach(function(el){
-    el.classList.toggle('active',btn?el===btn:false);
-  });
-  preencherUnidades();
-  var r=document.getElementById('conv-resultado');
-  if(r)r.textContent='';
-}
-function preencherUnidades(){
-  var units=Object.keys(categorias[categoriaAtual].units);
-  var de=document.getElementById('conv-de'),para=document.getElementById('conv-para');
-  if(!de||!para)return;
-  de.innerHTML=units.map(function(u){return '<option>'+u+'</option>';}).join('');
-  para.innerHTML=units.map(function(u,i){return '<option'+(i===1?' selected':'')+'>'+u+'</option>';}).join('');
-}
-function converter(){
-  var val=parseFloat((document.getElementById('conv-val').value||'0').replace(',','.'));
-  if(isNaN(val)){document.getElementById('conv-resultado').textContent='Informe um valor válido';return;}
-  var de=document.getElementById('conv-de').value;
-  var para=document.getElementById('conv-para').value;
-  var units=categorias[categoriaAtual].units;
-  var res;
-  if(categoriaAtual==='temp'){
-    if(de===para){res=val;}
-    else if(de==='Celsius'&&para==='Fahrenheit'){res=val*9/5+32;}
-    else if(de==='Celsius'&&para==='Kelvin'){res=val+273.15;}
-    else if(de==='Fahrenheit'&&para==='Celsius'){res=(val-32)*5/9;}
-    else if(de==='Fahrenheit'&&para==='Kelvin'){res=(val-32)*5/9+273.15;}
-    else if(de==='Kelvin'&&para==='Celsius'){res=val-273.15;}
-    else if(de==='Kelvin'&&para==='Fahrenheit'){res=(val-273.15)*9/5+32;}
-    else res=val;
-  } else {
-    res=(val*units[de])/units[para];
-  }
-  res=parseFloat(res.toPrecision(8));
-  document.getElementById('conv-resultado').textContent=val+' '+de+' = '+res+' '+para;
-}
-
-/* =========================================================
-   PARCELAMENTO
-========================================================= */
-function calcParcelamento(){
-  var valor=parseFloat((document.getElementById('parc-valor').value||'0').replace(',','.'));
-  var juros=parseFloat((document.getElementById('parc-juros').value||'0').replace(',','.'))/100;
-  var n=parseInt(document.getElementById('parc-parcelas').value||'1');
-  var el=document.getElementById('parc-resultado');
-  if(!el)return;
-  if(!valor||valor<=0){el.innerHTML='<div style="color:var(--text2);font-size:14px;padding:12px">Informe o valor</div>';return;}
-  var html='';
-  if(juros<=0){
-    var pmt=valor/n;
-    html='<div class="parc-result-row"><span>Parcela (sem juros)</span><span style="font-weight:700">R$ '+fmt2(pmt)+'</span></div>'+
-         '<div class="parc-result-row"><span>Total pago</span><span style="color:var(--success)">R$ '+fmt2(valor)+'</span></div>';
-  } else {
-    var i=juros;
-    var pmt=valor*(i*Math.pow(1+i,n))/(Math.pow(1+i,n)-1);
-    var total=pmt*n;
-    var jurosTotal=total-valor;
-    html='<div class="parc-result-row"><span>Parcela</span><span style="font-weight:700">R$ '+fmt2(pmt)+'</span></div>'+
-         '<div class="parc-result-row"><span>Total pago</span><span style="color:var(--warning)">R$ '+fmt2(total)+'</span></div>'+
-         '<div class="parc-result-row"><span>Juros totais</span><span style="color:var(--danger)">R$ '+fmt2(jurosTotal)+'</span></div>';
-  }
-  el.innerHTML=html;
-}
-function fmt2(n){return n.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
-
-/* =========================================================
-   CONFORTO TERMICO
-========================================================= */
-function confortoTermico(temp,hum){
-  var el=document.getElementById('tempo-conforto');
-  if(!el)return;
-  if(temp===null||temp===undefined||hum===null||hum===undefined){el.style.display='none';return;}
-  var hi=temp;
-  if(temp>=27&&hum>=40){
-    hi=-8.78469475556+1.61139411*temp+2.33854883889*hum
-       -0.14611605*temp*hum-0.012308094*temp*temp
-       -0.0164248277778*hum*hum+0.002211732*temp*temp*hum
-       +0.00072546*temp*hum*hum-0.000003582*temp*temp*hum*hum;
-  }
-  hi=Math.round(hi);
-  var label,cor,emoji;
-  if(hi<10){label='Muito Frio';cor='#60A5FA';emoji='❄️';}
-  else if(hi<18){label='Frio';cor='#93C5FD';emoji='🥶';}
-  else if(hi<24){label='Agradável';cor='#34D399';emoji='😊';}
-  else if(hi<28){label='Confortável';cor='#10B981';emoji='🌞';}
-  else if(hi<33){label='Quente';cor='#F59E0B';emoji='🔥';}
-  else if(hi<41){label='Muito Quente';cor='#EF4444';emoji='🥵';}
-  else{label='Perigoso';cor='#991B1B';emoji='☠️';}
-  el.innerHTML='<div style="background:var(--surface2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px">'+
-    '<div style="font-size:28px">'+emoji+'</div>'+
-    '<div>'+
-      '<div style="font-size:11px;color:var(--text2);margin-bottom:2px">Conforto Térmico</div>'+
-      '<div style="font-size:16px;font-weight:700;color:'+cor+'">'+label+'</div>'+
-      '<div style="font-size:12px;color:var(--text2)">Sensação: '+hi+'°C</div>'+
-    '</div>'+
-  '</div>';
-  el.style.display='block';
-}
-
-/* =========================================================
-   TIMER DE COZINHA — PANELA DE PRESSÃO
-   Tempos após pegar pressão (válvula apitando)
-   Fontes: Seara, TudoGostoso, MenuControl, Consul — 2026
-========================================================= */
-var timerTempos={
-  'frango-pedacos': [15,18,22,'Pedaços médios com osso'],
-  'frango-peito':   [10,12,15,'Peito sem osso — não passar do ponto'],
-  'frango-inteiro': [25,30,35,'Frango inteiro; vire na metade se possível'],
-  'frango-desfiado':[15,18,20,'Cozinhe bem para desfiar com facilidade'],
-  'carne-cubos':    [30,35,40,'Acém, músculo ou paleta em cubos ~3cm'],
-  'carne-peca':     [45,50,60,'Lagarto, coxão duro — peça grande'],
-  'carne-seca':     [20,25,30,'Deixe de molho 12h antes, troque a água'],
-  'costela':        [40,50,60,'Costela bovina; quanto maior mais tempo'],
-  'porco-cubos':    [25,30,35,'Lombo ou pernil em cubos'],
-  'linguica':       [10,12,15,'Linguiça já cozida — menos tempo'],
-  'feijao-molho':   [15,18,20,'Com molho prévio de 8-12h'],
-  'feijao-seco':    [40,45,50,'Sem molho; adicione mais água'],
-  'grao-bico':      [20,25,30,'Com molho de 12h; fica macio por igual'],
-  'lentilha':       [8,10,12,'Lentilha não precisa de molho prévio'],
-  'batata':         [5,7,8,'Em cubos; inteiras levam mais 2-3 min'],
-  'cenoura':        [5,7,8,'Em rodelas ou cubos'],
-  'mandioca':       [10,12,15,'Descascada e em pedaços'],
-  'beterraba':      [20,25,30,'Inteira com casca; descasca fácil depois'],
-  'arroz':          [8,10,10,'Proporção 1 xíc arroz : 1,5 xíc água'],
-  'milho':          [10,12,15,'Espiga cortada ao meio']
-};
-var panInterval=null;
-var panSeg=0;
-var panRodando=false;
-
-function timerSelecionarTempo(){
-  var alimento=document.getElementById('timer-alimento').value;
-  var panela=document.getElementById('timer-panela').value;
-  var sug=document.getElementById('timer-sugestao');
-  var val=document.getElementById('timer-sugestao-val');
-  var obs=document.getElementById('timer-sugestao-obs');
-  if(!alimento){sug.style.display='none';return;}
-  var dados=timerTempos[alimento];
-  if(!dados){sug.style.display='none';return;}
-  var idx=panela==='5'?0:panela==='10'?1:2;
-  val.textContent=dados[idx]+' minutos';
-  obs.textContent=dados[3];
-  sug.style.display='block';
-  if(panInterval){clearInterval(panInterval);panInterval=null;}
-  panRodando=false;
-  panSeg=dados[idx]*60;
-  panTimerDisplay();
-  document.getElementById('timer-btn-start').textContent='▶ Iniciar';
-}
-
-function panTimerDisplay(){
-  var m=Math.floor(panSeg/60);
-  var s=panSeg%60;
-  document.getElementById('timer-clock').textContent=
-    (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-}
-
-function timerStart(){
-  var btn=document.getElementById('timer-btn-start');
-  if(panRodando){
-    clearInterval(panInterval);panInterval=null;
-    panRodando=false;
-    btn.textContent='▶ Continuar';
-    return;
-  }
-  if(panSeg<=0){toast('Selecione um alimento primeiro');return;}
-  panRodando=true;
-  btn.textContent='⏸ Pausar';
-  panInterval=setInterval(function(){
-    panSeg--;
-    panTimerDisplay();
-    if(panSeg<=0){
-      clearInterval(panInterval);panInterval=null;
-      panRodando=false;
-      btn.textContent='▶ Iniciar';
-      toast('🍳 Tempo esgotado! Desligue o fogo.',5000);
-      if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
-        try{new Notification('Ooh! Timer 🍳',{body:'Tempo esgotado! Desligue o fogo.'});}catch(e){}
-      }
-    }
-  },1000);
-}
-
-function timerReset(){
-  if(panInterval){clearInterval(panInterval);panInterval=null;}
-  panRodando=false;
-  document.getElementById('timer-btn-start').textContent='▶ Iniciar';
-  var alimento=document.getElementById('timer-alimento').value;
-  var panela=document.getElementById('timer-panela').value;
-  if(alimento&&timerTempos[alimento]){
-    var idx=panela==='5'?0:panela==='10'?1:2;
-    panSeg=timerTempos[alimento][idx]*60;
-  } else { panSeg=0; }
-  panTimerDisplay();
-}
-
-</script>
-</body>
-</html>
+    return '<div style="display:flex;align
