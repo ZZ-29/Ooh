@@ -454,22 +454,22 @@ select{appearance:none;-webkit-appearance:none}
       <button class="calc-btn calc-fn" onclick="calcAC()">AC</button>
       <button class="calc-btn calc-fn" onclick="calcPlusMinus()">+/-</button>
       <button class="calc-btn calc-fn" onclick="calcPercent()">%</button>
-      <button class="calc-btn calc-op" onclick="calcOp('/')">&#xF7;</button>
+      <button class="calc-btn calc-op" onclick="calcOp('/',this)">&#xF7;</button>
       <!-- Row 2 -->
       <button class="calc-btn" onclick="calcNum('7')">7</button>
       <button class="calc-btn" onclick="calcNum('8')">8</button>
       <button class="calc-btn" onclick="calcNum('9')">9</button>
-      <button class="calc-btn calc-op" onclick="calcOp('*')">&#xD7;</button>
+      <button class="calc-btn calc-op" onclick="calcOp('*',this)">&#xD7;</button>
       <!-- Row 3 -->
       <button class="calc-btn" onclick="calcNum('4')">4</button>
       <button class="calc-btn" onclick="calcNum('5')">5</button>
       <button class="calc-btn" onclick="calcNum('6')">6</button>
-      <button class="calc-btn calc-op" onclick="calcOp('-')">&#x2212;</button>
+      <button class="calc-btn calc-op" onclick="calcOp('-',this)">&#x2212;</button>
       <!-- Row 4 -->
       <button class="calc-btn" onclick="calcNum('1')">1</button>
       <button class="calc-btn" onclick="calcNum('2')">2</button>
       <button class="calc-btn" onclick="calcNum('3')">3</button>
-      <button class="calc-btn calc-op" onclick="calcOp('+')">+</button>
+      <button class="calc-btn calc-op" onclick="calcOp('+',this)">+</button>
       <!-- Row 5 -->
       <button class="calc-btn" onclick="calcNum('0')" style="grid-column:span 2">0</button>
       <button class="calc-btn" onclick="calcDot()">.</button>
@@ -915,13 +915,14 @@ function goTo(s){
   try{if(s!=='qr')pararCam();}catch(e){}
   try{if(s!=='scanner')scannerFecharCamera();}catch(e){}
   if(s==='extras')carregarNotas();
-  if(s==='lembretes')initLembretes();
+  // lembretes redireciona para cal - initLembretes() sera chamado pelo setTimeout abaixo
+  if(s==='lembretes'){goTo('cal');calTabSwitch('lemb');return;}
   if(s==='cal')setTimeout(function(){if(document.getElementById('cal-pane-lemb')&&document.getElementById('cal-pane-lemb').classList.contains('active'))initLembretes();},50);
   if(s==='veiculos'){veiFecharCadastro();veiRenderLista();}
   if(s==='timer'){resetTimer();setTimeout(renderCookPresets,100);}
   if(s==='calc'){calcRenderHist();}
   if(s==='cal'){try{calInit();}catch(e){toast('Erro agenda: '+e.message,5000);}}
-  if(s==='lembretes'){goTo('cal');calTabSwitch('lemb');return;}
+
   if(s==='scanner')setTimeout(scannerNovo,0);
   if(s==='tempo')setTimeout(tempoInit,50);
 }
@@ -2013,9 +2014,10 @@ function dispararAlarme(l){
 }
 
 // Inicia verificacao global quando app abre
+// setInterval gerenciado APENAS por initLembretes() - evita acumulo de intervalos
 window.addEventListener('load', function(){
   checarLembretes();
-  setInterval(checarLembretes, 30000);
+  renderCookPresets(); // pre-popula alimentos para primeira visita ao Timer
 });
 
 
@@ -2039,6 +2041,11 @@ function setTimer(min,seg){
   document.getElementById('timer-display').style.color='#fff';
   document.getElementById('timer-status').textContent='Iniciando...';
   iniciarTimer();
+  // Rolar para mostrar o contador — o display fica abaixo da lista de alimentos
+  setTimeout(function(){
+    var d=document.getElementById('timer-display');
+    if(d) d.scrollIntoView({behavior:'smooth',block:'center'});
+  },80);
 }
 
 function toggleTimer(){
@@ -2204,6 +2211,7 @@ function renderCronoVoltas(){
 
 
 // ===== PREVISAO DO TEMPO =====
+var _tempoBuscando=false; // guarda contra multiplos fetches simultaneos
 function tempoInit(){
   var lat=parseFloat(localStorage.getItem('ooh_tempo_lat')||'');
   var lon=parseFloat(localStorage.getItem('ooh_tempo_lon')||'');
@@ -2374,6 +2382,8 @@ function wttrToWmo(c){
   return m[c]||0;
 }
 function buscarTempoCoords(lat,lon,nomeCidade){
+  if(_tempoBuscando){return;} // evita chamadas simultaneas
+  _tempoBuscando=true;
   toast('🌐 Buscando clima...',3000);
   var ctrl=new AbortController();
   var timer=setTimeout(function(){ctrl.abort();},12000);
@@ -2384,6 +2394,7 @@ function buscarTempoCoords(lat,lon,nomeCidade){
   fetch(url,{signal:ctrl.signal})
     .then(function(r){clearTimeout(timer);return r.json();})
     .then(function(d){
+      _tempoBuscando=false;
       esconderTempoLoading();
       if(!d||!d.current){toast('Dados indisponíveis');return;}
       try{
@@ -2398,6 +2409,7 @@ function buscarTempoCoords(lat,lon,nomeCidade){
       }catch(e){toast('Erro ao exibir clima: '+e.message,5000);}
     })
     .catch(function(e){
+      _tempoBuscando=false;
       clearTimeout(timer);esconderTempoLoading();
       toast('Clima: '+(e&&e.name==='AbortError'?'sem resposta (12s)':e.message),5000);
     });
@@ -2967,14 +2979,14 @@ function calcAC(){
 }
 function calcPlusMinus(){calcVal=String(parseFloat(calcVal)*-1);calcDisplay(calcVal);}
 function calcPercent(){calcVal=String(parseFloat(calcVal)/100);calcDisplay(calcVal);}
-function calcOp(op){
+function calcOp(op,btn){
   if(calcOper&&!calcNewNum)calcEquals(true);
   calcPrev=parseFloat(calcVal);
   calcOper=op;
   calcNewNum=true;
   document.getElementById('calc-expr').textContent=calcVal+' '+calcOpSymbols[op];
   document.querySelectorAll('.calc-op').forEach(function(b){b.classList.remove('calc-op-active');});
-  if(event&&event.target)event.target.classList.add('calc-op-active');
+  if(btn)btn.classList.add('calc-op-active');
 }
 function calcEquals(silent){
   if(calcOper===null)return;
