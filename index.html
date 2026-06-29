@@ -126,6 +126,12 @@ textarea{resize:vertical;min-height:90px}
 .temp-item{background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center}
 .temp-item-lbl{font-size:10px;color:rgba(255,255,255,.65);font-weight:600;text-transform:uppercase}
 .temp-item-val{font-size:16px;font-weight:700;color:#fff;margin-top:2px}
+.prev5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 16px 20px}
+.prev5-day{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 4px;text-align:center}
+.prev5-nome{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:4px}
+.prev5-ico{font-size:22px;line-height:1;margin-bottom:4px}
+.prev5-max{font-size:13px;font-weight:700;color:#fff}
+.prev5-min{font-size:11px;color:var(--text2);margin-top:1px}
 
 /* VEICULOS */
 .vei-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
@@ -232,6 +238,10 @@ textarea{resize:vertical;min-height:90px}
         <div class="temp-item"><div class="temp-item-lbl">Max</div><div class="temp-item-val" id="tempo-max"></div></div>
       </div>
     </div>
+  </div>
+  <div id="tempo-prev5" style="display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;padding:0 16px 8px">Próximos 5 dias</div>
+    <div class="prev5" id="tempo-prev5-grid"></div>
   </div>
   <div id="tempo-erro" style="display:none;text-align:center;padding:40px;color:var(--danger);font-size:14px">
     Cidade nao encontrada.<br>Tente outro nome ou verifique a conexao.
@@ -516,6 +526,7 @@ function tempoBuscar() {
   if (!cidade) { toast('Digite o nome da cidade'); return; }
   document.getElementById('tempo-loading').style.display = 'block';
   document.getElementById('tempo-result').style.display = 'none';
+  document.getElementById('tempo-prev5').style.display = 'none';
   document.getElementById('tempo-erro').style.display = 'none';
   if (_tempoCtrl) { try { _tempoCtrl.abort(); } catch(e) {} }
   _tempoCtrl = new AbortController();
@@ -529,7 +540,7 @@ function tempoBuscar() {
       return fetch(
         'https://api.open-meteo.com/v1/forecast?latitude=' + loc.latitude + '&longitude=' + loc.longitude +
         '&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code' +
-        '&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo&forecast_days=1',
+        '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America%2FSao_Paulo&forecast_days=5',
         { signal: sig }
       ).then(function(r){ return r.json(); })
        .then(function(w){ return { nome: nomeCompleto, w: w }; });
@@ -544,6 +555,21 @@ function tempoBuscar() {
       document.getElementById('tempo-vento').textContent = Math.round(c.wind_speed_10m) + ' km/h';
       document.getElementById('tempo-min').textContent = Math.round(d.temperature_2m_min[0]) + '°';
       document.getElementById('tempo-max').textContent = Math.round(d.temperature_2m_max[0]) + '°';
+      // Previsão 5 dias (pula o dia atual = índice 0)
+      var diasSem = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+      var prev5Html = '';
+      for (var i = 0; i < 5; i++) {
+        var dt = new Date(d.time[i] + 'T12:00:00');
+        var nomeDia = (i === 0) ? 'Hoje' : diasSem[dt.getDay()];
+        prev5Html += '<div class="prev5-day">'
+          + '<div class="prev5-nome">' + nomeDia + '</div>'
+          + '<div class="prev5-ico">' + _tempoIco(d.weather_code[i]) + '</div>'
+          + '<div class="prev5-max">' + Math.round(d.temperature_2m_max[i]) + '°</div>'
+          + '<div class="prev5-min">' + Math.round(d.temperature_2m_min[i]) + '°</div>'
+          + '</div>';
+      }
+      document.getElementById('tempo-prev5-grid').innerHTML = prev5Html;
+      document.getElementById('tempo-prev5').style.display = 'block';
       document.getElementById('tempo-loading').style.display = 'none';
       document.getElementById('tempo-result').style.display = 'block';
       localStorage.setItem('ooh-ultima-cidade', cidade);
@@ -566,6 +592,19 @@ function _tempoDesc(code) {
   if (code <= 82)  return '🌧️ Chuva forte';
   if (code <= 99)  return '⛈️ Tempestade';
   return '--';
+}
+
+function _tempoIco(code) {
+  if (code === 0)  return '☀️';
+  if (code <= 2)   return '⛅';
+  if (code <= 3)   return '☁️';
+  if (code <= 49)  return '🌫️';
+  if (code <= 59)  return '🌦️';
+  if (code <= 69)  return '🌧️';
+  if (code <= 79)  return '❄️';
+  if (code <= 82)  return '🌧️';
+  if (code <= 99)  return '⛈️';
+  return '🌡️';
 }
 
 // ================================================================
